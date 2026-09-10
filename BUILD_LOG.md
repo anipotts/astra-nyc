@@ -71,3 +71,9 @@ The generated concept was inspected alongside actual desktop and mobile screensh
 ### 11:01:40 AM — recording metadata verified
 
 ffprobe confirmed H.264, 1280×900, exactly 60.000 seconds. Sample frames from the commute and Nearby portions were inspected. The file remains local outside the public repo; nothing has been submitted or uploaded. Formatting completed, both unit tests passed again, and the production build passed. Vite reports a non-blocking bundle-size warning (576.58 kB minified JavaScript, 145.32 kB gzip); no split was added for this small prototype.
+
+### 11:10:48 AM — listing-first dogfood flow verified
+
+Added URL intake directly below the heading. Researched public listing facts during this event and bundled two explicit snapshots: 95 Wall Street #2308 and archived Zephyr Lofts #501. The running app does not fetch URLs or call Astra. The 95 Wall preview uses reported area and studio type; geometry and furniture positions are inferred, not measured. Unsupported links explain the current two-example limit. No listing images or page copies are distributed; source links and attribution are documented. No new dependencies.
+
+Four unit tests and production build passed. Browser checks verified listing review, studio walking, archived status, stale-scene clearing, unsupported links, and no overflow at 768px/390px. A missing selector was found and fixed before the successful rerun; zero page errors in the passing run. The sandbox blocked Chromium launch; native-approved launch was used. Screenshots and verification JSON are outside the public repo.

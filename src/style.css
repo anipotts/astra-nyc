@@ -605,3 +605,87 @@ canvas {
     max-width: 330px;
   }
 }
+
+.listing-form {
+  display: grid;
+  gap: 10px;
+  margin-top: 24px;
+}
+.listing-form > label {
+  font-size: 15px;
+  font-weight: 650;
+}
+.listing-form input {
+  width: 100%;
+  min-width: 0;
+  padding: 13px 12px;
+  border: 1px solid #a6b9ad;
+  border-radius: 8px;
+  font-size: 14px;
+  color: #17201f;
+  background: white;
+}
+.listing-form .primary {
+  display: flex;
+  justify-content: space-between;
+}
+.listing-examples {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.listing-examples button {
+  min-height: 36px;
+  padding: 7px 9px;
+  font-size: 11px;
+}
+#listing-status {
+  font-size: 12px;
+  line-height: 1.6;
+  color: var(--green);
+}
+.listing-card {
+  margin-top: 16px;
+  padding: 16px;
+  border: 1px solid #bccdbf;
+  background: #f4f7f2;
+  border-radius: 10px;
+}
+.listing-card[hidden] {
+  display: none;
+}
+.listing-card h2 {
+  margin: 8px 0 3px;
+  font-size: 18px;
+}
+.listing-card p {
+  font-size: 12px;
+  margin: 5px 0;
+}
+.listing-card strong,
+.listing-card small,
+.listing-card a {
+  display: block;
+  font-size: 12px;
+  margin-top: 8px;
+  line-height: 1.6;
+}
+.listing-card a {
+  color: var(--green);
+}
+.listing-card small {
+  color: var(--muted);
+}
+.listing-card details {
+  margin: 12px 0;
+  font-size: 12px;
+}
+.listing-card button {
+  width: 100%;
+  font-size: 12px;
+}
+.eyebrow {
+  font-size: 10px;
+  letter-spacing: 0.03em;
+  color: var(--green);
+}

@@ -21,6 +21,62 @@
             picture before committing to a viewing.
           </p>
         </div>
+        <form id="listing-form" class="listing-form">
+          <label for="listing-url">Start with a listing</label>
+          <input
+            id="listing-url"
+            type="url"
+            required
+            maxlength="2048"
+            placeholder="Paste a listing URL"
+            aria-describedby="listing-help"
+            autocomplete="off"
+            spellcheck="false"
+          />
+          <button class="primary" type="submit">
+            Explore this listing <span aria-hidden="true">→</span>
+          </button>
+          <p id="listing-help" class="fine">
+            Try a researched example. Live URL import is not connected yet.
+          </p>
+          <div class="listing-examples">
+            <button type="button" data-listing="wall2308">95 Wall studio</button
+            ><button type="button" data-listing="zephyr501">
+              Zephyr #501 · archived
+            </button>
+          </div>
+          <output id="listing-status" aria-live="polite"></output>
+        </form>
+        <section
+          id="listing-evidence"
+          class="listing-card"
+          aria-label="Listing evidence"
+          hidden
+        >
+          <span class="eyebrow"
+            >Source facts · reviewed during development</span
+          >
+          <h2 id="listing-name"></h2>
+          <p id="listing-location"></p>
+          <strong id="listing-facts"></strong>
+          <p id="listing-price"></p>
+          <p id="listing-availability"></p>
+          <a id="listing-source" target="_blank" rel="noopener noreferrer"
+            >View listing &amp; original photos ↗</a
+          >
+          <small id="listing-checked"></small>
+          <details>
+            <summary>What still needs checking?</summary>
+            <p id="listing-unknowns"></p>
+          </details>
+          <button id="listing-preview" type="button">
+            Walk an inferred studio
+          </button>
+          <p class="fine">
+            Scene shape and arrangement are illustrative. Photos have not been
+            reconstructed. No live Astra call.
+          </p>
+        </section>
         <fieldset class="homes">
           <legend class="sr-only">Choose a home</legend>
           <label class="home"
@@ -39,8 +95,10 @@
               aria-hidden="true"
               >02</span
             ><span
-              ><strong>Potential home</strong
-              ><small>Synthetic example · more space</small></span
+              ><strong id="potential-name">Potential home</strong
+              ><small id="potential-note"
+                >Synthetic example · more space</small
+              ></span
             ></label
           >
         </fieldset>
@@ -71,10 +129,11 @@
         <details class="evidence">
           <summary>What is verified?</summary>
           <p>
-            No real listing has been connected. These homes, streets, and nearby
-            places are synthetic. Photo sources, capture dates, and observed
-            concerns will appear here when listing evidence is connected. Unseen
-            conditions remain unknown.
+            Example listing facts are dated source snapshots reviewed during
+            development. The 95 Wall sketch uses its reported area and studio
+            type; all other geometry, streets, and nearby places are
+            illustrative. Photos have not been analyzed. Unseen conditions
+            remain unknown.
           </p>
         </details>
         <output id="status" aria-live="polite"

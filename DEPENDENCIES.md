@@ -38,3 +38,7 @@ Codex/Astra assisted development. No model API calls occur in the running produc
 Playwright 1.63.0 (Apache-2.0) and Prettier 3.9.6 (MIT) were installed as external local QA/formatting tools outside this repository. Their code is not bundled in the app. The recording uses locally installed Chromium and ffmpeg; their artifacts are not runtime application dependencies.
 
 No license has yet been selected for the original project code. A public repository alone is not an open-source license grant.
+
+## Public listing sources
+
+Facts only from [95 Wall Street #2308](https://streeteasy.com/building/95-wall-street-new_york/2308) and [Zephyr Lofts #501](https://streeteasy.com/building/zephyr-lofts/501), checked September 10, 2026 during development. These external listing records are not original project work or open-source dependencies. Listing photography and page content remain under their owners’ rights; no images, floor plans, or page copies are bundled. The original scene code is illustrative and does not reproduce a verified floor plan.

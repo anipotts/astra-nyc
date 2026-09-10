@@ -2,6 +2,7 @@ import * as THREE from "three";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import { homes, pointOnRoute, blocked } from "./model.js";
 import "./style.css";
+import { listings, identifyListing } from "./listings.js";
 const $ = (s) => document.querySelector(s);
 const container = $("#scene");
 const state = {
@@ -222,7 +223,8 @@ function buildHome() {
   );
   box(house, 1.8, 0.65, 0.18, 0, 2.675, d / 2, "#efede4");
   // Bedroom divider includes a walkable opening near the entry.
-  box(house, 0.14, 2.9, d - 2.5, w * 0.19, 1.45, -1.25, "#ece9df", true);
+  if (!homes[state.home].studio)
+    box(house, 0.14, 2.9, d - 2.5, w * 0.19, 1.45, -1.25, "#ece9df", true);
   if (state.unfurnished) return;
   box(house, w * 0.32, 0.09, d * 0.65, -w * 0.22, 0.075, -0.45, "#ded4bf");
   const sofaX = -w * 0.25,
@@ -554,6 +556,74 @@ function refresh() {
     ? "Restore furnishings"
     : "See it unfurnished";
 }
+let selectedListing = null;
+const syntheticPotential = { ...homes.potential };
+function showListing(listing) {
+  selectedListing = listing;
+  $("#listing-evidence").hidden = false;
+  for (const key of ["name", "location", "facts", "price", "availability"])
+    $("#listing-" + key).textContent = listing[key];
+  $("#listing-source").href = listing.url;
+  $("#listing-checked").textContent =
+    "Source checked " +
+    new Date(listing.checkedAt).toLocaleString("en-US", {
+      timeZone: "America/New_York",
+      month: "short",
+      day: "numeric",
+      hour: "numeric",
+      minute: "2-digit",
+    }) +
+    " ET · not a live refresh";
+  $("#listing-unknowns").textContent = listing.questions;
+  $("#listing-preview").hidden = !listing.scene;
+  $("#listing-status").textContent = listing.archived
+    ? "Archived listing found. Current availability is unknown."
+    : "Source snapshot loaded. Review the facts, then explore the inferred studio.";
+}
+$("#listing-form").addEventListener("submit", (event) => {
+  event.preventDefault();
+  selectedListing = null;
+  $("#listing-evidence").hidden = true;
+  // Do not leave a previously selected listing scene attached to a new URL.
+  Object.assign(homes.potential, syntheticPotential, { studio: false });
+  $("#potential-name").textContent = "Potential home";
+  $("#potential-note").textContent = "Synthetic example · more space";
+  refresh();
+  setMode("overview");
+  try {
+    const listing = identifyListing($("#listing-url").value);
+    if (listing) showListing(listing);
+    else
+      $("#listing-status").textContent =
+        "This link has no researched snapshot yet. Try one of the two examples below. No page was fetched and no scene was generated.";
+  } catch (error) {
+    $("#listing-status").textContent = error.message;
+  }
+});
+for (const button of document.querySelectorAll("[data-listing]"))
+  button.addEventListener("click", () => {
+    $("#listing-url").value = listings.find(
+      (l) => l.id === button.dataset.listing,
+    ).url;
+    $("#listing-form").requestSubmit();
+  });
+$("#listing-preview").addEventListener("click", () => {
+  if (!selectedListing?.scene) return;
+  Object.assign(homes.potential, selectedListing.scene, {
+    label: selectedListing.name + " · inferred sketch",
+  });
+  $("#potential-name").textContent = selectedListing.name;
+  $("#potential-note").textContent = "Reported area · inferred layout";
+  $("input[value=potential]").checked = true;
+  state.home = "potential";
+  state.largeBed = state.unfurnished = state.evening = false;
+  refresh();
+  setMode("walk");
+  message(
+    "575 ft² reported by listing. Shape, windows and furnishings are inferred; this is not a reconstruction. Streets remain synthetic.",
+  );
+  container.focus({ preventScroll: true });
+});
 for (const b of document.querySelectorAll("[data-mode]"))
   b.addEventListener("click", () => {
     setMode(b.dataset.mode);
