@@ -1,5 +1,5 @@
 import { DEMO_DESTINATION, MODES, externalDirections, formatDuration, formatDistance, stepLabel } from './route.js';
-import { createRouteController } from './controller.js';
+import { createAutomaticRoute } from './automatic-route.js';
 import { lookupLocation } from '../location.js';
 import './styles.css';
 
@@ -10,7 +10,7 @@ export function mountCommuteView(container, { routeLayer = {}, acquire, resolveD
     <p class="cv-origin"></p>
     <form class="cv-form"><label class="cv-label ui-label">Destination<input class="cv-destination ui-field" maxlength="180" placeholder="A public destination or work address" value="3 World Trade Center" autocomplete="off" required></label>
     <div class="cv-modes" role="group" aria-label="Travel mode">${Object.entries(MODES).map(([value,label]) => `<button type="button" class="ui-chip" data-travel-mode="${value}" aria-pressed="${value === 'walking'}">${label}</button>`).join('')}</div>
-    <button class="cv-submit ui-button" type="submit">Preview walking route <span aria-hidden="true">↗</span></button></form>
+    <button class="cv-submit ui-button" type="submit" hidden>Find place</button></form>
     <div class="cv-candidates"></div><p class="cv-status" role="status" aria-live="polite"></p>
     <div class="cv-result" hidden><div class="cv-metrics"><strong class="cv-duration"></strong><span class="cv-distance"></span><span class="cv-freshness"></span></div><p class="cv-estimate">Provider estimate · no live traffic or departure schedule</p>
     <div class="cv-preview-heading"><h3>Along the way</h3><button type="button" class="cv-fit">Show full route</button></div>
@@ -18,13 +18,16 @@ export function mountCommuteView(container, { routeLayer = {}, acquire, resolveD
     <p class="cv-step" aria-live="polite"></p><div class="cv-step-controls"><button type="button" class="cv-prev">← Previous</button><span class="cv-step-count"></span><button type="button" class="cv-next">Next →</button></div>
     <details class="cv-details ui-disclosure"><summary>Route sources & limitations</summary><p class="cv-receipt"></p><p>Approximate building points connect to the nearest routable network within 250 m. The gap is not a verified entrance or walking connection. Times omit traffic, wait times and current disruptions. Ferry segments, if returned, need schedule checks.</p><p class="cv-snapping"></p><p class="cv-endpoint-sources"></p><a href="https://routing.openstreetmap.de/about.html" target="_blank" rel="noopener noreferrer">FOSSGIS / OSRM routing</a></details></div>
     <a class="cv-external" target="_blank" rel="noopener noreferrer" hidden>Open directions in Google Maps ↗</a>
-    <p class="cv-sharing">Preview sends these two public locations to FOSSGIS. Destination lookup uses OpenStreetMap. No request while typing.</p>
+    <p class="cv-sharing">Walking, cycling and driving routes load automatically from FOSSGIS. Destination lookup uses OpenStreetMap. No request while typing.</p>
     <footer class="cv-attribution">Route data © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">OpenStreetMap contributors</a> · <a href="https://www.openstreetmap.org/fixthemap" target="_blank" rel="noopener noreferrer">Fix the map</a></footer>
   </section>`;
   const $ = selector => container.querySelector(selector);
   let context = { active: true }, mode = 'walking', destination = DEMO_DESTINATION, lookup = null, lookupGeneration = 0, stepIndex = 0, lastIdentity = '', destroyed = false;
   const motion = () => globalThis.matchMedia?.('(prefers-reduced-motion: reduce)').matches ? 0 : 500;
-  const controller = createRouteController({ acquire, onChange: renderState });
+  const controller = createAutomaticRoute({ acquire, onChange: renderState });
+  function syncRoute() {
+    controller.update({ active: context.active !== false, listingId: (context.selectedListing || context.listing)?.id, origin: context.resolvedLocation, destination, mode });
+  }
   function external() {
     const listing = context.selectedListing || context.listing;
     const origin = context.resolvedLocation?.label || listing?.mapAddress || (listing ? `${listing.name}, ${listing.location}` : null);
@@ -33,7 +36,8 @@ export function mountCommuteView(container, { routeLayer = {}, acquire, resolveD
   }
   function invalidate() {
     lookupGeneration++; lookup?.abort(); lookup = null;
-    $('.cv-candidates').replaceChildren(); controller.invalidate(); routeLayer.stop?.(); routeLayer.setRoute?.(null); external();
+    $('.cv-candidates').replaceChildren(); routeLayer.stop?.(); syncRoute(); external();
+    renderState(controller.state);
   }
   function showStep() {
     const route = controller.state.route; if (!route) return;
@@ -49,8 +53,11 @@ export function mountCommuteView(container, { routeLayer = {}, acquire, resolveD
   function renderState(state) {
     const route = state.route;
     $('.cv-result').hidden = !route;
-    $('.cv-submit').disabled = state.status === 'loading' || context.active === false || !(context.selectedListing || context.listing);
-    $('.cv-status').textContent = state.status === 'loading' ? 'Finding the route…' : state.status === 'error' ? state.error : state.status === 'external' || mode === 'transit' ? 'Transit schedules and itineraries open in Google Maps. No transit route is drawn here.' : route ? '' : context.resolvedLocation ? 'Preview the route to see its streets and estimated time.' : 'The selected home needs a resolved location for an in-app route. External directions remain available.';
+    const findingPlace = Boolean(lookup);
+    $('.cv-submit').hidden = mode === 'transit' || Boolean(destination && state.status !== 'error');
+    $('.cv-submit').textContent = destination ? 'Retry route' : 'Find place';
+    $('.cv-submit').disabled = findingPlace || state.status === 'loading' || context.active === false || !(context.selectedListing || context.listing);
+    $('.cv-status').textContent = state.status === 'loading' ? 'Finding the route…' : state.status === 'error' ? state.error : state.status === 'external' || mode === 'transit' ? 'Transit schedules and itineraries open in Google Maps. No transit route is drawn here.' : route ? '' : context.resolvedLocation ? (destination ? 'Preparing the route…' : 'Enter a public destination and choose Find place.') : 'The selected home needs a resolved location for an in-app route. External directions remain available.';
     if (!route) { routeLayer.setRoute?.(null); return; }
     $('.cv-duration').textContent = formatDuration(route.duration);
     $('.cv-distance').textContent = `${formatDistance(route.distance)} · ${MODES[route.mode]}`;
@@ -66,34 +73,41 @@ export function mountCommuteView(container, { routeLayer = {}, acquire, resolveD
   }
   $('.cv-destination').addEventListener('input', () => { destination = null; invalidate(); onDestinationChange({ text: $('.cv-destination').value, location: null }); });
   for (const button of container.querySelectorAll('[data-travel-mode]')) button.onclick = () => {
+    if (mode === button.dataset.travelMode) return;
     mode = button.dataset.travelMode;
     for (const item of container.querySelectorAll('[data-travel-mode]')) item.setAttribute('aria-pressed', String(item === button));
-    $('.cv-submit').innerHTML = `${mode === 'transit' ? 'Prepare transit directions' : `Preview ${mode === 'bicycling' ? 'cycling' : mode} route`} <span aria-hidden="true">↗</span>`;
     invalidate(); onModeChange(mode);
   };
   $('.cv-form').onsubmit = async event => {
     event.preventDefault(); if (destroyed || context.active === false) return;
     external();
     if (mode === 'transit') { renderState({ status: 'external', route: null }); return; }
-    if (!context.resolvedLocation) { renderState({ status: 'error', route: null, error: 'Resolve the selected home first, or open external directions.' }); return; }
-    if (/^3\s*world\s*trade\s*cent(?:er|re)$/i.test($('.cv-destination').value.trim())) destination = DEMO_DESTINATION;
+    if (!context.resolvedLocation) { $('.cv-status').textContent = 'Resolve the selected home first, or open external directions.'; return; }
+    if (!destination && /^3\s*world\s*trade\s*cent(?:er|re)$/i.test($('.cv-destination').value.trim())) {
+      destination = DEMO_DESTINATION; invalidate();
+      onDestinationChange({ text: $('.cv-destination').value, location: destination });
+      return;
+    }
     if (!destination) {
       lookup?.abort(); lookup = new AbortController(); const token = ++lookupGeneration;
+      $('.cv-candidates').replaceChildren();
+      $('.cv-submit').disabled = true;
       $('.cv-status').textContent = 'Looking up this public destination…';
       try {
         const result = await resolveDestination($('.cv-destination').value.trim(), { signal: lookup.signal });
         if (token !== lookupGeneration || destroyed || context.active === false) return;
         $('.cv-candidates').replaceChildren();
-        $('.cv-status').textContent = result.candidates.length ? 'Choose the matching destination, then preview the route.' : 'No destination match. Try a numbered street address or open external directions.';
+        $('.cv-status').textContent = result.candidates.length ? 'Choose the matching destination to see your route.' : 'No destination match. Try a numbered street address or open external directions.';
         for (const candidate of result.candidates) {
           const button = document.createElement('button'); button.type = 'button'; button.textContent = candidate.label;
-          button.onclick = () => { destination = candidate; $('.cv-destination').value = candidate.label.slice(0,180); invalidate(); onDestinationChange({ text: candidate.label, location: candidate }); $('.cv-submit').focus(); };
+          button.onclick = () => { destination = candidate; $('.cv-destination').value = candidate.label.slice(0,180); invalidate(); onDestinationChange({ text: candidate.label, location: candidate }); $('.cv-destination').focus(); };
           $('.cv-candidates').append(button);
         }
       } catch (e) { if (token === lookupGeneration && e.name !== 'AbortError') $('.cv-status').textContent = e.name === 'TypeError' ? 'Destination lookup is unavailable. Try again or open external directions.' : e.message; }
+      finally { if (token === lookupGeneration) { lookup = null; $('.cv-submit').disabled = context.active === false; } }
       return;
     }
-    await controller.request({ origin: context.resolvedLocation, destination, mode });
+    controller.retry();
   };
   $('.cv-scrub').oninput = () => { stepIndex = Number($('.cv-scrub').value); showStep(); };
   $('.cv-prev').onclick = () => { stepIndex--; showStep(); }; $('.cv-next').onclick = () => { stepIndex++; showStep(); };
