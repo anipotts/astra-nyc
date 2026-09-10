@@ -122,6 +122,128 @@
               <button id="add-listing" class="ui-button ui-button--quiet" type="button" aria-label="Add listing">Add</button>
             </div>
           </div>
+          <section id="evidence-stage" class="ui-panel" hidden aria-label="Listing evidence only">
+            <h1 id="evidence-title"></h1>
+            <p id="evidence-facts"></p>
+            <p id="overview-price"></p>
+            <p id="view-unavailable" role="status" hidden></p>
+            <details id="source-details" class="ui-disclosure">
+              <summary>Sources &amp; details</summary>
+              <div class="summary-heading">
+                <span id="summary-view-label">Your next place</span
+                ><button id="change-listing" type="button">Change</button>
+              </div>
+              <small id="overview-freshness"></small>
+              <p id="summary-next"></p>
+              <details
+                id="location-review"
+                hidden
+                style="
+                  position: static;
+                  inset: auto;
+                  width: auto;
+                  max-height: none;
+                  margin: 8px 0;
+                  padding: 0;
+                  border: 0;
+                  box-shadow: none;
+                  background: transparent;
+                  transform: none;
+                "
+              >
+                <summary>Map location</summary>
+                <p id="location-progress" role="status"></p>
+                <button id="resolve-location" type="button">
+                  Retry location lookup
+                </button>
+                <div id="location-candidates"></div>
+              </details>
+              <details id="city-source-details">
+                <summary>3D city sources</summary>
+                <h3 id="map-title">Your neighborhood</h3>
+                <p id="map-status" role="status">Loading map…</p>
+                <p id="city-source-description"></p>
+                <a id="city-source-link" target="_blank" rel="noopener noreferrer"
+                  >Building height method ↗</a
+                >
+              </details>
+              <section id="location-source" hidden>
+                <a
+                  id="location-source-link"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                ></a>
+                <small id="location-source-date"></small>
+                <button id="change-location" type="button">
+                  Review map location
+                </button>
+              </section>
+              <p id="evidence-reason">
+                A matching, authorized plan with usable scale is needed before
+                creating a dimensional interior. Reported square footage is not
+                enough.
+              </p>
+              <a id="evidence-source" target="_blank" rel="noopener noreferrer"
+                >View original listing ↗</a
+              >
+              <a
+                id="evidence-plan-source"
+                target="_blank"
+                rel="noopener noreferrer"
+                hidden
+                >View original plan reference ↗</a
+              >
+              <p class="evidence-note">
+                No room dimensions or furniture fit have been established. Listing
+                furnishing status is unknown; photo staging does not establish
+                what is included.
+              </p>
+              <section id="inspected-region" hidden aria-label="Inspected region">
+                <h3>Inspected 2D region available</h3>
+                <p id="inspected-region-note"></p>
+                <button id="open-inspected-region" type="button">
+                  Open bedroom region in Plans
+                </button>
+              </section>
+              <details id="plan-inspection">
+                <summary>Inspect a published plan</summary>
+                <p>
+                  Use a direct PDF or image link from a supported publisher. The
+                  source is sent to OpenAI when you submit.
+                </p>
+                <form id="plan-inspection-form">
+                  <label for="plan-source-url">Plan PDF or image URL</label>
+                  <input
+                    id="plan-source-url"
+                    type="url"
+                    required
+                    placeholder="https://…/floor-plan.pdf"
+                  />
+                  <button id="inspect-plan" type="submit">Inspect plan →</button>
+                </form>
+                <p
+                  id="plan-inspection-progress"
+                  role="status"
+                  aria-live="polite"
+                ></p>
+                <section id="plan-inspection-report" hidden></section>
+              </details>
+              <section
+                id="reconstruction-evidence"
+                aria-label="Interior evidence review"
+              >
+                <button id="collect-evidence" type="button">
+                  Assess interior evidence →
+                </button>
+                <p class="intake-note">
+                  Searches public sources with Astra. No images or plans are
+                  imported.
+                </p>
+                <output id="evidence-progress" role="status"></output>
+                <div id="evidence-report" hidden></div>
+              </section>
+            </details>
+          </section>
           <details class="evidence">
             <summary>
               <span id="model-status">Illustrative model</span>
@@ -258,128 +380,6 @@
         </div>
         <section id="inside-surface" hidden aria-label="Inside source view"></section>
         <section id="commute-panel" hidden aria-label="Plan a regular journey"></section>
-        <section id="evidence-stage" class="ui-panel" hidden aria-label="Listing evidence only">
-          <div class="summary-heading">
-            <span id="summary-view-label">Your next place</span
-            ><button id="change-listing" type="button">Change</button>
-          </div>
-          <h1 id="evidence-title"></h1>
-          <p id="evidence-facts"></p>
-          <p id="overview-price"></p>
-          <small id="overview-freshness"></small>
-          <p id="view-unavailable" role="status" hidden></p>
-          <p id="summary-next"></p>
-          <details id="source-details" class="ui-disclosure">
-            <summary>Sources &amp; details</summary>
-            <details
-              id="location-review"
-              hidden
-              style="
-                position: static;
-                inset: auto;
-                width: auto;
-                max-height: none;
-                margin: 8px 0;
-                padding: 0;
-                border: 0;
-                box-shadow: none;
-                background: transparent;
-                transform: none;
-              "
-            >
-              <summary>Map location</summary>
-              <p id="location-progress" role="status"></p>
-              <button id="resolve-location" type="button">
-                Retry location lookup
-              </button>
-              <div id="location-candidates"></div>
-            </details>
-            <details id="city-source-details">
-              <summary>3D city sources</summary>
-              <h3 id="map-title">Your neighborhood</h3>
-              <p id="map-status" role="status">Loading map…</p>
-              <p id="city-source-description"></p>
-              <a id="city-source-link" target="_blank" rel="noopener noreferrer"
-                >Building height method ↗</a
-              >
-            </details>
-            <section id="location-source" hidden>
-              <a
-                id="location-source-link"
-                target="_blank"
-                rel="noopener noreferrer"
-              ></a>
-              <small id="location-source-date"></small>
-              <button id="change-location" type="button">
-                Review map location
-              </button>
-            </section>
-            <p id="evidence-reason">
-              A matching, authorized plan with usable scale is needed before
-              creating a dimensional interior. Reported square footage is not
-              enough.
-            </p>
-            <a id="evidence-source" target="_blank" rel="noopener noreferrer"
-              >View original listing ↗</a
-            >
-            <a
-              id="evidence-plan-source"
-              target="_blank"
-              rel="noopener noreferrer"
-              hidden
-              >View original plan reference ↗</a
-            >
-            <p class="evidence-note">
-              No room dimensions or furniture fit have been established. Listing
-              furnishing status is unknown; photo staging does not establish
-              what is included.
-            </p>
-            <section id="inspected-region" hidden aria-label="Inspected region">
-              <h3>Inspected 2D region available</h3>
-              <p id="inspected-region-note"></p>
-              <button id="open-inspected-region" type="button">
-                Open bedroom region in Plans
-              </button>
-            </section>
-            <details id="plan-inspection">
-              <summary>Inspect a published plan</summary>
-              <p>
-                Use a direct PDF or image link from a supported publisher. The
-                source is sent to OpenAI when you submit.
-              </p>
-              <form id="plan-inspection-form">
-                <label for="plan-source-url">Plan PDF or image URL</label>
-                <input
-                  id="plan-source-url"
-                  type="url"
-                  required
-                  placeholder="https://…/floor-plan.pdf"
-                />
-                <button id="inspect-plan" type="submit">Inspect plan →</button>
-              </form>
-              <p
-                id="plan-inspection-progress"
-                role="status"
-                aria-live="polite"
-              ></p>
-              <section id="plan-inspection-report" hidden></section>
-            </details>
-            <section
-              id="reconstruction-evidence"
-              aria-label="Interior evidence review"
-            >
-              <button id="collect-evidence" type="button">
-                Assess interior evidence →
-              </button>
-              <p class="intake-note">
-                Searches public sources with Astra. No images or plans are
-                imported.
-              </p>
-              <output id="evidence-progress" role="status"></output>
-              <div id="evidence-report" hidden></div>
-            </section>
-          </details>
-        </section>
         <dialog id="plans-dialog" aria-labelledby="plan-name">
           <section id="plans-panel" hidden aria-label="Planning documents">
             <div class="plan-heading">
