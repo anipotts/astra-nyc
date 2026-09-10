@@ -5,24 +5,44 @@ import { mountWalkingControls } from '../src/commute-view/walking-view.js';
 // View adapter exercises the live session callbacks without a WebGL context.
 function setup() {
   const nodes = new Map();
+  let focused;
   const $ = selector => {
-    if (!nodes.has(selector)) nodes.set(selector, { setAttribute() {}, focus() {} });
+    if (!nodes.has(selector)) nodes.set(selector, { setAttribute() {}, focus() { focused = selector; } });
     return nodes.get(selector);
   };
-  let callbacks, scrolls = 0;
+  let callbacks, scrolls = 0, exits = 0;
+  const forward = $('[data-walk-action="forward"]'); forward.dataset = { walkAction: 'forward' };
   const container = {
-    querySelector: $, querySelectorAll: () => [],
+    querySelector: $, querySelectorAll: () => [forward],
     classList: { add() {}, remove() {} }, replaceChildren() {},
     closest: () => ({ scrollTo: () => scrolls++ }),
   };
   const view = mountWalkingControls(container, {
     beginWalk(value) { callbacks = value; value.onChange(state(0)); return true; },
-    endWalk() { callbacks.onExit(); },
+    endWalk() { exits++; callbacks.onExit(); },
+    walkAction(action) { if (action === 'forward') callbacks.onChange(state(3)); },
   });
   view.update({ key: 'internal-test', mode: 'walking', geometry: { type: 'LineString', coordinates: [[0, 0], [0, .01]] } });
-  return { $, view, start: () => $('.cv-walk-start').onclick(), change: value => callbacks.onChange(value), scrolls: () => scrolls };
+  return { $, view, forward, start: () => $('.cv-walk-start').onclick(), change: value => callbacks.onChange(value), scrolls: () => scrolls, exits: () => exits, focused: () => focused };
 }
 const state = (distance, extra = {}) => ({ distance, fraction: distance / 2000, speed: 1, stepIndex: 0, arrived: false, step: { name: 'Test street' }, ...extra });
+
+test('Escape after Step forward exits from walking controls and returns focus to the start action', () => {
+  const h = setup(); h.start(); h.forward.focus(); h.forward.onclick();
+  assert.match(h.$('.cv-walk-progress').textContent, /^3 m/);
+  let prevented = 0, stopped = 0;
+  const event = key => ({ key, target: h.forward, preventDefault() { prevented++; }, stopPropagation() { stopped++; } });
+  h.$('.cv-walk-controls').onkeydown(event('ArrowRight'));
+  assert.equal(h.exits(), 0); assert.equal(prevented, 0);
+  h.$('.cv-walk-controls').onkeydown(event('Escape'));
+  assert.equal(h.exits(), 1); assert.equal(prevented, 1); assert.equal(stopped, 1);
+  assert.equal(h.$('.cv-walk-controls').hidden, true);
+  assert.equal(h.$('.cv-walk-start').hidden, false);
+  assert.equal(h.focused(), '.cv-walk-start');
+  h.$('.cv-walk-controls').onkeydown(event('Escape'));
+  assert.equal(h.exits(), 1, 'inactive controls do not handle Escape');
+  h.view.destroy();
+});
 
 test('visible walking distance updates for each small step while live announcements remain throttled', () => {
   const h = setup(); h.start();
