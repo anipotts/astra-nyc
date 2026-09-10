@@ -98,7 +98,7 @@ export async function createNeighborhood(container, onStatus = () => {}, { route
     if (!selected) return;
     const camera = {
       center: [selected.longitude, selected.latitude],
-      zoom: 17.5, pitch: 56, bearing: map.getBearing(),
+      zoom: 16.5, pitch: 52, bearing: map.getBearing(),
     };
     focus.set(camera);
     move(camera);

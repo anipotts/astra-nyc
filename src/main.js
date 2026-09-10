@@ -16,6 +16,7 @@ import {
 import { nycListings } from "./nyc-listings.js";
 import { listingSummary } from "./listing-summary.js";
 import { setupPriorities } from "./priorities.js";
+import { mountBuildingNotes } from "./building-notes/index.js";
 import { setupListingIntake } from "./listing-intake.js";
 import { acceptInspectedRegion } from "./inspected-plan.js";
 import { inspectedPlans } from "./inspected-plan-records.js";
@@ -656,10 +657,12 @@ const evidenceReview = setupEvidenceReview({
 });
 const planInspection = setupPlanInspection();
 let selectedListing = null;
+const buildingNotesHost = document.createElement("div");
+$("#evidence-stage").append(buildingNotesHost);
+const buildingNotes = mountBuildingNotes(buildingNotesHost);
 const insideView = mountInsideView($("#inside-surface"), {
   onOpenPlans: () => setPlansOpen(true),
   onInspectPlan: ({ sourceUrl }) => {
-    setMode("overview");
     $("#source-details").open = true;
     planInspection.inspect(sourceUrl);
   },
@@ -677,6 +680,7 @@ const commuteView = mountCommuteView($("#commute-panel"), {
   },
 });
 function syncViewServices() {
+  buildingNotes.setListing(selectedListing);
   insideView.update({
     selectedListing,
     acceptedRegion,

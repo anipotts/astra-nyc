@@ -16,16 +16,28 @@ export function setupPlanInspection() {
     panel.replaceChildren();
     panel.hidden = false;
     const title = document.createElement("h3");
-    title.textContent = "Plan observations · review required";
-    const summary = document.createElement("p");
-    summary.textContent = report.assessment;
+    title.textContent = "Astra’s plan notes";
+    const match = document.createElement("p");
+    match.textContent = `Reported match: ${report.identity.match.replaceAll("_", " ")}`;
+    const details = document.createElement("details");
+    details.className = "ui-disclosure";
+    const detailsLabel = document.createElement("summary");
+    detailsLabel.textContent = "Details & missing measurements";
+    const assessment = document.createElement("p");
+    assessment.textContent = report.assessment;
     const scope = document.createElement("p");
     scope.textContent = `Proposed identity: ${report.identity.address} · ${report.identity.unit || "unit unknown"} · ${report.identity.match.replaceAll("_", " ")}`;
-    panel.append(title, summary, scope);
+    details.append(detailsLabel, assessment, scope);
+    panel.append(title, match);
     for (const room of report.rooms) {
       const item = document.createElement("p");
-      item.textContent = `${room.label}: ${room.printedDimensions || "No readable dimensions"}. ${inspectionExtentText(room.extent)} Boundary: ${room.boundary}.`;
+      const label = document.createElement("strong");
+      label.textContent = room.label;
+      item.append(label, document.createElement("br"), room.printedDimensions || "No readable dimensions");
       panel.append(item);
+      const extent = document.createElement("p");
+      extent.textContent = `${room.label}: ${inspectionExtentText(room.extent)} Boundary: ${room.boundary}.`;
+      details.append(extent);
     }
     for (const [label, values] of [
       ["Conflicts", report.conflicts],
@@ -34,7 +46,7 @@ export function setupPlanInspection() {
       if (!values.length) continue;
       const item = document.createElement("p");
       item.textContent = `${label}: ${values.join("; ")}`;
-      panel.append(item);
+      details.append(item);
     }
     const notice = document.createElement("p");
     notice.textContent =
@@ -46,7 +58,8 @@ export function setupPlanInspection() {
     source.rel = "noopener noreferrer";
     const receipt = document.createElement("small");
     receipt.textContent = `${report.cached ? "Local result replay" : "Astra media inspection"} · ${new Date(report.observedAt).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })} · source date: ${report.sourceDate || "unknown"}`;
-    panel.append(notice, source, receipt);
+    details.append(notice, source);
+    panel.append(details, receipt);
     panel.scrollIntoView({ block: "start" });
   }
   $("#plan-inspection-form").onsubmit = async (event) => {
