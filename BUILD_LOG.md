@@ -272,3 +272,11 @@ Integrated the compact shared header, collapsed persistent routine, shorter Comm
 Verification: the combined tree passed 216 tests and the production build; the subsequent first-opening behavior passed all four targeted building-note view tests. Browser checks on 5174 verified MiMA's dated HPD result, the reported agency finding of no violation in inspected conditions, and clearing that result when changing to 95 Wall. A complaint is not treated as a verified defect or a unit-specific condition. Source geometry remains untextured city massing. The newly authorized estimated indoor 3D service is still in development and is not claimed as delivered by this entry. Final combined recording remains pending.
 
 GitHub main was verified at 2b12ddd with successful CI after the participant's push. Later integrated changes in this entry remain local until separately verified at the remote.
+
+## 2026-09-10 20:35 UTC — estimated interior service
+
+- Participant explicitly requested a reusable fast Astra service for a realistic estimated 3D interior, superseding Inside's automatic PDF-first presentation.
+- Added separate estimated scene schema, selected-catalog PDF binding, bounded Responses request, three-attempt budget, coalesced 30-minute memory cache and provenance. Estimates never enter accepted measured-region records.
+- Added local Three.js furnished interior rendering, solid walls/ceiling, indoor third-person camera, local movement/collision/reset and source/assumption disclosure. Official drawings remain in Plans.
+- Verified 209 tests and production build in this worktree. Existing large-bundle warnings remain. Initial sandbox test run could not bind the source-preview test HTTP server; authorized rerun passed.
+- Live Astra generation, actual scene quality and combined preview visual acceptance remain pending Direction integration at this milestone. No new dependencies.

@@ -24,7 +24,7 @@ test('automatic source preview binds NYC listing id to its own approved PDF', ()
 // source renderer. PDF.js rendering itself is covered by its independent QA.
 const hooks = registerHooks({ load(url, context, next) {
   if (url.endsWith('/inside-view/style.css')) return { format: 'module', source: '', shortCircuit: true };
-  if (url.endsWith('/source-plan/index.js')) return { format: 'module', source: 'export function mountSourcePlan() { throw new Error("Use the test renderer"); }', shortCircuit: true };
+  if (url.endsWith('/inside-view/estimate-view.js')) return { format: 'module', source: 'export function mountEstimatedInterior() { throw new Error("Use the test renderer"); }', shortCircuit: true };
   return next(url, context);
 } });
 const { mountInsideView } = await import('../src/inside-view/index.js');
@@ -65,18 +65,18 @@ function setup() {
   return { view, renders, plans, root: container.children[0], close() { view.destroy(); globalThis.document = original; } };
 }
 
-test('entering Inside loads original PDF directly; repeated context updates do not restart it', () => {
+test('entering Inside loads estimated 3D directly; repeated context updates do not restart it', () => {
   const h = setup();
   try {
     h.view.update({ selectedListing: mima, active: false });
-    assert.equal(h.renders.length, 0, 'Overview must not fetch an invisible PDF');
+    assert.equal(h.renders.length, 0, 'Overview must not fetch an invisible estimate');
     h.view.update({ selectedListing: mima, active: true });
     assert.equal(h.renders.length, 1);
-    assert.deepEqual(h.renders[0].updates, [{ sourceUrl: mima.planUrl, title: mima.name, active: true }]);
+    assert.deepEqual(h.renders[0].updates, [{ sourceUrl: mima.planUrl, listingId: mima.id, title: mima.name, active: true }]);
     assert.match(h.root.innerHTML, /iv-published-plan/);
     assert.equal(h.renders[0].options.compact, true);
     assert.doesNotMatch(h.root.innerHTML, /<h2>|Open listing source|What would unlock more/);
-    assert.match(h.root.innerHTML, /Ask Astra to inspect this plan/);
+    assert.match(h.root.innerHTML, /Estimated 3D apartment interior/);
     h.renders[0].options.onSource({ sourceUrl: mima.planUrl, fetchedAt: '2026-09-10T20:00:00Z' });
     assert.match(h.root.querySelector('.iv-source-receipt').textContent, /retrieved 2026-09-10/);
     assert.doesNotMatch(h.root.innerHTML, /No supported PDF plan/);
