@@ -142,3 +142,10 @@ Verification: 32 unit tests and production build pass. Browser checks cover 1440
 Replaced active header and favicon references to the approximated SVG with PNG exports resized directly from the participant-approved, event-generated compact home-to-home artwork. Header export 512 px; favicon exports 16/32 px; Apple touch export 180 px. Versioned asset URLs avoid reusing previous favicon cache keys. No new dependencies, model calls, or unrelated UI changes. Original source SHA-256: c11b9d23af5e5286aca55f7ce0e804e3739381eae7164644386e916c3843586e. Asset generation completed; visual and HTTP verification follow separately.
 
 Verification at 2026-09-10T12:23:33-04:00: browser check passed for approved header PNG decoding, versioned 16/32 px favicon references, and favicon/Apple touch PNG HTTP 200 responses. Header screenshot visually checked; retained rounded container corners with CSS. Production build passed with the existing large-chunk warning. Initial verification script needed an absolute URL correction before passing. No unrelated functional tests run for this asset-only change.
+
+
+### 12:25:38 PM — bounded Plans recording completed
+
+Completed a new silent recording of the verified synthetic-home flow: Plans, bed selection, local king-bed edit synchronized across 2D/3D, empty layout retaining fixed fixtures, Undo, SVG export and dimension visibility. Removed the nonessential final navigation that stalled the earlier attempt. No features or runtime model calls were added for capture. Existing recordings remain intact.
+
+ffprobe verified the new MP4 is H.264, 1440×1000, 30fps and exactly 60.000 seconds. Visually inspected frames at 18, 25 and 58 seconds for the king-bed result, empty view and restored arrangement. No captured page errors. The UI identifies synthetic geometry and local edits; this recording does not prove live Astra inference or real-apartment fit. Video and technical receipt are local artifacts outside the public repository. Participant review and narration remain pending.
