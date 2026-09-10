@@ -60,3 +60,14 @@
 .inside-view .iv-fallback p { font-size:var(--ui-text-sm,12px); color:var(--ui-color-muted,#59665e); }
 
 .inside-view.iv-source-first .sp-status:empty { display:none; }
+
+/* The original drawing lives in Plans; Inside opens the generated interior. */
+.iv-published-plan { position: relative; overflow: hidden; min-height: 400px; background: var(--ui-surface, #fafaf6); }
+.iv-estimate-stage { position: absolute; inset: 0; }
+.iv-estimate-stage canvas { display: block; width: 100%; height: 100%; outline-offset: -4px; }
+.iv-estimate-stage canvas:focus-visible { outline: 3px solid var(--ui-focus, #387954); }
+.iv-estimate-tools { position: absolute; top: 12px; left: 12px; right: 12px; display: flex; justify-content: space-between; gap: 8px; pointer-events: none; }
+.iv-estimate-tools > * { pointer-events: auto; background: var(--ui-surface, #fafaf6); }
+.iv-estimate-status { position: absolute; top: 42%; left: 24px; right: 24px; text-align: center; color: var(--ui-muted, #59665e); }
+.iv-estimate-status[hidden] { display: none; }
+.iv-estimate-help { position: absolute; bottom: 8px; left: 12px; right: 12px; margin: 0; padding: 8px 12px; background: #fafaf6ee; border-radius: 8px; color: var(--ui-text, #18231f); font-size: 12px; pointer-events: none; }

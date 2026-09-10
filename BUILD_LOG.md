@@ -264,3 +264,11 @@ Merged the designer's selected-address hierarchy and the Commute walking preview
 The walking preview follows provider route geometry at approximate eye height. Browser checks on canonical5174 covered forward movement, segment skip, looking, position seeking, Exit and Escape, changing listings during a walk, destination retention, and reduced-motion keyboard stepping. Both1144x853 and723x856 desktop layouts were inspected, with no document overflow and no browser console errors. Source massing is untextured; ground, sidewalk, entrance and interior accuracy are not established.
 
 Verification: all197combined tests and the production build pass. Native source-plan modal, automatic routes, landing/recent reopening and preference persistence had passed the preceding combined review. Four obsolete worktrees were retired after ancestry/ownership checks; the unique layout file is preserved privately. Only canonical5174 remains a preview server. GitHub main was independently verified at2be2e82 after Ani's manual push, with successful CI; these later local changes are not yet claimed as pushed. No additional runtime Astra inference or dependency was needed for this integration.
+
+## 2026-09-10 20:35 UTC — estimated interior service
+
+- Participant explicitly requested a reusable fast Astra service for a realistic estimated 3D interior, superseding Inside's automatic PDF-first presentation.
+- Added separate estimated scene schema, selected-catalog PDF binding, bounded Responses request, three-attempt budget, coalesced 30-minute memory cache and provenance. Estimates never enter accepted measured-region records.
+- Added local Three.js furnished interior rendering, solid walls/ceiling, indoor third-person camera, local movement/collision/reset and source/assumption disclosure. Official drawings remain in Plans.
+- Verified 209 tests and production build in this worktree. Existing large-bundle warnings remain. Initial sandbox test run could not bind the source-preview test HTTP server; authorized rerun passed.
+- Live Astra generation, actual scene quality and combined preview visual acceptance remain pending Direction integration at this milestone. No new dependencies.

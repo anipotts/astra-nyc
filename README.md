@@ -115,3 +115,20 @@ The local Vite dev/preview endpoint accepts at most ten model attempts per serve
 GitHub Actions runs the stable `test-and-build` job on every push and pull request using Node22, `npm ci`, `npm test` and `npm run build`. Direction reviews the combined tree before normal main integration under the explicit event authorization. Local checks, remote CI and the canonical preview are reported separately; adding a workflow does not establish branch protection or deployment.
 
 Close-up rendering now requests MSAA antialiasing, caps pixel density at 2, and uses map-anchored daylight so lighting remains stable when rotating. Focusing moves to the reviewed geographic point with a bounded camera transition. These changes improve presentation; they do not add missing roofs, facade textures or surveyed building heights.
+
+### Estimated Inside interiors
+
+`createInteriorEstimateMiddleware({ apiKey, maxAttempts: 3 })` from
+`server/inside-view/index.js` adds `/api/interiors/estimate` (POST with the selected
+`listingId` and its own `sourceUrl`) and value-silent `/api/interiors/status`.
+Inject the existing private server key; never put it in client configuration.
+Astra reads the approved source PDF and emits the strict estimated-scene contract.
+Requests coalesce and successful scenes remain in server memory for 30 minutes;
+there is no model call for camera movement. The client caches scenes for the same
+period. Restarting the server clears its cache and attempt budget.
+
+Inside renders these scenes locally with Three.js and labels geometry, furnishings
+and materials as estimates. Click the scene, use WASD/arrows to move, drag to look,
+and press Home or Reset view to restore the indoor shoulder camera. Official
+plans remain available through Plans. Listings without a supported source PDF
+show their evidence state rather than a substitute apartment.
