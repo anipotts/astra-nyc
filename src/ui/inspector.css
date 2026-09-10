@@ -1,0 +1,46 @@
+/* Shared evidence inspector: compact rows, full source facts on demand. */
+.ui-icon { display: inline-block; width: 16px; height: 16px; flex: 0 0 16px; vertical-align: -3px; margin-right: 5px; background: currentColor; mask: var(--ui-icon) center / contain no-repeat; }
+.ui-icon-files { --ui-icon: url('./icons/files.svg'); }
+.ui-icon-map-pin { --ui-icon: url('./icons/map-pin.svg'); }
+.ui-icon-ruler { --ui-icon: url('./icons/ruler.svg'); }
+.ui-icon-magnifying-glass { --ui-icon: url('./icons/magnifying-glass.svg'); }
+.ui-icon-buildings { --ui-icon: url('./icons/buildings.svg'); }
+.desktop-shell #evidence-stage #source-details { margin-top: 8px; }
+.desktop-shell #source-details > summary { color: var(--ui-color-accent); }
+.desktop-shell #source-details summary { min-height: 32px; padding: 6px 0; font-size: 12px; line-height: 20px; font-weight: 550; }
+.desktop-shell #source-details > details { margin: 0; padding: 0; border: 0; }
+.desktop-shell #source-details .inspector-source-actions { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 6px; margin: 4px 0 8px; }
+.desktop-shell #source-details a { margin: 4px 0; color: var(--ui-color-accent); line-height: 1.4; }
+.desktop-shell #source-details .inspector-source-actions a { display: flex; align-items: center; justify-content: center; min-height: 30px; margin: 0; padding: 4px; border: 1px solid var(--ui-color-border); border-radius: 6px; text-decoration: none; font-weight: 500; }
+.desktop-shell #source-details .inspector-source-actions a:hover { background: var(--ui-color-hover); }
+.desktop-shell #source-details [hidden] { display: none !important; }
+.desktop-shell #source-details :is(p,small,output) { font-size: 12px; line-height: 1.4; }
+.desktop-shell #source-details p { margin: 6px 0; }
+.desktop-shell #overview-freshness { margin-bottom: 8px; }
+.desktop-shell #source-details h3 { margin: 8px 0 4px; font-size: 13px; line-height: 1.35; }
+.desktop-shell #source-details button { min-height: 30px; padding: 5px 8px; line-height: 1.3; font-size: 12px; }
+.desktop-shell #source-details :is(#plan-inspection,#reconstruction-evidence) { margin: 0; padding: 0; }
+.desktop-shell #source-details .summary-heading { margin-top: 4px; }
+.desktop-shell #source-details #location-source-date { display: block; color: var(--ui-color-muted); }
+.desktop-shell #source-details #location-source-link { overflow-wrap: anywhere; }
+.desktop-shell #plan-inspection-form { display: grid; gap: 6px; margin: 8px 0; }
+.desktop-shell #plan-inspection-form label { font-size: 12px; color: var(--ui-color-muted); }
+.desktop-shell #plan-source-url { min-height: 32px; border: 1px solid var(--ui-color-border); border-radius: 6px; padding: 6px 8px; font: inherit; font-size: 12px; background: white; }
+.desktop-shell #plan-inspection-form button { justify-self: start; color: var(--ui-color-accent); }
+.desktop-shell #source-details :is(#plan-inspection-progress,#evidence-progress):empty { display: none; }
+.desktop-shell #source-details :is(#plan-inspection-progress,#evidence-progress):not(:empty) { display: block; margin: 6px 0; padding: 6px 8px; border-left: 2px solid var(--ui-color-accent); }
+.desktop-shell #plan-inspection-report > p:has(strong) { display: grid; grid-template-columns: minmax(0,1fr) minmax(0,1fr); gap: 8px; align-items: baseline; padding: 6px 0; border-bottom: 1px solid var(--ui-color-border); }
+.desktop-shell #plan-inspection-report > p:has(strong) br { display: none; }
+.desktop-shell #plan-inspection-report > small { display: block; margin: 6px 0; color: var(--ui-color-muted); }
+.desktop-shell #reconstruction-evidence > button { margin: 4px 0; }
+.desktop-shell #source-details .intake-note { color: var(--ui-color-muted); }
+
+/* One sidebar inspector and one uninterrupted map in Commute. */
+.desktop-shell.evidence-only[data-view="commute"] #viewport { grid-template: "surface" minmax(0,1fr) / minmax(0,1fr); }
+.desktop-shell #evidence-stage #commute-panel.commute-view { position: static; display: block; width: 100%; max-width: none; max-height: none; margin: 14px 0; padding: 0; border: 0; border-radius: 0; overflow: visible; box-shadow: none; }
+.desktop-shell #evidence-stage #commute-panel[hidden] { display: none !important; }
+.desktop-shell #evidence-stage #commute-panel .cv-card { padding: 0; border: 0; border-radius: 0; background: transparent; box-shadow: none; }
+.desktop-shell #evidence-stage #commute-panel h2 { font-size: 16px; line-height: 1.3; margin: 0 0 8px; }
+.desktop-shell #evidence-stage #commute-panel .cv-modes { gap: 2px; margin: 8px 0; padding: 2px; }
+.desktop-shell #evidence-stage #commute-panel .cv-modes button { padding: 5px 2px; font-size: 12px; }
+.desktop-shell #evidence-stage #commute-panel :is(.cv-details,.cv-freshness,.cv-estimate,.cv-sharing,.cv-attribution) { font-size: 12px; letter-spacing: normal; text-transform: none; line-height: 1.4; }
