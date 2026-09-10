@@ -273,7 +273,7 @@ Verification: all197combined tests and the production build pass. Native source-
 - Verified 209 tests and production build in this worktree. Existing large-bundle warnings remain. Initial sandbox test run could not bind the source-preview test HTTP server; authorized rerun passed.
 - Live Astra generation, actual scene quality and combined preview visual acceptance remain pending Direction integration at this milestone. No new dependencies.
 
-## 2026-09-10 20:44 UTC — first-person refinement
+## 2026-09-10 20:42 UTC — first-person refinement
 
 - Participant changed the default to first person and requested realism/speed improvements.
 - Replaced the shoulder camera/avatar with a 1.65m eye-level view. Initial heading searches existing clear space locally without changing the generated geometry.
