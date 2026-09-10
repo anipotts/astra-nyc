@@ -1,5 +1,4 @@
 import { walkingAvailability } from './walking-model.js';
-import { formatDistance } from './route.js';
 
 // A compact route inset, drawn only from the returned geographic coordinates.
 function drawRoute(canvas, route, position) {
@@ -21,14 +20,18 @@ export function mountWalkingControls(container, routeLayer) {
     <p class="cv-walk-unavailable" hidden></p>
     <div class="cv-walk-controls" hidden>
       <div class="cv-walk-heading"><strong>Walk the route</strong><button type="button" class="ui-button ui-button--compact cv-walk-exit">Exit walk</button></div>
-      <p class="cv-walk-progress" role="status"></p>
-      <canvas class="cv-walk-inset" width="240" height="100" role="img" aria-label="North-up route overview; orange point shows your position and viewing direction"></canvas>
-      <label class="ui-label">Jump along route<input class="cv-walk-seek" type="range" min="0" max="1000" value="0" aria-label="Position along walking route"></label>
+      <p class="cv-walk-progress"></p>
+      <span class="cv-walk-announcement" role="status" aria-live="polite" aria-atomic="true"></span>
       <div class="cv-walk-actions"><button type="button" class="ui-button ui-button--compact" data-walk-action="back">Step back</button><button type="button" class="ui-button ui-button--compact" data-walk-action="forward">Step forward</button><button type="button" class="ui-button ui-button--compact" data-walk-action="next">Skip segment</button></div>
       <div class="cv-walk-actions"><button type="button" class="ui-button ui-button--compact" data-walk-action="left">Look left</button><button type="button" class="ui-button ui-button--compact" data-walk-action="right">Look right</button><button type="button" class="ui-button ui-button--compact cv-walk-speed" data-walk-action="speed">Speed 1×</button></div>
-      <p class="cv-walk-help">Focus the map: W/S move, A/D or drag look, Shift speeds up. Release to pause; Escape exits. Reduced motion uses single steps.</p>
+      <label class="ui-label cv-walk-seek-label">Jump along route<input class="cv-walk-seek" type="range" min="0" max="1000" value="0" aria-label="Position along walking route"></label>
+      <details class="cv-walk-details ui-disclosure"><summary>Route overview & controls</summary>
+        <canvas class="cv-walk-inset" width="240" height="64" role="img" aria-label="North-up route overview; orange point shows your position and viewing direction"></canvas>
+        <p class="cv-walk-help">Focus the map: W/S move, A/D or drag look, Shift speeds up. Release to pause; Escape exits. Reduced motion uses single steps.</p>
+        <p class="cv-walk-help">The environment uses approximate, untextured buildings along the mapped route. Sidewalks, street elevation and entrances are unverified. Select another home in Your places to compare the same destination.</p>
+      </details>
     </div>
-    <p class="cv-walk-note" hidden>Approximate eye-level preview on the mapped route. Untextured buildings; sidewalks, street elevation and entrances are unverified. Select another home in Your places to compare the same destination.</p>`;
+    <p class="cv-walk-note" hidden>Approximate route · entrances unverified</p>`;
   const $ = selector => container.querySelector(selector);
   let route = null, active = false, lastAnnouncement = '';
   function exited() { active = false; $('.cv-walk-controls').hidden = true; $('.cv-walk-start').hidden = Boolean(walkingAvailability(route)); container.classList.remove('is-walking'); }
@@ -36,18 +39,22 @@ export function mountWalkingControls(container, routeLayer) {
     $('.cv-walk-seek').value = String(Math.round(state.fraction * 1000));
     $('.cv-walk-seek').setAttribute('aria-valuetext', `${Math.round(state.fraction * 100)} percent of route`);
     $('.cv-walk-speed').textContent = `Speed ${state.speed}×`;
-    const text = state.arrived ? 'At the mapped route end · entrance unverified' : `${formatDistance(state.distance)} along route · ${state.step?.name || 'Mapped route'}`;
+    const text = state.arrived ? 'At the mapped route end · entrance unverified' : `${Math.round(state.distance).toLocaleString()} m along route · ${state.step?.name || 'Mapped route'}`;
+    $('.cv-walk-progress').textContent = text;
     // Announce at most each 10 m or segment change, not every rendered frame.
     const announcement = `${Math.floor(state.distance / 10)}:${state.stepIndex}:${state.arrived}`;
-    if (announcement !== lastAnnouncement) { lastAnnouncement = announcement; $('.cv-walk-progress').textContent = text; }
+    if (announcement !== lastAnnouncement) { lastAnnouncement = announcement; $('.cv-walk-announcement').textContent = text; }
     drawRoute($('.cv-walk-inset'), route, state);
   }
   $('.cv-walk-start').onclick = () => {
     if (!route || active) return;
     try {
+      lastAnnouncement = '';
+      $('.cv-walk-details').open = false;
       if (!routeLayer.beginWalk?.({ onChange: position, onExit: exited })) throw new Error('The walking camera is not ready yet. Try again shortly.');
       active = true; $('.cv-walk-controls').hidden = false; $('.cv-walk-start').hidden = true; container.classList.add('is-walking');
       $('.cv-walk-unavailable').hidden = true;
+      container.closest?.('.commute-view')?.scrollTo?.({ top: 0, behavior: 'instant' });
     } catch (error) { $('.cv-walk-unavailable').hidden = false; $('.cv-walk-unavailable').textContent = error.message; }
   };
   $('.cv-walk-exit').onclick = () => { routeLayer.endWalk?.(); exited(); $('.cv-walk-start').focus(); };

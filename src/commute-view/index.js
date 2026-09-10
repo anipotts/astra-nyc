@@ -8,20 +8,18 @@ import './styles.css';
 export function mountCommuteView(container, { routeLayer = {}, acquire, resolveDestination = lookupLocation, onDestinationChange = () => {}, onModeChange = () => {} } = {}) {
   container.classList.add('commute-view');
   container.innerHTML = `<section aria-label="Commute preview" class="cv-card ui-panel">
-    <div class="cv-eyebrow">YOUR EVERYDAY JOURNEY</div><h2>From here to there.</h2>
-    <p class="cv-origin"></p>
+    <h2>Your commute</h2>
     <form class="cv-form"><label class="cv-label ui-label">Destination<input class="cv-destination ui-field" maxlength="180" placeholder="A public destination or work address" value="3 World Trade Center" autocomplete="off" required></label>
     <div class="cv-modes" role="group" aria-label="Travel mode">${Object.entries(MODES).map(([value,label]) => `<button type="button" class="ui-chip" data-travel-mode="${value}" aria-pressed="${value === 'walking'}">${label}</button>`).join('')}</div>
     <button class="cv-submit ui-button" type="submit" hidden>Find place</button></form>
     <div class="cv-candidates"></div><p class="cv-status" role="status" aria-live="polite"></p>
-    <div class="cv-result" hidden><div class="cv-metrics"><strong class="cv-duration"></strong><span class="cv-distance"></span><span class="cv-freshness"></span></div><p class="cv-estimate">Provider estimate · no live traffic or departure schedule</p>
+    <div class="cv-result" hidden><div class="cv-metrics"><strong class="cv-duration"></strong><span class="cv-distance"></span></div><p class="cv-estimate">Estimate · current conditions may differ</p>
     <div class="cv-walking" hidden></div>
-    <div class="cv-preview-heading"><h3>Along the way</h3><button type="button" class="cv-fit">Show full route</button></div>
+    <details class="cv-route-segments ui-disclosure"><summary>Route segments</summary><div class="cv-preview-heading"><h3>Along the way</h3><button type="button" class="cv-fit">Show full route</button></div>
     <label class="cv-scrub-label">Explore route segments<input class="cv-scrub" type="range" min="0" value="0" step="1"></label>
-    <p class="cv-step" aria-live="polite"></p><div class="cv-step-controls"><button type="button" class="cv-prev">← Previous</button><span class="cv-step-count"></span><button type="button" class="cv-next">Next →</button></div>
-    <details class="cv-details ui-disclosure"><summary>Route sources & limitations</summary><p class="cv-receipt"></p><p>Approximate building points connect to the nearest routable network within 250 m. The gap is not a verified entrance or walking connection. Times omit traffic, wait times and current disruptions. Ferry segments, if returned, need schedule checks.</p><p class="cv-snapping"></p><p class="cv-endpoint-sources"></p><a href="https://routing.openstreetmap.de/about.html" target="_blank" rel="noopener noreferrer">FOSSGIS / OSRM routing</a></details></div>
+    <p class="cv-step" aria-live="polite"></p><div class="cv-step-controls"><button type="button" class="cv-prev">← Previous</button><span class="cv-step-count"></span><button type="button" class="cv-next">Next →</button></div></details>
+    <details class="cv-details ui-disclosure"><summary>Route sources & limitations</summary><span class="cv-freshness"></span><p class="cv-receipt"></p><p class="cv-sharing">Walking, cycling and driving routes load automatically from FOSSGIS. Destination lookup uses OpenStreetMap. No request while typing.</p><p>Approximate building points connect to the nearest routable network within 250 m. The gap is not a verified entrance or walking connection. Times omit traffic, wait times and current disruptions. Ferry segments, if returned, need schedule checks.</p><p class="cv-snapping"></p><p class="cv-endpoint-sources"></p><a href="https://routing.openstreetmap.de/about.html" target="_blank" rel="noopener noreferrer">FOSSGIS / OSRM routing</a></details></div>
     <a class="cv-external" target="_blank" rel="noopener noreferrer" hidden>Open directions in Google Maps ↗</a>
-    <p class="cv-sharing">Walking, cycling and driving routes load automatically from FOSSGIS. Destination lookup uses OpenStreetMap. No request while typing.</p>
     <footer class="cv-attribution">Route data © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">OpenStreetMap contributors</a> · <a href="https://www.openstreetmap.org/fixthemap" target="_blank" rel="noopener noreferrer">Fix the map</a></footer>
   </section>`;
   const $ = selector => container.querySelector(selector);
@@ -125,7 +123,6 @@ export function mountCommuteView(container, { routeLayer = {}, acquire, resolveD
       context = { ...context, ...next };
       const listing = context.selectedListing || context.listing;
       const identity = JSON.stringify([listing?.id, context.resolvedLocation, context.active]);
-      $('.cv-origin').textContent = listing ? `From ${listing.name}` : 'Choose a home to explore its commute.';
       if (identity !== lastIdentity) { lastIdentity = identity; invalidate(); }
       external();
     },
