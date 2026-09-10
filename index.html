@@ -8,6 +8,7 @@
     <link rel="stylesheet" href="/src/style.css" />
     <link rel="stylesheet" href="/src/shell.css" />
     <link rel="stylesheet" href="/src/desktop.css" />
+    <link rel="stylesheet" href="/src/landing-motion.css" />
     <link
       rel="icon"
       type="image/png"
@@ -185,6 +186,8 @@
         <small id="collapsed-model-status">Illustrative model</small>
       </aside>
       <section id="viewport" aria-label="Interactive 3D home preview">
+        <canvas id="landing-motion" aria-hidden="true" hidden></canvas>
+        <button id="landing-motion-toggle" type="button" hidden>Pause motion</button>
         <section id="entry-stage" aria-labelledby="entry-title">
           <p class="entry-eyebrow">A new way to find home</p>
           <h1 id="entry-title">
@@ -661,5 +664,6 @@
       </section>
     </main>
     <script type="module" src="/src/main.js"></script>
+    <script type="module" src="/src/landing-motion.js"></script>
   </body>
 </html>
