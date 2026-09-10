@@ -138,3 +138,22 @@ test("print document is a complete self-contained landscape snapshot", () => {
   assert.match(html, /not an official architectural drawing/);
   assert.doesNotMatch(html, /<script|<link|<img|@import|url\(/);
 });
+
+test("compact view omits metadata annotations, fits the plan, and preserves element geometry", () => {
+  const value = layout();
+  const full = renderPlanSvg(value);
+  const compact = renderPlanSvg(value, { compact: true });
+  assert.match(compact, /<g id="annotations"><\/g>/);
+  assert.doesNotMatch(
+    compact,
+    /Elsewhere planning document|rev-2|2026-09-10T16:00:00Z/,
+  );
+  assert.match(compact, /\.object-label\{font-size:18px\}/);
+  assert.match(compact, /\.dimension\{font-size:20px\}/);
+  const bed = /<g data-object-id="bed"[\s\S]*?<\/g>/;
+  assert.equal(compact.match(bed)[0], full.match(bed)[0]);
+  assert.notEqual(
+    compact.match(/viewBox="([^"]+)"/)[1],
+    full.match(/viewBox="([^"]+)"/)[1],
+  );
+});

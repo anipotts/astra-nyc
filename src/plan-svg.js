@@ -43,6 +43,7 @@ export function renderPlanSvg(layout, options = {}) {
     selectedId = null,
     showDimensions = true,
     showClearance = true,
+    compact = false,
   } = options;
   const width = positive(layout.width),
     depth = positive(layout.depth);
@@ -70,7 +71,7 @@ export function renderPlanSvg(layout, options = {}) {
   const footerY = header + depth * scale + 92;
   let pageHeight;
   const revision = layout.revision || {};
-  const rules = `text{font-family:Arial,Helvetica,sans-serif;fill:#243b32;font-size:13px}.muted{fill:#58685f;font-size:12px}.heading{font-size:23px;font-weight:700}.dimension{font-size:12px;paint-order:stroke;stroke:#fff;stroke-width:4px;stroke-linejoin:round}.object-label{font-size:11px;text-anchor:middle;paint-order:stroke;stroke:#fff;stroke-width:3px;stroke-linejoin:round}.dimension-line{stroke:#65746b;stroke-width:1;fill:none}.clearance-line{stroke:#28765d;stroke-width:1.5;stroke-dasharray:5 4;fill:none}[data-object-id]{cursor:pointer}`;
+  const rules = `text{font-family:Arial,Helvetica,sans-serif;fill:#243b32;font-size:13px}.muted{fill:#58685f;font-size:12px}.heading{font-size:23px;font-weight:700}.dimension{font-size:12px;paint-order:stroke;stroke:#fff;stroke-width:4px;stroke-linejoin:round}.object-label{font-size:11px;text-anchor:middle;paint-order:stroke;stroke:#fff;stroke-width:3px;stroke-linejoin:round}.dimension-line{stroke:#65746b;stroke-width:1;fill:none}.clearance-line{stroke:#28765d;stroke-width:1.5;stroke-dasharray:5 4;fill:none}[data-object-id]{cursor:pointer}${compact ? ".object-label{font-size:18px}.dimension{font-size:20px}" : ""}`;
   layers.annotations.push(
     text(32, 38, "Elsewhere planning document", 'class="heading"'),
   );
@@ -87,6 +88,8 @@ export function renderPlanSvg(layout, options = {}) {
     `<rect x="${number(sx(-width / 2))}" y="${number(sy(-depth / 2))}" width="${number(width * scale)}" height="${number(depth * scale)}" fill="#fcfcf8" stroke="#d0d5ce" stroke-width="1"/>`,
   );
   for (const element of elements) {
+    // Overhead lintels do not obstruct the floor-level plan.
+    if (element.kind === "lintel") continue;
     const category =
       element.category === "structure"
         ? "structure"
@@ -228,7 +231,12 @@ export function renderPlanSvg(layout, options = {}) {
     ),
   );
   pageHeight = footerY + footerLines.length * 20 + 16;
-  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${number(pageWidth)} ${number(pageHeight)}" role="img" aria-labelledby="plan-title plan-description"><title id="plan-title">${escape(layout.label || "Home")} — generated planning document</title><desc id="plan-description">${escape(basisLabel(layout))}. Canonical layout in metres. Structure, fixed fixtures and visible movable furniture. Source and revision details included.</desc><style>${rules}</style><rect width="100%" height="100%" fill="white"/>${Object.entries(
+  let viewBox = `0 0 ${number(pageWidth)} ${number(pageHeight)}`;
+  if (compact) {
+    layers.annotations = [];
+    viewBox = `${number(sx(-width / 2) - 70)} ${number(sy(-depth / 2) - 30)} ${number(width * scale + 100)} ${number(depth * scale + 105)}`;
+  }
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${viewBox}" role="img" aria-labelledby="plan-title plan-description"><title id="plan-title">${escape(layout.label || "Home")} — generated planning document</title><desc id="plan-description">${escape(basisLabel(layout))}. Canonical layout in metres. Structure, fixed fixtures and visible movable furniture. Source and revision details included.</desc><style>${rules}</style><rect width="100%" height="100%" fill="white"/>${Object.entries(
     layers,
   )
     .map(([id, items]) => `<g id="${id}">${items.join("")}</g>`)
