@@ -1,0 +1,10 @@
+.building-notes { color: var(--ink, #20392e); font-size: 13px; line-height: 1.5; }
+.building-notes h3 { margin: 0 0 8px; font-size: 16px; }
+.building-notes p { margin: 8px 0; }
+.building-notes button { margin: 4px 0 10px; padding: 9px 12px; border: 1px solid var(--border, #d7dfd8); border-radius: 9px; background: #edf2eb; color: inherit; cursor: pointer; }
+.building-notes button:disabled { opacity: .6; cursor: default; }
+.building-notes details { border-top: 1px solid var(--border, #d7dfd8); padding: 9px 0; }
+.building-notes summary { cursor: pointer; font-weight: 550; }
+.building-notes-meta, .building-notes small { color: var(--muted, #58665d); font-size: 11px; overflow-wrap: anywhere; }
+.building-notes a { color: var(--green, #24503c); }
+.building-notes :is(a, button, summary):focus-visible { outline: 2px solid currentColor; outline-offset: 3px; }
