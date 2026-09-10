@@ -1,6 +1,8 @@
 import { createHash } from "node:crypto";
 import { validateBedEdit } from "../src/clearance.js";
 
+class SafeAstraError extends Error {}
+
 // Local demo adapter only. Never exposed as a public, unauthenticated API.
 export function createAstraMiddleware({ apiKey, fetchImpl = fetch }) {
   const cache = new Map();
@@ -28,7 +30,7 @@ export function createAstraMiddleware({ apiKey, fetchImpl = fetch }) {
       return send(res, 404, { error: "Not found." });
     if (
       req.headers.origin !== `http://${req.headers.host}` ||
-      !req.headers["content-type"]?.startsWith("application/json")
+      !/^application\/json(?:\s*;|$)/i.test(req.headers["content-type"] ?? "")
     )
       return send(res, 403, { error: "Use the local app to request an edit." });
     if (!apiKey)
@@ -36,17 +38,30 @@ export function createAstraMiddleware({ apiKey, fetchImpl = fetch }) {
         error:
           "Astra API access is not configured. Local scene controls still work.",
       });
-    let body = "";
     try {
+      const chunks = [];
+      let bytes = 0;
       for await (const chunk of req) {
-        body += chunk.toString();
-        if (Buffer.byteLength(body) > 2048)
+        const buffer = Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk);
+        bytes += buffer.length;
+        if (bytes > 2048)
           return send(res, 413, { error: "Request too large." });
+        chunks.push(buffer);
       }
-      const data = JSON.parse(body);
+      let data;
+      try {
+        data = JSON.parse(Buffer.concat(chunks).toString("utf8"));
+      } catch {
+        return send(res, 400, {
+          error: "Send a valid JSON bed-change request.",
+        });
+      }
       if (
+        !data ||
+        typeof data !== "object" ||
+        Array.isArray(data) ||
         typeof data.prompt !== "string" ||
-        data.prompt.length < 1 ||
+        data.prompt.trim().length < 1 ||
         data.prompt.length > 500 ||
         data.scene !== "wall2308-inferred-v2"
       )
@@ -111,12 +126,12 @@ export function createAstraMiddleware({ apiKey, fetchImpl = fetch }) {
           },
         );
         if (!response.ok)
-          throw new Error(
+          throw new SafeAstraError(
             `Astra request failed (HTTP ${response.status}). Check project access or credit balance; no edit was applied.`,
           );
         const payload = await response.json();
         if (payload.status !== "completed")
-          throw new Error(
+          throw new SafeAstraError(
             "Astra did not complete the edit. The scene is unchanged.",
           );
         const output = payload.output
@@ -128,7 +143,7 @@ export function createAstraMiddleware({ apiKey, fetchImpl = fetch }) {
         try {
           edit = validateBedEdit(JSON.parse(output));
         } catch {
-          throw new Error(
+          throw new SafeAstraError(
             "Astra did not return a supported king/queen bed edit. The scene is unchanged.",
           );
         }
@@ -153,9 +168,10 @@ export function createAstraMiddleware({ apiKey, fetchImpl = fetch }) {
       }
     } catch (error) {
       // Do not echo provider bodies, credentials, or user input into logs/responses.
-      const safe = error.message?.startsWith("Astra ")
-        ? error.message
-        : "The edit request could not be completed. No scene change was applied.";
+      const safe =
+        error instanceof SafeAstraError
+          ? error.message
+          : "The edit request could not be completed. No scene change was applied.";
       send(res, 502, { error: safe });
     }
   };
