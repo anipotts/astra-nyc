@@ -78,9 +78,10 @@ test("malformed geometry, non-geographic coordinates, invalid IDs and duplicates
     feature({ DOITT_ID: 1 }, { type: "Point", coordinates: location }),
     feature({ DOITT_ID: 2 }, { type: "Polygon", coordinates: [ring.slice(0, -1)] }),
     feature({ DOITT_ID: 3 }, { type: "Polygon", coordinates: [[[0, 0], [1, 0], [1, 1], [0, 0]]] }),
+    feature({ DOITT_ID: 6 }, { type: "Polygon", coordinates: [ring.map(([x, y]) => [x + 0.1, y])] }),
     feature({ DOITT_ID: "4" }), feature({ DOITT_ID: 5 }), feature({ DOITT_ID: 5 }),
   ]));
-  assert.equal(result.counts.invalidGeometry, 3); assert.equal(result.counts.invalidProperties, 1);
+  assert.equal(result.counts.invalidGeometry, 4); assert.equal(result.counts.invalidProperties, 1);
   assert.equal(result.counts.duplicates, 1); assert.equal(result.counts.footprints, 1);
   assert.equal(result.completeQuery, false);
   assert.throws(() => normalize({ ...payload(), crs: { properties: { name: "EPSG:3857" } } }));

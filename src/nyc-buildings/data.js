@@ -68,6 +68,16 @@ function validGeometry(geometry) {
     && polygons.every(polygon => Array.isArray(polygon) && polygon.length > 0 && polygon.every(validRing));
 }
 
+function overlapsRequest(geometry, [west, south, east, north]) {
+  const polygons = geometry.type === "Polygon" ? [geometry.coordinates] : geometry.coordinates;
+  let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+  for (const polygon of polygons) for (const ring of polygon) for (const [x, y] of ring) {
+    minX = Math.min(minX, x); minY = Math.min(minY, y);
+    maxX = Math.max(maxX, x); maxY = Math.max(maxY, y);
+  }
+  return maxX >= west && minX <= east && maxY >= south && minY <= north;
+}
+
 function isoDate(value) {
   if (typeof value !== "number" || !Number.isFinite(value) || value <= 0) return null;
   const date = new Date(value);
@@ -93,7 +103,8 @@ export function normalizeBuildings(payload, request, { fetchedAt = new Date().to
     // FEATURE_CODE is the actual placeholder field. Reject malformed legacy-like
     // GEOM_SOURCE=1003 too; it must never accidentally become a building prism.
     if (Number(p.FEATURE_CODE) === 1003 || String(p.GEOM_SOURCE).trim() === "1003") { counts.placeholders++; continue; }
-    if (raw.type !== "Feature" || !validGeometry(raw.geometry)) { counts.invalidGeometry++; continue; }
+    if (raw.type !== "Feature" || !validGeometry(raw.geometry)
+      || !overlapsRequest(raw.geometry, request.bounds)) { counts.invalidGeometry++; continue; }
     if (seen.has(p.DOITT_ID)) { counts.duplicates++; continue; }
     const polygons = raw.geometry.type === "Polygon" ? [raw.geometry.coordinates] : raw.geometry.coordinates;
     vertexCount += polygons.reduce((n, polygon) => n + polygon.reduce((m, ring) => m + ring.length, 0), 0);

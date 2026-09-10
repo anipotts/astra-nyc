@@ -64,7 +64,7 @@ Suggested compact copy: “NYC building footprints and roof heights.” Show old
 - Requests only seven needed fields; explicitly uses `inSR=4326`, `outSR=4326`, GeoJSON and 2,000 maximum records.
 - Eight-second timeout, 6 MB streamed body cap, 150,000 accepted vertices, bounded ring/polygon sizes and eight-entry in-memory cache for 30 minutes. Cache retains original acquisition timestamps. There is no disk cache.
 - Abort stale listing requests and reject late results even if acquisition ignores abort. Errors are not cached or retried automatically.
-- Server transfer-limit flags or reaching the record/geometry cap are conservatively marked truncated. There is no second count query. Unsupported geometry, duplicate IDs and invalid identifying properties prevent area-wide OSM exclusion.
+- Server transfer-limit flags or reaching the record/geometry cap are conservatively marked truncated. There is no second count query. Unsupported geometry, polygons outside the requested envelope, duplicate IDs and invalid identifying properties prevent area-wide OSM exclusion.
 - Unknown heights remain flat. No imagery, LiDAR, CityGML, terrain, real-time construction status or professional survey is implied.
 
 ## Live evidence and verification
