@@ -129,6 +129,6 @@ period. Restarting the server clears its cache and attempt budget.
 
 Inside renders these scenes locally with Three.js and labels geometry, furnishings
 and materials as estimates. Click the scene, use WASD/arrows to move, drag to look,
-and press Home or Reset view to restore the indoor shoulder camera. Official
+and press Home or Reset view to restore the first-person eye-level camera. Official
 plans remain available through Plans. Listings without a supported source PDF
 show their evidence state rather than a substitute apartment.

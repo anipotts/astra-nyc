@@ -1,11 +1,13 @@
 import { validateEstimate } from './estimate-model.js';
 const cache=new Map();
+let rendererModule;
+const loadRenderer=()=>rendererModule ||= import('./estimate-scene.js');
 export function mountEstimatedInterior(host,{onSource}={}) {
   let active=true,destroyed=false,request=null,generation=0,scene=null,identity='';
   const status=document.createElement('p');status.className='iv-estimate-status';status.setAttribute('role','status');
   const stage=document.createElement('div');stage.className='iv-estimate-stage';
   const tools=document.createElement('div');tools.className='iv-estimate-tools';
-  const badge=document.createElement('span');badge.className='iv-badge ui-chip';badge.textContent='Estimated interior';
+  const badge=document.createElement('span');badge.className='iv-badge ui-chip';badge.textContent='Estimated interior · first person';
   const reset=document.createElement('button');reset.className='ui-button';reset.type='button';reset.textContent='Reset view';reset.addEventListener('click',()=>scene?.reset());
   const help=document.createElement('p');help.className='iv-estimate-help';help.textContent='W A S D / arrows to move · Drag to look · Home to reset';
   tools.append(badge,reset);host.append(stage,tools,status,help);
@@ -16,6 +18,9 @@ export function mountEstimatedInterior(host,{onSource}={}) {
     identity=key;request?.abort();const turn=++generation;request=new AbortController();
     scene?.destroy();scene=null;status.hidden=false;status.textContent='Astra is estimating this apartment from its published plan…';reset.disabled=true;
     try {
+      // Download/parse rendering code while Astra works, rather than afterward.
+      const readyRenderer=loadRenderer();
+      void readyRenderer.catch(()=>{});
       let receipt=cache.get(key);
       if(receipt&&Date.now()-receipt.savedAt>30*60*1000){cache.delete(key);receipt=null;}
       if(receipt)receipt={...receipt,cached:true};
@@ -25,7 +30,7 @@ export function mountEstimatedInterior(host,{onSource}={}) {
         if(payload.sourceUrl!==sourceUrl||payload.representation!=='estimated_interior')throw new Error('The interior did not match this source.');
         receipt={...payload,scene:validateEstimate(payload.scene,listingId),savedAt:Date.now()};cache.set(key,receipt);
       }
-      const {createEstimateScene}=await import('./estimate-scene.js');
+      const {createEstimateScene}=await readyRenderer;
       if(destroyed||turn!==generation||!active)return;
       scene=createEstimateScene(stage,receipt.scene);status.hidden=true;reset.disabled=false;
       help.textContent='W A S D / arrows to move · Drag to look · Home to reset';
