@@ -81,3 +81,11 @@ Shared pass:123existing tests and production build pass; existing bundle-size ad
 Calculated contrast: body/surface15.45:1, muted/surface5.76:1, white/accent9.59:1, selected-text/background8.11:1, focus/surface4.98:1. These are token-pair checks, not a claim of exhaustive accessibility certification.
 
 Direction owns combined checks of rapid listing selection, intended camera restoration, route cancellation and source-view state on the final integration head. Practical motion uses a160ms result reveal and300ms route-segment emphasis; both cancel on state changes and respect reduced motion. Camera movement uses actual geographic framing; no input morph or simulated map zoom decorates view changes. Private screenshots and detailed QA receipts remain outside public sources.
+
+## Compact evidence inspector
+
+`src/ui/inspector.css` loads after desktop.css. Original listing/plan links form one quiet action row. Map identity, city sources, full facts/limitations, plan inspection, and additional Astra evidence use native disclosures; runtime IDs and complete source qualifications remain intact. Dynamic inspection room labels/dimensions use compact rows. Status/error output stays visible in its active disclosure.
+
+Five decorative Phosphor regular SVGs are vendored under `src/ui/icons`, from core revision `2b75f3ad12b420c9504ef05df8d2564a28f8500e`, MIT license included. Source: https://github.com/phosphor-icons/core/tree/2b75f3ad12b420c9504ef05df8d2564a28f8500e/assets/regular. Use `<span class="ui-icon ui-icon-buildings" aria-hidden="true"></span>` alongside real text; available names: files, map-pin, ruler, magnifying-glass, buildings. No icon runtime dependency.
+
+Commute mounts by its unchanged #commute-panel ID in #evidence-stage, between property facts and source disclosures. It shares the independently scrolling sidebar at both desktop widths; the map keeps the full remaining viewport. Module controls retain their behavior and outer card chrome is removed.

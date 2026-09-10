@@ -10,6 +10,7 @@
     <link rel="stylesheet" href="/src/ui/tokens.css" />
     <link rel="stylesheet" href="/src/ui/components.css" />
     <link rel="stylesheet" href="/src/desktop.css" />
+    <link rel="stylesheet" href="/src/ui/inspector.css" />
     <link
       rel="icon"
       type="image/png"
@@ -129,15 +130,22 @@
             <p id="overview-price"></p>
             <p id="evidence-availability"></p>
             <p id="view-unavailable" role="status" hidden></p>
+            <section id="commute-panel" hidden aria-label="Plan a regular journey"></section>
             <details id="source-details" class="ui-disclosure">
-              <summary>Sources &amp; details</summary>
-              <div class="summary-heading">
-                <span id="summary-view-label">Your next place</span
-                ><button id="change-listing" type="button">Change</button>
+              <summary><span class="ui-icon ui-icon-files" aria-hidden="true"></span>Sources &amp; details</summary>
+              <div class="inspector-source-actions">
+              <a id="evidence-source" target="_blank" rel="noopener noreferrer"
+                >Original listing ↗</a
+              >
+              <a
+                id="evidence-plan-source"
+                target="_blank"
+                rel="noopener noreferrer"
+                hidden
+                >Plan PDF ↗</a
+              >
               </div>
               <small id="overview-freshness"></small>
-              <p id="evidence-context"></p>
-              <p id="summary-next"></p>
               <details
                 id="location-review"
                 hidden
@@ -162,7 +170,7 @@
                 <div id="location-candidates"></div>
               </details>
               <details id="city-source-details">
-                <summary>3D city sources</summary>
+                <summary><span class="ui-icon ui-icon-buildings" aria-hidden="true"></span>3D city sources</summary>
                 <h3 id="map-title">Your neighborhood</h3>
                 <p id="map-status" role="status">Loading map…</p>
                 <p id="city-source-description"></p>
@@ -170,7 +178,8 @@
                   >Building height method ↗</a
                 >
               </details>
-              <section id="location-source" hidden>
+              <details id="location-source" hidden>
+                <summary><span class="ui-icon ui-icon-map-pin" aria-hidden="true"></span>Map location</summary>
                 <a
                   id="location-source-link"
                   target="_blank"
@@ -180,27 +189,26 @@
                 <button id="change-location" type="button">
                   Review map location
                 </button>
-              </section>
+              </details>
+              <details id="listing-qualifications">
+                <summary><span class="ui-icon ui-icon-ruler" aria-hidden="true"></span>Facts &amp; limitations</summary>
+              <div class="summary-heading">
+                <span id="summary-view-label">Your next place</span
+                ><button id="change-listing" type="button">Change</button>
+              </div>
+              <p id="evidence-context"></p>
+              <p id="summary-next"></p>
               <p id="evidence-reason">
                 A matching, authorized plan with usable scale is needed before
                 creating a dimensional interior. Reported square footage is not
                 enough.
               </p>
-              <a id="evidence-source" target="_blank" rel="noopener noreferrer"
-                >View original listing ↗</a
-              >
-              <a
-                id="evidence-plan-source"
-                target="_blank"
-                rel="noopener noreferrer"
-                hidden
-                >View original plan reference ↗</a
-              >
               <p class="evidence-note">
                 No room dimensions or furniture fit have been established. Listing
                 furnishing status is unknown; photo staging does not establish
                 what is included.
               </p>
+              </details>
               <section id="inspected-region" hidden aria-label="Inspected region">
                 <h3>Inspected 2D region available</h3>
                 <p id="inspected-region-note"></p>
@@ -209,10 +217,9 @@
                 </button>
               </section>
               <details id="plan-inspection">
-                <summary>Inspect a published plan</summary>
+                <summary><span class="ui-icon ui-icon-ruler" aria-hidden="true"></span>Inspect a plan</summary>
                 <p>
-                  Use a direct PDF or image link from a supported publisher. The
-                  source is sent to OpenAI when you submit.
+                  Submit a publisher PDF or image to OpenAI for inspection.
                 </p>
                 <form id="plan-inspection-form">
                   <label for="plan-source-url">Plan PDF or image URL</label>
@@ -231,10 +238,11 @@
                 ></p>
                 <section id="plan-inspection-report" hidden></section>
               </details>
-              <section
+              <details
                 id="reconstruction-evidence"
                 aria-label="Interior evidence review"
               >
+                <summary><span class="ui-icon ui-icon-magnifying-glass" aria-hidden="true"></span>Find more evidence</summary>
                 <button id="collect-evidence" type="button">
                   Assess interior evidence →
                 </button>
@@ -244,7 +252,7 @@
                 </p>
                 <output id="evidence-progress" role="status"></output>
                 <div id="evidence-report" hidden></div>
-              </section>
+              </details>
             </details>
           </section>
           <details class="evidence">
@@ -388,7 +396,6 @@
           <div id="map-canvas"></div>
         </div>
         <section id="inside-surface" hidden aria-label="Inside source view"></section>
-        <section id="commute-panel" hidden aria-label="Plan a regular journey"></section>
         <dialog id="plans-dialog" aria-labelledby="plan-name">
           <section id="plans-panel" hidden aria-label="Planning documents">
             <div class="plan-heading">
