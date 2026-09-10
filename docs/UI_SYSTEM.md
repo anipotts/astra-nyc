@@ -1,6 +1,6 @@
 # Elsewhere shared desktop UI
 
-The map, plan or source image is the primary surface. Controls support it with a compact persistent sidebar and a separate listing fact strip. Keep the approved Elsewhere brand/artwork and forest-green/off-white palette. Desktop only, including723×856 and1144×853 windows.
+The map, plan or source image is the primary surface. Controls support it with a compact persistent sidebar. Keep the approved Elsewhere brand/artwork and forest-green/off-white palette. Desktop only, including723×856 and1144×853 windows.
 
 ## Sources and loading order
 
@@ -33,7 +33,7 @@ New view modules should consume tokens and primitives, then add only module-scop
 | Easing | --ui-ease | cubic-bezier(.2,.7,.2,1) |
 | Sidebar | --ui-sidebar-width |248px |
 
-The22px title reduces to20px in the sidebar listing summary. The approved landing heading remains a deliberate large display exception. Provider map controls retain their native29px geometry to preserve supplied icon alignment.
+The22px title reduces to18px in the sidebar listing summary. The approved landing heading remains a deliberate large display exception. Provider map controls retain their native29px geometry to preserve supplied icon alignment.
 
 ## Primitives
 
@@ -68,7 +68,7 @@ For a selected listing, #evidence-stage belongs in the main sidebar directly bel
 
 Plans remains a native dialog. Opening it must not reposition the sidebar or map. Preserve Escape, focus return, document state and camera state. Background document controls remain inert. Original publisher documents and generated planning drawings must remain visibly distinct.
 
-Use one visible Selected place section heading. Browse listings remains the accessible name of the native selector without another visible label; bundled source cases are not relabelled as user-saved. Add sits alongside the select. Priorities remain real pressed-state buttons in stable single-column rows. Status/persistence elements retain runtime IDs and failure messages.
+Use one visible Selected place section heading. Browse listings remains the accessible name of the native selector without another visible label; bundled source cases are not relabelled as user-saved. Add sits alongside the select. Your routine is a native disclosure, collapsed initially, with the selected short labels in #priority-summary and an Edit affordance. Expanded priorities remain real pressed-state buttons in stable single-column rows. Status/persistence elements retain runtime IDs and failure messages inside the disclosure. Plans is a compact action beside the wordmark, above the three view tabs.
 
 ## Content and evidence
 
