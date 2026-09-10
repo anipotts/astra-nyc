@@ -44,3 +44,7 @@
 .desktop-shell #evidence-stage #commute-panel .cv-modes { gap: 2px; margin: 8px 0; padding: 2px; }
 .desktop-shell #evidence-stage #commute-panel .cv-modes button { padding: 5px 2px; font-size: 12px; }
 .desktop-shell #evidence-stage #commute-panel :is(.cv-details,.cv-freshness,.cv-estimate,.cv-sharing,.cv-attribution) { font-size: 12px; letter-spacing: normal; text-transform: none; line-height: 1.4; }
+.desktop-shell #evidence-stage #commute-panel .cv-attribution a { display: inline; min-height: 0; margin: 0; font-size: 12px; }
+.desktop-shell #evidence-stage #commute-panel .cv-attribution { padding-top: 8px; }
+.desktop-shell #evidence-stage #commute-panel .cv-external { min-height: 30px; margin: 8px 0; font-size: 12px; line-height: 1.4; }
+.desktop-shell #evidence-stage #commute-panel .cv-candidates:empty { display: none; }
