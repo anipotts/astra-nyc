@@ -4,6 +4,6 @@
 .source-plan-viewer .sp-toolbar button { min-height:var(--ui-control-compact,30px); padding:4px 8px; }
 .source-plan-viewer .sp-scroll { flex:1; min-height:160px; overflow:auto; background:white; border:1px solid var(--ui-color-border,#dce2df); }
 .source-plan-viewer .sp-scroll canvas { display:block; max-width:none; margin:0 auto; }
-.source-plan-viewer canvas[hidden] { display:none; }
+.source-plan-viewer [hidden] { display:none !important; }
 .source-plan-viewer .sp-status { margin:0; font-size:var(--ui-text-sm,12px); }
 .source-plan-viewer .sp-provenance { color:var(--ui-color-muted,#59665e); overflow-wrap:anywhere; }

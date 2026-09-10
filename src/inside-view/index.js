@@ -1,4 +1,6 @@
 import { initialInsideState, resolveInsideContext, reduceInsideAction, dimensionLabel, safeSourceUrl } from './model.js';
+import { mountSourcePlan } from '../source-plan/index.js';
+import { insideSourcePlan } from './source.js';
 import './style.css';
 
 const escape = (value) => String(value ?? '').replace(/[&<>"']/g, (char) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
@@ -6,9 +8,10 @@ const link = (url, label) => safeSourceUrl(url) ? `<a href="${escape(safeSourceU
 let viewSequence = 0;
 const date = (value) => value && Number.isFinite(Date.parse(value)) ? new Date(value).toISOString().slice(0, 10) : 'Unknown';
 
-export function mountInsideView(container, { onInspectPlan, onOpenPlans, onAction, records } = {}) {
+export function mountInsideView(container, { onInspectPlan, onOpenPlans, onAction, records, createSourcePlan = mountSourcePlan } = {}) {
   const helpId = `inside-help-${++viewSequence}`;
   let context = resolveInsideContext(), state = initialInsideState(), destroyed = false, active = true, signature = '', drag = null;
+  let sourceViewer = null, sourceVisible = false;
   const root = document.createElement('section');
   root.className = 'inside-view';
   root.setAttribute('aria-label', 'Inside evidence explorer');
@@ -40,19 +43,46 @@ export function mountInsideView(container, { onInspectPlan, onOpenPlans, onActio
     }
   }
 
+  function syncSourcePlan() {
+    const plan = !context.region && insideSourcePlan(context.listing);
+    const host = root.querySelector('.iv-published-plan');
+    if (!plan || !host) return;
+    if (!active) {
+      if (sourceVisible) sourceViewer?.setActive(false);
+      sourceVisible = false;
+      return;
+    }
+    sourceViewer ||= createSourcePlan(host, {
+      compact: true,
+      onSource(receipt) {
+        if (destroyed || !sourceVisible || context.listing?.id !== plan.listingId || insideSourcePlan(context.listing)?.sourceUrl !== plan.sourceUrl) return;
+        const output = root.querySelector('.iv-source-receipt');
+        if (output) output.textContent = `${new URL(receipt.sourceUrl).hostname} · retrieved ${receipt.fetchedAt || 'time not supplied'}`;
+      },
+    });
+    if (!sourceVisible) {
+      sourceVisible = true;
+      void sourceViewer.update({ sourceUrl: plan.sourceUrl, title: plan.title, active: true });
+    }
+  }
+
   function render() {
+    sourceViewer?.destroy(); sourceViewer = null; sourceVisible = false;
     const { listing, region } = context;
+    const sourcePlan = !region && insideSourcePlan(listing);
+    root.classList.toggle('iv-source-first', Boolean(sourcePlan));
     if (!listing) {
       root.innerHTML = '<div class="iv-empty ui-panel"><span class="iv-eyebrow">Inside</span><h2>Choose a home to look inside</h2><p>Select a listing to review its source and any accepted room evidence.</p></div>';
       return;
     }
-    root.innerHTML = `<header class="iv-heading"><div><span class="iv-eyebrow">${region ? 'Reviewed partial plan' : 'Source review'}</span><h2>${escape(listing.name)}</h2><p>${escape(listing.location)}</p></div><span class="iv-badge ui-chip">${listing.archived ? 'Archived source' : listing.historical ? 'Historical plan' : 'Source snapshot'}</span></header>
-      ${region ? `<div class="iv-toolbar" role="group" aria-label="Room view controls"><button class="ui-button" type="button" data-action="dimensions" aria-pressed="true">Dimensions</button><button class="ui-button" type="button" data-action="unit" aria-label="Switch dimension units">Feet</button><span class="iv-toolbar-spacer"></span><button class="ui-button" type="button" data-action="zoom-out" aria-label="Zoom out">−</button><output class="iv-zoom" aria-label="Zoom level">100%</output><button class="ui-button" type="button" data-action="zoom-in" aria-label="Zoom in">+</button><button class="ui-button" type="button" data-action="reset">Reset</button></div><div class="iv-canvas" tabindex="0" aria-label="Room canvas. Drag or use arrow keys to pan, plus and minus to zoom, Home to reset." aria-describedby="${helpId}"></div><p class="iv-canvas-help" id="${helpId}">Drag to pan · + / − to zoom · Home to reset</p><p class="iv-scope">${escape(region.extent)} <strong>Nominal region only; no fit guarantee.</strong></p>` : `<div class="iv-empty ui-panel"><div class="iv-empty-mark" aria-hidden="true">↗</div><h3>Start with the original source</h3><p>${escape(listing.readinessReason || 'Room dimensions and boundaries have not been accepted for this home. Review the listing photos and published plan at their source.')}</p><p class="iv-muted">Photos and reported floor area alone cannot establish measured room geometry.</p></div>`}
-      <nav class="iv-source-actions" aria-label="Source actions">${link(listing.url, 'Open listing source')}${listing.planUrl && listing.planUrl !== listing.url ? link(listing.planUrl, 'Published plan') : ''}${onInspectPlan && safeSourceUrl(listing.planUrl) ? '<button class="ui-button" type="button" data-action="inspect">Inspect this plan</button>' : ''}${(region || safeSourceUrl(listing.planUrl)) && onOpenPlans ? '<button class="ui-button" type="button" data-action="plans">Open Plans</button>' : ''}</nav>
-      <details class="iv-details ui-disclosure"><summary>Sources & dimensions</summary><dl><dt>Listing checked</dt><dd>${date(listing.checkedAt)}</dd><dt>Availability</dt><dd>${escape(listing.availability || 'Not verified')}</dd>${region ? `<dt>Region dimensions</dt><dd>${dimensionLabel(region.width, 'ft')} × ${dimensionLabel(region.depth, 'ft')} (${dimensionLabel(region.width, 'm')} × ${dimensionLabel(region.depth, 'm')})</dd><dt>Basis</dt><dd>${escape(region.elements[0].evidence.source)}</dd><dt>Reviewed</dt><dd>${date(region.revision.createdAt)}</dd><dt>Published date</dt><dd>${date(region.sourceDate)}</dd><dt>Artwork metadata</dt><dd>${date(region.artworkDate)}; not a publication date</dd>` : ''}</dl>${region ? `<p>${escape(region.qualification)}</p><p><strong>Excluded:</strong> ${escape(region.exclusions.join('; '))}.</p>${region.sources.map((source) => `<p>${link(source.url, escape(source.title))}</p>`).join('')}<p>Source artwork remains at the publisher. Reuse rights are unresolved.</p>` : `<p>${escape(listing.questions || 'Confirm exact unit, source date, dimensions and current condition.')}</p>`}</details>
+    root.innerHTML = `${sourcePlan ? '' : `<header class="iv-heading"><div><span class="iv-eyebrow">${region ? 'Reviewed partial plan' : 'Source review'}</span>${region ? `<h2>${escape(listing.name)}</h2><p>${escape(listing.location)}</p>` : ''}</div><span class="iv-badge ui-chip">${listing.archived ? 'Archived source' : listing.historical ? 'Historical plan' : 'Source snapshot'}</span></header>`}
+      ${sourcePlan ? `<p class="iv-source-scope">${escape(sourcePlan.scope)}${listing.archived ? ' · Archived listing' : ''}</p><div class="iv-published-plan" aria-label="Original source plan"></div>` : region ? `<div class="iv-toolbar" role="group" aria-label="Room view controls"><button class="ui-button" type="button" data-action="dimensions" aria-pressed="true">Dimensions</button><button class="ui-button" type="button" data-action="unit" aria-label="Switch dimension units">Feet</button><span class="iv-toolbar-spacer"></span><button class="ui-button" type="button" data-action="zoom-out" aria-label="Zoom out">−</button><output class="iv-zoom" aria-label="Zoom level">100%</output><button class="ui-button" type="button" data-action="zoom-in" aria-label="Zoom in">+</button><button class="ui-button" type="button" data-action="reset">Reset</button></div><div class="iv-canvas" tabindex="0" aria-label="Room canvas. Drag or use arrow keys to pan, plus and minus to zoom, Home to reset." aria-describedby="${helpId}"></div><p class="iv-canvas-help" id="${helpId}">Drag to pan · + / − to zoom · Home to reset</p><p class="iv-scope">${escape(region.extent)} <strong>Nominal region only; no fit guarantee.</strong></p>` : `<div class="iv-fallback"><h3>No supported PDF plan for this home</h3><p>Open the listing source to review its photos and any published plan. Room geometry remains unverified.</p></div>`}
+      <nav class="iv-source-actions" aria-label="Source actions">${sourcePlan ? '' : link(listing.url, 'Open listing source')}${!sourcePlan && listing.planUrl && listing.planUrl !== listing.url ? link(listing.planUrl, 'Published plan') : ''}${onInspectPlan && safeSourceUrl(listing.planUrl) ? '<button class="ui-button" type="button" data-action="inspect">Ask Astra to inspect this plan</button>' : ''}${(region || safeSourceUrl(listing.planUrl)) && onOpenPlans ? '<button class="ui-button" type="button" data-action="plans">Open Plans</button>' : ''}</nav>
+      <details class="iv-details ui-disclosure"><summary>${sourcePlan ? 'Plan details & evidence' : 'Sources & dimensions'}</summary><dl><dt>Selected source</dt><dd>${escape(listing.name)}</dd>${sourcePlan ? '<dt>PDF retrieval</dt><dd class="iv-source-receipt">Not loaded yet</dd>' : ''}<dt>Listing checked</dt><dd>${date(listing.checkedAt)}</dd><dt>Availability</dt><dd>${escape(listing.availability || 'Not verified')}</dd>${region ? `<dt>Region dimensions</dt><dd>${dimensionLabel(region.width, 'ft')} × ${dimensionLabel(region.depth, 'ft')} (${dimensionLabel(region.width, 'm')} × ${dimensionLabel(region.depth, 'm')})</dd><dt>Basis</dt><dd>${escape(region.elements[0].evidence.source)}</dd><dt>Reviewed</dt><dd>${date(region.revision.createdAt)}</dd><dt>Published date</dt><dd>${date(region.sourceDate)}</dd><dt>Artwork metadata</dt><dd>${date(region.artworkDate)}; not a publication date</dd>` : ''}</dl>${region ? `<p>${escape(region.qualification)}</p><p><strong>Excluded:</strong> ${escape(region.exclusions.join('; '))}.</p>${region.sources.map((source) => `<p>${link(source.url, escape(source.title))}</p>`).join('')}<p>Source artwork remains at the publisher. Reuse rights are unresolved.</p>` : `<p>${escape(listing.questions || 'Confirm exact unit, source date, dimensions and current condition.')}</p>`}</details>
       ${region ? `<details class="iv-details ui-disclosure"><summary>Compare an object’s footprint</summary><p>Enter dimensions you know. This creates a separate scale reference; placing furniture needs verified room boundaries and obstacles.</p><form class="iv-object-form"><label>Width (m)<input class="ui-field" name="width" type="number" min="0.1" max="10" step="any" required placeholder="e.g. 1.5"></label><label>Depth (m)<input class="ui-field" name="depth" type="number" min="0.1" max="10" step="any" required placeholder="e.g. 2.0"></label><button class="ui-button" type="submit">Compare size</button></form><div class="iv-comparison" hidden></div></details>` : ''}
-      <details class="iv-details ui-disclosure"><summary>What would unlock more?</summary><p><strong>Furniture placement:</strong> reviewed clear-floor boundaries, doors, fixed obstacles and confirmed object dimensions.</p><p><strong>Walkthrough & lighting:</strong> reviewed wall, opening, ceiling and orientation evidence. These sources do not establish a complete 3D interior.</p></details><p class="iv-status" role="status" aria-live="polite"></p>`;
+      ${sourcePlan ? '' : '<details class="iv-details ui-disclosure"><summary>What would unlock more?</summary><p><strong>Furniture placement:</strong> reviewed clear-floor boundaries, doors, fixed obstacles and confirmed object dimensions.</p><p><strong>Walkthrough & lighting:</strong> reviewed wall, opening, ceiling and orientation evidence. These sources do not establish a complete 3D interior.</p></details>'}<p class="iv-status" role="status" aria-live="polite"></p>`;
     draw();
+    syncSourcePlan();
   }
 
   function dispatch(action) {
@@ -115,26 +145,29 @@ export function mountInsideView(container, { onInspectPlan, onOpenPlans, onActio
   }, { passive: false });
 
   function setActive(value) {
+    if (destroyed) return;
     active = Boolean(value);
     drag = null;
     root.inert = !active;
+    syncSourcePlan();
   }
   render();
   return {
     update(next) {
       if (destroyed) return;
-      setActive(next?.active !== false);
+      const nextActive = next?.active !== false;
       const resolved = resolveInsideContext(next, records);
       const nextSignature = JSON.stringify([resolved.listing, resolved.region]);
       context = resolved;
       if (signature !== nextSignature) {
+        active = nextActive; root.inert = !active;
         signature = nextSignature; state = initialInsideState(); drag = null; render();
-      }
+      } else setActive(nextActive);
     },
     dispatch,
     setActive,
     deactivate: () => setActive(false),
     getState: () => structuredClone(state),
-    destroy() { destroyed = true; drag = null; abort.abort(); root.remove(); },
+    destroy() { destroyed = true; drag = null; sourceViewer?.destroy(); sourceViewer = null; sourceVisible = false; abort.abort(); root.remove(); },
   };
 }

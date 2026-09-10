@@ -10,18 +10,22 @@ async function library() {
   return pdfLibrary;
 }
 
-export function mountSourcePlan(container, { fetchFn = fetch } = {}) {
+export function mountSourcePlan(container, { fetchFn = fetch, compact = false, onSource } = {}) {
   const root = document.createElement('section'); root.className = 'source-plan-viewer';
   root.innerHTML = '<div class="sp-toolbar"><a target="_blank" rel="noopener noreferrer">Open publisher plan ↗</a><span class="sp-pages"></span><button class="ui-button" type="button" data-step="-1">Previous</button><button class="ui-button" type="button" data-step="1">Next</button><button class="ui-button" type="button" data-fit="true">Fit page</button><button class="ui-button" type="button" data-zoom="-1" aria-label="Zoom out of source plan">−</button><button class="ui-button" type="button" data-zoom="1" aria-label="Zoom into source plan">+</button></div><p class="sp-status" role="status" aria-live="polite"></p><div class="sp-scroll"><canvas role="img"></canvas></div><small class="sp-provenance"></small>';
   container.append(root);
   const $ = (selector) => root.querySelector(selector);
   const canvas = $('canvas'), status = $('.sp-status'), provenance = $('.sp-provenance');
+  provenance.hidden = compact;
   let selected = null, active = true, destroyed = false, generation = 0, controller, task, pdfDocument, renderTask, page = 1, zoom = 1, ready = false;
   const listeners = new AbortController();
   function clear() {
     ready = false; canvas.width = 0; canvas.height = 0; canvas.hidden = true;
     $('.sp-pages').textContent = ''; provenance.textContent = '';
-    for (const button of root.querySelectorAll('button')) button.disabled = true;
+    for (const button of root.querySelectorAll('button')) {
+      button.disabled = true;
+      if (button.dataset.step) button.hidden = true;
+    }
   }
   async function cancel() {
     const version = ++generation; controller?.abort(); renderTask?.cancel();
@@ -51,9 +55,10 @@ export function mountSourcePlan(container, { fetchFn = fetch } = {}) {
     await renderTask.promise;
     if (version !== generation || !active) return;
     ready = true; canvas.hidden = false;
-    status.textContent = 'Original publisher plan · nominal dimensions; current unit conditions unverified.';
+    status.textContent = compact ? '' : 'Original publisher plan · nominal dimensions; current unit conditions unverified.';
     $('.sp-pages').textContent = `Page ${page} of ${pdfDocument.numPages}`;
     for (const button of root.querySelectorAll('button')) {
+      if (button.dataset.step) button.hidden = pdfDocument.numPages === 1;
       button.disabled = button.dataset.step === '-1' ? page === 1 : button.dataset.step === '1' ? page === pdfDocument.numPages : false;
     }
   }
@@ -82,6 +87,7 @@ export function mountSourcePlan(container, { fetchFn = fetch } = {}) {
       validateSourcePlanPages(pdfDocument.numPages);
       const source = normalizeSourceUrl(response.headers.get('x-plan-source') || selected.sourceUrl);
       provenance.textContent = `Source: ${new URL(source).hostname} · retrieved ${response.headers.get('x-plan-fetched-at') || 'just now'} · original document, not reconstructed geometry`;
+      onSource?.({ sourceUrl: source, fetchedAt: response.headers.get('x-plan-fetched-at') || null, sha256: response.headers.get('x-plan-sha256') || null });
       await render(version);
     } catch (error) {
       if (version === generation && active && !destroyed) {

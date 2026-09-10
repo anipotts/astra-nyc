@@ -45,3 +45,18 @@
 .inside-view .iv-comparison text { font:12px system-ui,sans-serif; fill:#244b39; }
 .inside-view .iv-status { font-size:var(--ui-text-sm,12px); }
 @media (prefers-reduced-motion:reduce) { .inside-view *, .inside-view *::before, .inside-view *::after { animation:none !important; transition:none !important; scroll-behavior:auto !important; } }
+/* Source-first Inside: the original plan gets the primary desktop area. */
+.inside-view.iv-source-first { padding:var(--ui-space-4,16px); }
+.inside-view.iv-source-first .iv-heading { margin-bottom:var(--ui-space-2,8px); gap:var(--ui-space-2,8px); }
+.inside-view .iv-source-scope { margin:0 0 var(--ui-space-2,8px); color:var(--ui-color-muted,#59665e); font-size:var(--ui-text-sm,12px); }
+.inside-view .iv-published-plan { width:100%; height:clamp(400px,calc(100dvh - 180px),900px); min-width:0; }
+.inside-view.iv-source-first .iv-source-actions { margin:var(--ui-space-2,8px) 0; gap:var(--ui-space-2,8px); }
+.inside-view.iv-source-first .iv-details { padding:var(--ui-space-2,8px) 0; }
+.inside-view.iv-source-first .sp-toolbar { gap:var(--ui-space-1,4px); }
+.inside-view.iv-source-first .sp-toolbar button { min-height:var(--ui-control-compact,30px); padding:4px 8px; font-size:var(--ui-text-sm,12px); }
+.inside-view.iv-source-first .sp-status { margin:0; }
+.inside-view .iv-fallback { padding:var(--ui-space-4,16px) 0; max-width:560px; }
+.inside-view .iv-fallback h3 { font-size:var(--ui-text-base,14px); margin:0 0 var(--ui-space-2,8px); letter-spacing:0; }
+.inside-view .iv-fallback p { font-size:var(--ui-text-sm,12px); color:var(--ui-color-muted,#59665e); }
+
+.inside-view.iv-source-first .sp-status:empty { display:none; }
