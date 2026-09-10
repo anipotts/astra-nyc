@@ -16,3 +16,10 @@
 - This task encountered earlier context while creating the initial scaffold. Do not claim otherwise. See BUILD_LOG.md.
 - Keep credentials, private event information, conversation exports, and unrelated files out of the public repository. Use synthetic demo data unless the user supplies suitable public data during the build window.
 - Before implementing the product, establish one user problem, one core interaction, one visible result, and distinct development and runtime roles for Astra from the user's current requirements.
+
+## Current product direction
+
+- Help people decide which homes to pursue through a traversable preview of space, commute, and daily essentials.
+- Preserve the participant's updated direction: larger-bed fit, unfurnished view, lighting, and Nearby categories; do not reintroduce the rejected work-desk example.
+- Keep development assistance distinct from live runtime Astra. The current app has deterministic local controls only; a bounded, verified runtime integration is the next critical capability.
+- Real listing imagery and location information must carry sources and freshness context. Never imply complete defect detection or verified reconstruction from visual plausibility alone.

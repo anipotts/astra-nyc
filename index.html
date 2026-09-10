@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#ffffff" />
+    <title>Elsewhere — imagine your next home</title>
+    <link rel="icon" href="data:," />
+  </head>
+  <body>
+    <header>
+      <a class="wordmark" href="/">Elsewhere<span>↗</span></a
+      ><span class="local">Local demo · no data uploaded</span>
+    </header>
+    <main>
+      <aside>
+        <div class="intro">
+          <h1>Decide where to move. Before you visit.</h1>
+          <p>
+            Compare the space, the commute, and daily essentials. Get a clearer
+            picture before committing to a viewing.
+          </p>
+        </div>
+        <fieldset class="homes">
+          <legend class="sr-only">Choose a home</legend>
+          <label class="home"
+            ><input type="radio" name="home" value="current" checked /><span
+              class="home-art current"
+              aria-hidden="true"
+              >01</span
+            ><span
+              ><strong>Current home</strong
+              ><small>Synthetic example · compact</small></span
+            ></label
+          >
+          <label class="home"
+            ><input type="radio" name="home" value="potential" /><span
+              class="home-art potential"
+              aria-hidden="true"
+              >02</span
+            ><span
+              ><strong>Potential home</strong
+              ><small>Synthetic example · more space</small></span
+            ></label
+          >
+        </fieldset>
+        <div class="actions">
+          <button class="primary" data-mode="walk">
+            <span>Walk inside</span><span aria-hidden="true">↗</span></button
+          ><button data-mode="commute">
+            <span>Preview commute</span><span aria-hidden="true">→</span>
+          </button>
+        </div>
+        <section class="changes">
+          <h2>Picture your move</h2>
+          <button id="bed" aria-pressed="false">
+            <span aria-hidden="true">＋</span
+            ><span>Will a king bed fit?</span></button
+          ><button id="unfurnished" aria-pressed="false">
+            <span aria-hidden="true">□</span
+            ><span>See it unfurnished</span></button
+          ><button id="evening" aria-pressed="false">
+            <span aria-hidden="true">☼</span><span>Evening light</span></button
+          ><button id="reset">
+            <span aria-hidden="true">↺</span><span>Reset scene</span>
+          </button>
+          <p class="fine">
+            These are local scene controls. Live Astra editing is not connected.
+          </p>
+        </section>
+        <details class="evidence">
+          <summary>What is verified?</summary>
+          <p>
+            No real listing has been connected. These homes, streets, and nearby
+            places are synthetic. Photo sources, capture dates, and observed
+            concerns will appear here when listing evidence is connected. Unseen
+            conditions remain unknown.
+          </p>
+        </details>
+        <output id="status" aria-live="polite"
+          >Start with the home you know.</output
+        >
+      </aside>
+      <section id="viewport" aria-label="Interactive 3D home preview">
+        <div class="modebar" role="group" aria-label="View mode">
+          <button data-mode="overview" aria-pressed="true">Overview</button
+          ><button data-mode="walk" aria-pressed="false">Walk</button
+          ><button data-mode="commute" aria-pressed="false">Commute</button
+          ><button data-mode="nearby" aria-pressed="false">Nearby</button>
+        </div>
+        <div
+          id="scene"
+          tabindex="0"
+          aria-label="3D scene. In walk mode use W A S D to move, arrow keys to turn, or drag to look."
+        ></div>
+        <div id="scene-title">
+          <strong id="place">Current home</strong
+          ><span id="view-description">A place to start imagining.</span>
+        </div>
+        <div class="walk-controls" hidden>
+          <button data-key="a" aria-label="Step left">←</button
+          ><button data-key="w" aria-label="Walk forward">↑</button
+          ><button data-key="s" aria-label="Walk backward">↓</button
+          ><button data-key="d" aria-label="Step right">→</button
+          ><button data-key="ArrowLeft" aria-label="Turn left">↶</button
+          ><button data-key="ArrowRight" aria-label="Turn right">↷</button>
+        </div>
+        <div class="nearby-panel" hidden>
+          <h2>Life around your home</h2>
+          <p>Choose what matters to your move.</p>
+          <div id="categories"></div>
+          <strong id="poi-name"></strong>
+          <p id="poi-note">
+            Illustrative locations only. Real places and distances are not
+            connected.
+          </p>
+        </div>
+        <div class="journey" hidden>
+          <div>
+            <strong id="journey-label">Home → Work</strong
+            ><button id="ride">Pause ride</button>
+          </div>
+          <label for="progress" class="sr-only">Commute preview progress</label
+          ><input
+            id="progress"
+            type="range"
+            min="0"
+            max="100"
+            value="0"
+            step="0.1"
+          /><small>Illustrative route · no real travel-time estimate</small>
+        </div>
+        <div class="caption">
+          <span id="hint">Drag to orbit · scroll to zoom</span
+          ><span
+            >Illustrative geometry and streets. Not a verified listing
+            reconstruction.</span
+          >
+        </div>
+      </section>
+    </main>
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>
