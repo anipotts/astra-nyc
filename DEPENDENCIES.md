@@ -2,7 +2,7 @@
 
 ## Current integrated application
 
-The sections below record additions across the event; statements about earlier experiments describe their state at that milestone. The integrated app now uses OpenFreeMap/OpenStreetMap map tiles, official NYC building data, Nominatim address lookup, FOSSGIS/OSRM routes, transient original publisher PDF previews, and bounded OpenAI listing discovery/evidence services. Source data and hosted services are external contributions, separate from the original application code. The event-created landing illustration is bundled as decorative artwork. Listing photos, remote map tiles and publisher PDFs are not bundled. Original project code has no selected license grant.
+The sections below record additions across the event; statements about earlier experiments describe their state at that milestone. The integrated app now uses OpenFreeMap/OpenStreetMap map tiles, official NYC building data, Nominatim address lookup, FOSSGIS/OSRM routes, transient original publisher PDF previews, Google-issued public Street View embeds, and bounded OpenAI listing discovery, evidence assessment and estimated-interior generation. Source data and hosted services are external contributions, separate from the original application code. The event-created landing illustration is bundled as decorative artwork. Listing photos, remote map tiles and publisher PDFs are not bundled. Original project code has no selected license grant.
 
 Nominatim is used for bounded address lookup after selection, without autocomplete. See the [OSMF policy](https://operations.osmfoundation.org/policies/nominatim/) and server/location.js for identifying requests, shared throttling and caching. This supersedes the earlier evaluation-only note below. The current default ten-case NYC source catalog is in src/nyc-listings.js, with original links, evidence scope and dates; the older src/listings.js research remains available separately.
 
@@ -129,3 +129,21 @@ The official [Architectural visualization with Astra](https://developers.openai.
 [Mozilla PDF.js](https://github.com/mozilla/pdf.js) is installed as pinned [pdfjs-dist6.3.289](https://www.npmjs.com/package/pdfjs-dist); its Apache-2.0 license is retained at src/source-plan/PDFJS_LICENSE.txt. Official [examples](https://mozilla.github.io/pdf.js/examples/) and [API documentation](https://mozilla.github.io/pdf.js/api/draft/module-pdfjsLib.html) were consulted; no example app was imported. Library code loads on source viewing and the worker is served locally. Optional Node canvas packages listed above are npm dependencies, not browser imports. Platform-specific packages recorded in the lockfile but not installed here need their notices checked if distributed.
 
 Approved publisher PDFs are transient original-source previews: bounded retrieval, no persistent storage or bundled artwork, retained publisher link and acquisition metadata. This grants no redistribution rights or professional certification. A tighter SVG viewport around the already approved raster mark enlarges its header/favicon presentation; the original artwork bytes remain unchanged.
+
+## Final interior generation and street imagery — September 10, 2026
+
+Estimated interiors use the existing OpenAI Responses API and Three.js0.186.0;
+no additional npm dependency was introduced. Approved publisher PDFs or selected
+catalog listing facts plus bounded source search inform a validated estimated scene.
+Successful source-bound generations and charged attempts persist privately without
+a TTL. MiMA and 95 Wall were verified; the catalog is not entirely pregenerated.
+Source documents and listing evidence remain external contributions, and generated
+geometry is not a measured reconstruction.
+
+Interactive street imagery uses Google-issued public embeds obtained through the
+Google Maps Share/embed interface near MiMA and 95 Wall. Google hosts the panorama,
+controls and attribution; no imagery is downloaded or bundled. The reviewed
+panoramas are dated April 2026. This is a hosted service without a pinned software
+version or open-source imagery license, governed by Google Maps provider terms.
+Other coordinates use the existing official Google Maps URL API to open Street
+View externally. No Maps SDK package or new application credential was added.

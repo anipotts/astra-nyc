@@ -6,7 +6,7 @@ A local prototype for comparing the space, commute, and daily essentials around 
 
 ## Quick demo
 
-Choose **MiMA #48H** from the search suggestions to explore its approximate neighborhood context. Open **Plans** to inspect the original publisher PDF, using Fit page and zoom for its details. Switch to **95 Wall Street #2308**, open **Commute**, and use the default public destination, **3 World Trade Center**. Once the walking route loads, **Walk this route** follows its returned geometry through the map. Escape exits walking and closes Plans.
+Choose **MiMA #48H** from the search suggestions to explore its approximate neighborhood context. Open **Plans** to inspect the original publisher PDF, using Fit page and zoom for its details. Switch to **95 Wall Street #2308**, open **Commute**, and use the default public destination, **3 World Trade Center**. Once the walking route loads, compare Walk and Bike. Open Street View to explore real Google street imagery near the prepared MiMA and 95 Wall locations. Escape closes Plans.
 
 MiMA is an archived listing. Source dates, missing interior evidence and approximate geographic context remain visible. Supported publisher plans can now be used for an explicitly estimated 3D Inside preview; this does not establish a complete verified reconstruction or measured furniture fit.
 
@@ -33,9 +33,9 @@ npm run build
 - Review dated source facts and unknowns in the sidebar. MiMA #48H is an archived source with a reviewed H-line publisher plan and readable room-size labels; those labels do not establish calibrated room boundaries. No dimensional interior or fit result is generated from reported square footage. Earlier Charles & Co and Urby research remains preserved outside the NYC catalog.
 - Assess interior evidence from the selected source. Astra returns dated references, proposed exact-unit/building/other-unit classifications, subject levels, conflicts and gaps. The report separates available references from unverified geometry. It does not generate an interior.
 - Overview, Inside and Commute share a desktop left column: Elsewhere branding, view tabs, Plans and Your places. Source details remain in a disclosure. The ten NYC cases appear in the selector. Choosing a reviewed example immediately focuses its bundled source-supported building location. Other selected addresses are looked up automatically; one exact numbered-street match can be selected automatically, while ambiguous results remain under Sources & details. The former Locate this listing overlay has been removed.
-- Inside can request an estimated 3D scene from a supported publisher plan through the separate Astra interior service, then render it locally with a movable shoulder camera. Geometry, materials and furnishings remain labeled as estimates. Unsupported listings keep an explicit evidence state. The archived Charles research retains its separate reviewed nominal region. Plans displays approved original publisher PDFs in a native dialog using a bundled PDF.js worker, with Fit page and zoom controls. Original plan viewing remains distinct from model-generated estimates. SVG/print output for generated drawings remains a separate capability requiring supported geometry.
+- Inside can request an estimated 3D scene from an approved publisher plan or the selected catalog listing’s source evidence through the separate Astra interior service, then render it locally with a first-person camera. Geometry, materials and furnishings remain labeled as estimates. Listings without a matching PDF can use their own dated listing facts and bounded source search, with inferred boundaries and furnishings identified as assumptions. Unsupported sources retain an explicit evidence state. The archived Charles research retains its separate reviewed nominal region. Plans displays approved original publisher PDFs in a native dialog using a bundled PDF.js worker, with Fit page and zoom controls. Original plan viewing remains distinct from model-generated estimates. SVG/print output for generated drawings remains a separate capability requiring supported geometry.
 - Commute automatically requests real walking, cycling or driving routes when a resolved listing and destination are active. Selecting a travel mode updates the route in one action. Typing does not make requests; an unknown destination is looked up explicitly and selecting its match starts the route. Errors expose Retry. Route geometry stays attached to the map while zooming and panning; the segment slider highlights individual steps. Times are provider estimates without live traffic or departure schedules. Transit opens external Google Maps directions. Changing the listing, destination, mode or active view clears stale routes and aborts pending client requests. The default public destination is 3 World Trade Center. No current-home address is required.
-- Walk this route starts a controllable camera preview along a returned walking route. Move forward, look around, skip to the next segment, seek along the route, and exit with the control or Escape. This follows provider geometry through approximate building massing; it does not establish sidewalk, entrance, facade or street-condition accuracy.
+- Street View opens interactive Google-issued public embeds near the prepared MiMA and 95 Wall locations. Drag to look around and use Google’s native street arrows to move. These panoramas are dated April 2026 and do not establish a surveyed entrance or current conditions. Other coordinates open official Google Street View externally. The map-based route preview remains approximate provider geometry, separate from street imagery.
 - Your routine remains in a collapsed sidebar disclosure across views and listings. Choose up to three priorities; selections persist in this browser across reloads, synchronize across tabs, and remain usable for the visit if storage is unavailable. No authentication is required. Sourced nearby businesses, personalized detours and account sync are not implemented.
 
 ## Preserved development fixtures
@@ -126,17 +126,22 @@ Close-up rendering now requests MSAA antialiasing, caps pixel density at 2, and 
 
 ### Estimated Inside interiors
 
-`createInteriorEstimateMiddleware({ apiKey, maxAttempts: 3 })` from
+`createInteriorEstimateMiddleware({ apiKey, maxAttempts: 10, statePath })` from
 `server/inside-view/index.js` adds `/api/interiors/estimate` (POST with the selected
 `listingId` and its own `sourceUrl`) and value-silent `/api/interiors/status`.
 Inject the existing private server key; never put it in client configuration.
-Astra reads the approved source PDF and emits the strict estimated-scene contract.
-Requests coalesce and successful scenes remain in server memory for 30 minutes;
-there is no model call for camera movement. The client caches scenes for the same
-period. Restarting the server clears its cache and attempt budget.
+Astra reads an approved publisher PDF, or uses the selected catalog listing’s dated
+facts and bounded source search when no matching PDF is available, then emits the
+strict estimated-scene contract. Requests coalesce. Successful source-bound scenes
+and charged attempts persist in the private `.cache/interior-generations.json`
+state file without a TTL; restarting the configured server preserves both. The
+original generation timestamp remains attached. MiMA and 95 Wall were generated
+and verified during the event; this does not mean all ten examples are pregenerated.
+There is no model call for camera movement.
 
-Inside renders these scenes locally with Three.js and labels geometry, furnishings
-and materials as estimates. Click the scene, use WASD/arrows to move, drag to look,
-and press Home or Reset view to restore the first-person eye-level camera. Official
-plans remain available through Plans. Listings without a supported source PDF
-show their evidence state rather than a substitute apartment.
+Inside renders these scenes locally with Three.js. Geometry, furnishings and
+materials remain estimates. Click the scene, use WASD/arrows to move, drag to look,
+and press Home or Reset view to restore the first-person eye-level camera. Original
+publisher plans remain available through Plans where supported. A listing without
+a PDF may produce a hypothetical arrangement from its own evidence; it is not a
+measured reconstruction or proof of furniture fit.
