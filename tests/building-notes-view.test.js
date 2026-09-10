@@ -50,10 +50,34 @@ test('failed first-open lookup exposes explicit retry; new identity waits for it
   const container=createContainer();const calls=[];
   const view=mountBuildingNotes(container,{listing:{id:'wall',mapAddress:'95 Wall Street, New York, NY'},fetchFn:async(_url,options)=>{calls.push(JSON.parse(options.body));return new Response(JSON.stringify({...result(),coverage:'unavailable'}));}});
   const root=container.children[0];root.open=true;await root.ontoggle();
-  const button=walk(root).find(n=>n.tagName==='BUTTON');assert.equal(button.textContent,'Retry building records');
+  const button=walk(root).find(n=>n.tagName==='BUTTON');assert.equal(button.textContent,'Retry');assert.equal(button.attributes['aria-label'],'Retry building records');
   await button.onclick();assert.equal(calls[1].refresh,true);
   view.setListing({id:'mima',mapAddress:'450 West 42nd Street, New York, NY'});
   assert.equal(root.open,false);assert.equal(calls.length,2);assert.equal(button.hidden,true);
   await root.ontoggle();assert.equal(calls.length,2);
   root.open=true;await root.ontoggle();assert.equal(calls.length,3);assert.match(calls[2].address,/450/);
+});
+
+
+test('compact record keeps three issue rows but shares repeated agency wording and one source disclosure', async () => {
+  const container=createContainer();
+  const explanation='The agency found no violation in the conditions inspected.';
+  const data={...result(),coverage:'completed_with_matches',findings:[{id:'123',summary:'Reported appliance and unsanitary condition.',receivedAt:'2026-08-18',status:'CLOSE',outcome:'No violation found in inspected conditions.',sourceUrl:'https://data.cityofnewyork.us/resource/ygpa-z7cr.json',problems:['Range','Mold','Refrigerator'].map(detail=>({category:'CATEGORY',detail,status:'CLOSE',agencyExplanation:explanation}))}]};
+  mountBuildingNotes(container,{listing:{id:'mima',mapAddress:'450 West 42nd Street'},fetchFn:async()=>new Response(JSON.stringify(data))});
+  const root=container.children[0];root.open=true;await root.ontoggle();
+  assert.equal(walk(root).filter(n=>n.tagName==='LI').length,3);
+  assert.equal(walk(root).filter(n=>n.textContent===explanation).length,1);
+  assert.equal(walk(root).filter(n=>n.tagName==='DETAILS').length,2);
+  assert.match(text(root),/2026-08-18/);assert.match(text(root),/Closed/);assert.match(text(root),/not verified violations/);
+  assert.match(text(root),/2024-09-10 through 2026-09-10/);
+});
+
+
+test('distinct agency explanations retain their issue associations', async () => {
+  const container=createContainer();
+  const data={...result(),coverage:'completed_with_matches',findings:[{id:'123',summary:'Reported conditions.',receivedAt:'2026-08-18',status:'CLOSE',problems:[{category:'APPLIANCE',detail:'Range',status:'CLOSE',agencyExplanation:'Inspected range.'},{category:'WATER LEAK',detail:'Slow leak',status:'CLOSE',agencyExplanation:'Unable to access leak.'}]}]};
+  mountBuildingNotes(container,{listing:{id:'mima',mapAddress:'450 West 42nd Street'},fetchFn:async()=>new Response(JSON.stringify(data))});
+  const root=container.children[0];root.open=true;await root.ontoggle();
+  const groups=walk(root).filter(n=>n.className==='building-notes-agency-detail');
+  assert.equal(groups.length,2);assert.match(text(groups[0]),/Range.*Inspected range/);assert.match(text(groups[1]),/Slow leak.*Unable to access leak/);
 });
