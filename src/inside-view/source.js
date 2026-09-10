@@ -22,3 +22,18 @@ export function insideSourcePlan(listing) {
     };
   } catch { return null; }
 }
+
+// Estimated interiors can use the selected source's description without a PDF.
+// Keep this separate from the published-document contract used by Plans.
+export function insideEstimateSource(listing) {
+  const plan = insideSourcePlan(listing);
+  if (plan) return { ...plan, kind: 'pdf' };
+  const record = nycListings.find((item) => item.id === listing?.id);
+  if (!record?.url || !record.facts) return null;
+  try {
+    const sourceUrl = normalizeSourceUrl(listing.url);
+    if (sourceUrl !== normalizeSourceUrl(record.url)) return null;
+    return { sourceUrl, title: record.name, listingId: record.id,
+      kind: 'listing', scope: 'Estimated from listing evidence · room layout and dimensions inferred' };
+  } catch { return null; }
+}
