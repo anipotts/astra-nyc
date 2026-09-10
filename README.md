@@ -4,10 +4,17 @@ See what life could be like in your next home
 
 A local prototype for comparing the space, commute, and daily essentials around a possible home. Built during the Astra NYC hackathon hosted by Cerebral Valley.
 
+## Quick demo
+
+Choose **MiMA #48H** from the search suggestions to explore its approximate neighborhood context. Open **Inside**, then **Plans** to inspect the original publisher PDF. Switch to **95 Wall Street #2308**, open **Commute**, and use the default public destination, **3 World Trade Center**. Once the walking route loads, **Walk this route** follows its returned geometry through the map. Escape exits walking and closes Plans.
+
+MiMA is an archived listing. Source dates, missing interior evidence and approximate geographic context remain visible. No current NYC example establishes a complete reconstructed apartment or measured furniture fit.
+
 ## Run locally
 
 ```sh
-cd ~/Code/hackathons/astra-nyc
+git clone https://github.com/anipotts/astra-nyc.git
+cd astra-nyc
 npm ci
 npm run dev -- --port 5174
 ```
@@ -28,6 +35,7 @@ npm run build
 - Overview, Inside and Commute share a desktop left column: Elsewhere branding, view tabs, Plans and Your places. Inside shows the reviewed nominal 2D region when available, otherwise the real source link. Source details remain in a disclosure. The ten NYC cases appear in the selector. Choosing a reviewed example immediately focuses its bundled source-supported building location. Other selected addresses are looked up automatically; one exact numbered-street match can be selected automatically, while ambiguous results remain under Sources & details. The former Locate this listing overlay has been removed.
 - Inside mounts a source-aware evidence explorer. The archived Charles research retains pan/zoom, dimension units and a separate object-footprint reference for its reviewed nominal region; no NYC case has established a complete or walkable interior. Inspect this plan returns to a visible source review. Plans displays approved original publisher PDFs in a native dialog using a bundled PDF.js worker, with Fit page and zoom controls. It does not turn printed labels into invented geometry. SVG/print output for generated drawings remains a separate capability requiring supported geometry.
 - Commute automatically requests real walking, cycling or driving routes when a resolved listing and destination are active. Selecting a travel mode updates the route in one action. Typing does not make requests; an unknown destination is looked up explicitly and selecting its match starts the route. Errors expose Retry. Route geometry stays attached to the map while zooming and panning; the segment slider highlights individual steps. Times are provider estimates without live traffic or departure schedules. Transit opens external Google Maps directions. Changing the listing, destination, mode or active view clears stale routes and aborts pending client requests. The default public destination is 3 World Trade Center. No current-home address is required.
+- Walk this route starts a controllable camera preview along a returned walking route. Move forward, look around, skip to the next segment, seek along the route, and exit with the control or Escape. This follows provider geometry through approximate building massing; it does not establish sidewalk, entrance, facade or street-condition accuracy.
 - Your priorities remain in the sidebar across all views and listings. Choose up to three; selections persist in this browser across reloads, synchronize across tabs, and remain usable for the visit if storage is unavailable. No authentication is required. Sourced nearby businesses, personalized detours and account sync are not implemented.
 
 ## Preserved development fixtures
@@ -36,7 +44,7 @@ Synthetic apartments, invented journeys, furniture previews, canonical Plans, co
 
 ## What the demo does not establish
 
-Public listing facts were researched during development on September 10, 2026 and bundled in src/listings.js. The NYC picker opens source snapshots from src/nyc-listings.js; it does not import arbitrary page contents or analyze photographs. Separately, submitted searches can discover candidate source links using Astra web search; their details and availability remain unverified. Source links open the original listing and gallery. Listing availability and prices can change. The interior and car-demo streets, routes, and example nearby places are synthetic. The separate geographic view uses live OpenFreeMap tiles sourced from OpenStreetMap; a chosen listing map pin is approximate. Earlier recordings contain an inferred studio sketch; the current interface no longer enables it from listing area. Synthetic scenes are not a verified reconstruction, furniture-fit guarantee, current-condition inspection, or solar study.
+Public listing facts were researched during development on September 10, 2026 and bundled in src/listings.js. The NYC picker opens source snapshots from src/nyc-listings.js; it does not import arbitrary page contents or analyze photographs. Separately, submitted searches can discover candidate source links using Astra web search; their details and availability remain unverified. Source links open the original listing and gallery. Listing availability and prices can change. Internal regression fixtures contain synthetic interiors, car-demo streets, journeys and nearby places; normal listing navigation does not expose them. The current geographic view uses live OpenFreeMap tiles sourced from OpenStreetMap, official NYC building data where available, and provider-returned commute routes. A chosen listing map pin is approximate. Earlier recordings contain an inferred studio sketch; the current interface no longer enables it from listing area. Synthetic scenes are not a verified reconstruction, furniture-fit guarantee, current-condition inspection, or solar study.
 
 Astra assists development of the scene and app. The running product has an optional localhost-only Astra endpoint for validated scene edits across the two synthetic home previews. Earlier runtime evidence also includes an inferred studio that is now gated from the listing interface. Live gpt-6-astra bed resizing, sofa hiding, evening lighting, and cached replay were verified during the event. The client supplies the current model dimensions, lighting, bed size, and visibility state; the endpoint does not require a particular address or listing ID. The server reads OPENAI_API_KEY from the local environment or ignored .env.local; credentials are never bundled into the client. Local controls still work without credentials. The endpoint validates the returned edit, caches it in server memory, and leaves movement/rendering local. It does not launch runtime agents or reconstruct listing photos.
 
@@ -98,7 +106,7 @@ Runtime inspection-to-reviewed-boundary extraction remains incomplete: printed r
 
 Furniture evidence lookup should accept a photo, link, or description, use visual reasoning and bounded web search to find likely product variants and original specifications, and ask for confirmation when identity is ambiguous. No measurement form is required for previews. Automatic product search, matching, dimension recovery, and Astra manipulation of personal objects are not implemented. Single-image appearance alone does not establish real scale. Cache confirmed evidence per object; movement stays local.
 
-Replace the bundled snapshots with a live, bounded listing importer. Use the participant's listing inputs to collect attributable photo evidence with source URLs and observation dates. Separate visible details from inferred geometry and unknown conditions. Generate a validated scene description and bounded edits, then render locally with Three.js. Verified driving routes, travel times, and filtered nearby-business details remain unimplemented. A photo cannot establish every issue or guarantee a listing's present condition.
+Replace the bundled snapshots with a live, bounded listing importer. Use the participant's listing inputs to collect attributable photo evidence with source URLs and observation dates. Separate visible details from inferred geometry and unknown conditions. Generate a validated scene description and bounded edits, then render locally with Three.js. Current walking, cycling and driving routes come from a community routing provider; live traffic, scheduled transit and filtered nearby-business details remain unimplemented. A photo cannot establish every issue or guarantee a listing's present condition.
 
 ## Build provenance
 

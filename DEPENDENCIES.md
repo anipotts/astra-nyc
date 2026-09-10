@@ -1,5 +1,11 @@
 # Dependencies and attribution
 
+## Current integrated application
+
+The sections below record additions across the event; statements about earlier experiments describe their state at that milestone. The integrated app now uses OpenFreeMap/OpenStreetMap map tiles, official NYC building data, Nominatim address lookup, FOSSGIS/OSRM routes, transient original publisher PDF previews, and bounded OpenAI listing discovery/evidence services. Source data and hosted services are external contributions, separate from the original application code. The event-created landing illustration is bundled as decorative artwork. Listing photos, remote map tiles and publisher PDFs are not bundled. Original project code has no selected license grant.
+
+Nominatim is used for bounded address lookup after selection, without autocomplete. See the [OSMF policy](https://operations.osmfoundation.org/policies/nominatim/) and server/location.js for identifying requests, shared throttling and caching. This supersedes the earlier evaluation-only note below. The current default ten-case NYC source catalog is in src/nyc-listings.js, with original links, evidence scope and dates; the older src/listings.js research remains available separately.
+
 Direct dependencies: Three.js0.186.0 (MIT), MapLibre GL JS6.9.0 (BSD-3-Clause), PDF.js/pdfjs-dist6.3.289 (Apache-2.0) and Vite8.3.0 (MIT). Versions are pinned in package.json and package-lock.json. Vite and its dependency tree are build tools.
 
 Official documentation consulted during this event: [Three.js](https://threejs.org/docs/) and [Vite](https://vite.dev/guide/). No example app or pre-event project code was imported.
