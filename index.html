@@ -206,8 +206,11 @@
               </button>
             </div>
           </div>
-          <div class="changes" aria-label="Local scene changes">
-            <span class="local-edits">Quick previews</span>
+          <div
+            class="changes"
+            aria-label="Local scene changes"
+            title="Instant local previews"
+          >
             <button id="bed" type="button" aria-pressed="false">
               <span>King bed</span></button
             ><button id="unfurnished" type="button" aria-pressed="false">
@@ -223,9 +226,7 @@
               ↺
             </button>
           </div>
-          <output id="astra-status" aria-live="polite"
-            >Checking runtime access…</output
-          >
+          <output id="astra-status" aria-live="polite" hidden></output>
           <p id="scene-clearance" class="sr-only"></p>
         </form>
         <div id="transition" aria-hidden="true">

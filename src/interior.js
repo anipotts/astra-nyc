@@ -244,124 +244,130 @@ export function buildStudio(group, solids, state, dimensions) {
   box(2.6, 0.035, 3.25, -0.55, 0.052, -0.3, "#f0e8d9", false, 0.03, fabric);
   const sx = -0.9,
     sz = -1.25;
-  contact(sx, sz, 2.75, 1.65);
-  for (const x of [-0.96, 0.96])
-    for (const z of [-0.32, 0.32])
-      cylinder(0.045, 0.18, sx + x, 0.12, sz + z, "#625340");
-  box(2.35, 0.3, 0.88, sx, 0.37, sz, "#566b53", true, 0.1, fabric);
-  box(2.35, 0.62, 0.21, sx, 0.71, sz - 0.4, "#566b53", false, 0.09, fabric);
-  for (const x of [-1.1, 1.1])
-    box(0.19, 0.48, 0.92, sx + x, 0.55, sz, "#566b53", false, 0.08, fabric);
-  for (const x of [-0.7, 0, 0.7]) {
-    box(
-      0.66,
-      0.17,
-      0.68,
-      sx + x,
-      0.58,
-      sz + 0.05,
-      "#7c8b6d",
-      false,
-      0.07,
-      fabric,
-    );
-    const pillow = box(
-      0.58,
-      0.42,
-      0.16,
-      sx + x,
-      0.82,
-      sz - 0.25,
-      x === 0 ? "#c3ab83" : "#899676",
-      false,
-      0.07,
-      fabric,
-    );
-    pillow.rotation.x = -0.15;
+  if (!state.hiddenItems?.includes("sofa")) {
+    contact(sx, sz, 2.75, 1.65);
+    for (const x of [-0.96, 0.96])
+      for (const z of [-0.32, 0.32])
+        cylinder(0.045, 0.18, sx + x, 0.12, sz + z, "#625340");
+    box(2.35, 0.3, 0.88, sx, 0.37, sz, "#566b53", true, 0.1, fabric);
+    box(2.35, 0.62, 0.21, sx, 0.71, sz - 0.4, "#566b53", false, 0.09, fabric);
+    for (const x of [-1.1, 1.1])
+      box(0.19, 0.48, 0.92, sx + x, 0.55, sz, "#566b53", false, 0.08, fabric);
+    for (const x of [-0.7, 0, 0.7]) {
+      box(
+        0.66,
+        0.17,
+        0.68,
+        sx + x,
+        0.58,
+        sz + 0.05,
+        "#7c8b6d",
+        false,
+        0.07,
+        fabric,
+      );
+      const pillow = box(
+        0.58,
+        0.42,
+        0.16,
+        sx + x,
+        0.82,
+        sz - 0.25,
+        x === 0 ? "#c3ab83" : "#899676",
+        false,
+        0.07,
+        fabric,
+      );
+      pillow.rotation.x = -0.15;
+    }
   }
-  contact(-0.6, 0.38, 1.65, 1.35);
-  cylinder(0.55, 0.07, -0.6, 0.47, 0.38, "#c4b495");
-  cylinder(0.3, 0.4, -0.6, 0.25, 0.38, "#a2937b");
-  box(0.28, 0.035, 0.37, -0.63, 0.53, 0.43, "#f1eadb", false, 0.008);
-  plant(-0.4, 0.18, 0.48, 0.51);
-  const bed = studioBed(state.largeBed);
-  group.userData.bedFootprint = null;
-  contact(bed.x, bed.z, bed.width + 0.7, 2.9);
-  box(
-    bed.width + 0.12,
-    0.28,
-    2.14,
-    bed.x,
-    0.25,
-    bed.z,
-    "#a18b6b",
-    true,
-    0.055,
-    wood,
-  );
-  group.userData.bedFootprint = solids[solids.length - 1];
-  box(
-    bed.width,
-    0.24,
-    bed.depth,
-    bed.x,
-    0.5,
-    bed.z,
-    "#f7f3e8",
-    false,
-    0.1,
-    fabric,
-  );
-  box(
-    bed.width + 0.1,
-    0.85,
-    0.13,
-    bed.x,
-    0.55,
-    bed.z - 1.07,
-    "#b3a58d",
-    false,
-    0.06,
-    fabric,
-  );
-  box(
-    bed.width + 0.04,
-    0.12,
-    1.55,
-    bed.x,
-    0.67,
-    bed.z + 0.26,
-    "#9fa58e",
-    false,
-    0.06,
-    fabric,
-  );
-  box(
-    bed.width + 0.08,
-    0.065,
-    0.39,
-    bed.x,
-    0.755,
-    bed.z + 0.43,
-    "#c3c4af",
-    false,
-    0.025,
-    fabric,
-  );
-  for (const x of [-0.4, 0.4]) {
-    const pillow = box(
-      0.66,
-      0.19,
-      0.44,
-      bed.x + x,
-      0.72,
-      bed.z - 0.74,
-      "#f8f4eb",
+  if (!state.hiddenItems?.includes("table")) {
+    contact(-0.6, 0.38, 1.65, 1.35);
+    cylinder(0.55, 0.07, -0.6, 0.47, 0.38, "#c4b495");
+    cylinder(0.3, 0.4, -0.6, 0.25, 0.38, "#a2937b");
+    box(0.28, 0.035, 0.37, -0.63, 0.53, 0.43, "#f1eadb", false, 0.008);
+    plant(-0.4, 0.18, 0.48, 0.51);
+  }
+  if (!state.hiddenItems?.includes("bed")) {
+    const bed = studioBed(state.largeBed);
+    group.userData.bedFootprint = null;
+    contact(bed.x, bed.z, bed.width + 0.7, 2.9);
+    box(
+      bed.width + 0.12,
+      0.28,
+      2.14,
+      bed.x,
+      0.25,
+      bed.z,
+      "#a18b6b",
+      true,
+      0.055,
+      wood,
+    );
+    group.userData.bedFootprint = solids[solids.length - 1];
+    box(
+      bed.width,
+      0.24,
+      bed.depth,
+      bed.x,
+      0.5,
+      bed.z,
+      "#f7f3e8",
       false,
-      0.085,
+      0.1,
       fabric,
     );
-    pillow.rotation.y = x * 0.09;
+    box(
+      bed.width + 0.1,
+      0.85,
+      0.13,
+      bed.x,
+      0.55,
+      bed.z - 1.07,
+      "#b3a58d",
+      false,
+      0.06,
+      fabric,
+    );
+    box(
+      bed.width + 0.04,
+      0.12,
+      1.55,
+      bed.x,
+      0.67,
+      bed.z + 0.26,
+      "#9fa58e",
+      false,
+      0.06,
+      fabric,
+    );
+    box(
+      bed.width + 0.08,
+      0.065,
+      0.39,
+      bed.x,
+      0.755,
+      bed.z + 0.43,
+      "#c3c4af",
+      false,
+      0.025,
+      fabric,
+    );
+    for (const x of [-0.4, 0.4]) {
+      const pillow = box(
+        0.66,
+        0.19,
+        0.44,
+        bed.x + x,
+        0.72,
+        bed.z - 0.74,
+        "#f8f4eb",
+        false,
+        0.085,
+        fabric,
+      );
+      pillow.rotation.y = x * 0.09;
+    }
   }
   cylinder(0.28, 0.44, 2.98, 0.25, -2.22, "#9e8563");
   cylinder(0.11, 0.024, 2.98, 0.5, -2.22, "#9c8a63", true);
@@ -375,28 +381,30 @@ export function buildStudio(group, solids, state, dimensions) {
   const lamp = new THREE.PointLight("#ffd9a0", state.evening ? 14 : 2, 4, 2);
   lamp.position.set(2.98, 0.83, -2.22);
   group.add(lamp);
-  // Small dining table clear of the entrance and circulation path.
-  cylinder(0.58, 0.065, 1.9, 0.75, 1.65, "#b9986d");
-  solids.push({ minX: 1.32, maxX: 2.48, minZ: 1.07, maxZ: 2.23 });
-  cylinder(0.12, 0.7, 1.9, 0.38, 1.65, "#957a55");
-  for (const x of [1.02, 2.78]) {
-    box(0.46, 0.08, 0.48, x, 0.44, 1.65, "#b99d73", true, 0.06);
-    box(
-      0.07,
-      0.46,
-      0.48,
-      x + (x < 1.9 ? -0.2 : 0.2),
-      0.62,
-      1.65,
-      "#b99d73",
-      false,
-      0.035,
-    );
-    for (const z of [-0.17, 0.17])
-      for (const dx of [-0.16, 0.16])
-        box(0.035, 0.4, 0.035, x + dx, 0.22, 1.65 + z, "#79654b");
+  if (!state.hiddenItems?.includes("table")) {
+    // Small dining table clear of the entrance and circulation path.
+    cylinder(0.58, 0.065, 1.9, 0.75, 1.65, "#b9986d");
+    solids.push({ minX: 1.32, maxX: 2.48, minZ: 1.07, maxZ: 2.23 });
+    cylinder(0.12, 0.7, 1.9, 0.38, 1.65, "#957a55");
+    for (const x of [1.02, 2.78]) {
+      box(0.46, 0.08, 0.48, x, 0.44, 1.65, "#b99d73", true, 0.06);
+      box(
+        0.07,
+        0.46,
+        0.48,
+        x + (x < 1.9 ? -0.2 : 0.2),
+        0.62,
+        1.65,
+        "#b99d73",
+        false,
+        0.035,
+      );
+      for (const z of [-0.17, 0.17])
+        for (const dx of [-0.16, 0.16])
+          box(0.035, 0.4, 0.035, x + dx, 0.22, 1.65 + z, "#79654b");
+    }
+    plant(1.9, 1.65, 0.4, 0.79);
   }
-  plant(1.9, 1.65, 0.4, 0.79);
   plant(-2.83, -3.25, 1.65);
   plant(3.03, 2.95, 1.25);
   box(0.045, 0.94, 0.74, -w / 2 + 0.1, 1.67, 0.75, "#998465");

@@ -21,5 +21,5 @@
 
 - Help people decide which homes to pursue through a traversable preview of space, commute, and daily essentials.
 - Preserve the participant's updated direction: larger-bed fit, unfurnished view, lighting, and Nearby categories; do not reintroduce the rejected work-desk example.
-- Keep development assistance distinct from live runtime Astra. The app has local controls plus a verified live Astra king/queen bed-edit endpoint. Keep model-backed edits and cached replays visibly distinguishable from local suggestions.
+- Keep development assistance distinct from live runtime Astra. The app has local controls plus a verified live Astra endpoint for bed sizing, existing furniture-group visibility, and lighting across current scene contexts. Keep model-backed edits and cached replays visibly distinguishable from local suggestions.
 - Real listing imagery and location information must carry sources and freshness context. Never imply complete defect detection or verified reconstruction from visual plausibility alone.

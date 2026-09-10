@@ -26,7 +26,7 @@ npm run build
 - Review dated source facts and unknowns, then walk an inferred 95 Wall studio sketch. Its 575 ft² area and studio type come from the listing; the rectangular footprint, windows, furnishings, and placement are invented.
 - Switch between a synthetic current home and a potential home with illustrative routes.
 - Orbit the home or walk at eye level. Focus the scene, use WASD to move, arrow keys to turn, or drag to look. On-screen buttons also support movement. Walls and furniture have collision boundaries; the front doorway leads outside.
-- Compare queen and king bed footprints, remove furnishings, and change daylight/evening lighting.
+- Ask Astra to resize the bed, hide or restore the bed, sofa, table group, or all furnishings, and change daylight/evening lighting in any existing home preview. Table edits affect the full table group and attached chairs. Local preview buttons still work without API access.
 - Follow an animated car along an invented road route. Pause, replay, or scrub the commute; reduced-motion users start paused.
 - Explore example locations for groceries, transit, EV charging, gas, restaurants, shopping, healthcare, and airports.
 
@@ -34,7 +34,7 @@ npm run build
 
 Public listing facts were researched during development on September 10, 2026 and bundled in src/listings.js. The example picker opens these snapshots; it does not fetch arbitrary pages or analyze photographs. Source links open the original listing and gallery. Listing availability and prices can change. The interior and car-demo streets, routes, and example nearby places are synthetic. The separate 95 Wall neighborhood map uses live OpenFreeMap tiles sourced from OpenStreetMap; the listing map pin is approximate. Only the studio type and reported floor area inform the interior sketch. The scene is not a verified reconstruction, furniture-fit guarantee, current-condition inspection, or solar study.
 
-Astra assists development of the scene and app. The running product now has an optional localhost-only Astra endpoint for bounded king/queen bed edits. One live gpt-6-astra king-bed edit and cached replay were verified during the event. The server reads OPENAI_API_KEY from the local environment or ignored .env.local; credentials are never bundled into the client. Local controls still work without credentials. The endpoint validates the returned edit, caches it in server memory, and leaves movement/rendering local. It does not launch runtime agents or reconstruct listing photos.
+Astra assists development of the scene and app. The running product has an optional localhost-only Astra endpoint for validated scene edits across synthetic and inferred home previews. Live gpt-6-astra bed resizing, sofa hiding, evening lighting, and cached replay were verified during the event. The client supplies the current model dimensions, lighting, bed size, and visibility state; the endpoint does not require a particular address or listing ID. The server reads OPENAI_API_KEY from the local environment or ignored .env.local; credentials are never bundled into the client. Local controls still work without credentials. The endpoint validates the returned edit, caches it in server memory, and leaves movement/rendering local. It does not launch runtime agents or reconstruct listing photos.
 
 ## Current graphics and geographic experiment
 
@@ -52,4 +52,4 @@ See [DEPENDENCIES.md](DEPENDENCIES.md) and [THIRD_PARTY_NOTICES.md](THIRD_PARTY_
 
 ## Runtime scope
 
-The local Vite dev/preview endpoint accepts at most ten model attempts per server start, caps output at 2,048 tokens, and caches equivalent requests. Supported model edits are king/queen sizing of the existing bed only. Invalid responses leave the scene unchanged. The deployed static bundle alone does not include a hosted API. Do not expose the local development endpoint publicly.
+The local Vite dev/preview endpoint accepts at most ten model attempts per server start, caps output at 2,048 tokens, and caches equivalent requests. Supported model edits are king/queen sizing of the existing bed, visibility of the bed/sofa/table group/all furnishings, and day/evening lighting. Each request applies one validated action; unsupported compound changes, arbitrary object creation, and individual-table targeting are not supported. Invalid responses or responses for a scene changed during the request leave the scene unchanged. Scene dimensions and state participate in cache identity. The original bed-only endpoint is retained for the baseline flow, while the composer uses /api/astra/scene-edit. The deployed static bundle alone does not include a hosted API. Do not expose the local development endpoint publicly.

@@ -2,7 +2,8 @@ import * as THREE from "three";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import { homes, pointOnRoute, blocked } from "./model.js";
 import "./style.css";
-import { clearanceAround, validateBedEdit } from "./clearance.js";
+import { clearanceAround } from "./clearance.js";
+import { validateSceneEdit } from "./scene-edit.js";
 import { buildStudio, updateCutaway } from "./interior.js";
 import { listings, identifyListing } from "./listings.js";
 const $ = (s) => document.querySelector(s);
@@ -12,6 +13,7 @@ const state = {
   mode: "overview",
   largeBed: false,
   unfurnished: false,
+  hiddenItems: [],
   evening: false,
   progress: 0,
   playing: false,
@@ -179,6 +181,7 @@ function frameWindow(x, z, width, axis = "x") {
 function buildHome() {
   clear(house);
   solids.length = 0;
+  house.userData.bedFootprint = null;
   if (homes[state.home].studio) {
     buildStudio(house, solids, state, homes[state.home]);
     updateCutaway(house, state.mode === "overview");
@@ -237,45 +240,52 @@ function buildHome() {
   box(house, w * 0.32, 0.09, d * 0.65, -w * 0.22, 0.075, -0.45, "#ded4bf");
   const sofaX = -w * 0.25,
     sofaZ = -d * 0.13;
-  box(house, 1.05, 0.4, 2.8, sofaX, 0.43, sofaZ, sofa, true);
-  box(house, 0.24, 0.9, 2.8, sofaX - 0.45, 0.8, sofaZ, sofa);
-  for (const z of [sofaZ - 1.25, sofaZ + 1.25])
-    box(house, 1.15, 0.7, 0.23, sofaX, 0.64, z, sofa);
-  for (let i = 0; i < 3; i++)
-    box(
-      house,
-      0.87,
-      0.18,
-      0.77,
-      sofaX + 0.04,
-      0.71,
-      sofaZ - 0.84 + i * 0.84,
-      "#839274",
-    );
-  box(house, 1.15, 0.1, 1.4, sofaX + 1.65, 0.5, sofaZ, "#b49c76", true);
-  for (const x of [-0.44, 0.44])
-    for (const z of [-0.55, 0.55])
+  if (!state.hiddenItems.includes("sofa")) {
+    box(house, 1.05, 0.4, 2.8, sofaX, 0.43, sofaZ, sofa, true);
+    box(house, 0.24, 0.9, 2.8, sofaX - 0.45, 0.8, sofaZ, sofa);
+    for (const z of [sofaZ - 1.25, sofaZ + 1.25])
+      box(house, 1.15, 0.7, 0.23, sofaX, 0.64, z, sofa);
+    for (let i = 0; i < 3; i++)
       box(
         house,
-        0.055,
-        0.44,
-        0.055,
-        sofaX + 1.65 + x,
-        0.23,
-        sofaZ + z,
-        "#8a775d",
+        0.87,
+        0.18,
+        0.77,
+        sofaX + 0.04,
+        0.71,
+        sofaZ - 0.84 + i * 0.84,
+        "#839274",
       );
-  box(house, 0.32, 0.035, 0.42, sofaX + 1.65, 0.58, sofaZ + 0.1, "#eee9db");
-  plant(house, sofaX + 1.65, sofaZ - 0.4, 0.42, 0.55);
-  const bedX = w * 0.34,
-    bedZ = -d * 0.18,
-    bedWidth = state.largeBed ? 1.93 : 1.52;
-  box(house, bedWidth, 0.32, 2.1, bedX, 0.27, bedZ, "#a89372", true);
-  box(house, bedWidth, 0.22, 2.03, bedX, 0.54, bedZ, "#e6e2d8");
-  box(house, bedWidth, 0.07, 1.55, bedX, 0.7, bedZ + 0.4, "#899982");
-  for (const x of [-0.38, 0.38])
-    box(house, 0.62, 0.14, 0.46, bedX + x, 0.76, bedZ - 0.87, "#f5f1e5");
-  box(house, bedWidth + 0.12, 1, 0.12, bedX, 0.55, bedZ - 1.12, "#b19b79");
+  }
+  if (!state.hiddenItems.includes("table")) {
+    box(house, 1.15, 0.1, 1.4, sofaX + 1.65, 0.5, sofaZ, "#b49c76", true);
+    for (const x of [-0.44, 0.44])
+      for (const z of [-0.55, 0.55])
+        box(
+          house,
+          0.055,
+          0.44,
+          0.055,
+          sofaX + 1.65 + x,
+          0.23,
+          sofaZ + z,
+          "#8a775d",
+        );
+    box(house, 0.32, 0.035, 0.42, sofaX + 1.65, 0.58, sofaZ + 0.1, "#eee9db");
+    plant(house, sofaX + 1.65, sofaZ - 0.4, 0.42, 0.55);
+  }
+  if (!state.hiddenItems.includes("bed")) {
+    const bedX = w * 0.34,
+      bedZ = -d * 0.18,
+      bedWidth = state.largeBed ? 1.93 : 1.52;
+    box(house, bedWidth, 0.32, 2.1, bedX, 0.27, bedZ, "#a89372", true);
+    house.userData.bedFootprint = solids[solids.length - 1];
+    box(house, bedWidth, 0.22, 2.03, bedX, 0.54, bedZ, "#e6e2d8");
+    box(house, bedWidth, 0.07, 1.55, bedX, 0.7, bedZ + 0.4, "#899982");
+    for (const x of [-0.38, 0.38])
+      box(house, 0.62, 0.14, 0.46, bedX + x, 0.76, bedZ - 0.87, "#f5f1e5");
+    box(house, bedWidth + 0.12, 1, 0.12, bedX, 0.55, bedZ - 1.12, "#b19b79");
+  }
   // Kitchen on the entrance side, leaving the doorway clear.
   box(
     house,
@@ -566,7 +576,7 @@ function refresh() {
   $("#astra-reply").hidden = true;
   buildHome();
   buildNeighborhood();
-  const footprint = homes[state.home].studio && house.userData.bedFootprint;
+  const footprint = house.userData.bedFootprint;
   $("#clearance-panel").hidden = !footprint;
   if (footprint) {
     const c = clearanceAround(footprint, solids);
@@ -575,7 +585,9 @@ function refresh() {
       : `Left ${c.left.toFixed(2)} m · right ${c.right.toFixed(2)} m · foot ${c.foot.toFixed(2)} m`;
   }
   $("#scene-clearance").textContent = footprint
-    ? "Inferred layout · " + $("#clearance-values").textContent
+    ? (homes[state.home].studio
+        ? "Inferred layout · "
+        : "Synthetic layout · ") + $("#clearance-values").textContent
     : "";
   $("#place").textContent = homes[state.home].label;
   light();
@@ -699,6 +711,7 @@ $("#listing-preview").addEventListener("click", () => {
   $("input[value=potential]").checked = true;
   state.home = "potential";
   state.largeBed = state.unfurnished = state.evening = false;
+  state.hiddenItems = [];
   refresh();
   setMode("walk");
   message(
@@ -714,6 +727,7 @@ for (const b of document.querySelectorAll("[data-mode]"))
 for (const input of document.querySelectorAll("[name=home]"))
   input.addEventListener("change", () => {
     state.home = input.value;
+    state.hiddenItems = [];
     state.largeBed = false;
     state.unfurnished = false;
     state.evening = false;
@@ -724,8 +738,10 @@ for (const input of document.querySelectorAll("[name=home]"))
     );
   });
 $("#bed").onclick = () => {
+  $("#astra-status").hidden = false;
   $("#astra-status").textContent = "Local preview · no new Astra request";
   state.largeBed = !state.largeBed;
+  state.hiddenItems = state.hiddenItems.filter((item) => item !== "bed");
   state.unfurnished = false;
   refresh();
   if (state.mode === "walk") setMode("walk");
@@ -736,8 +752,10 @@ $("#bed").onclick = () => {
   );
 };
 $("#unfurnished").onclick = () => {
+  $("#astra-status").hidden = false;
   $("#astra-status").textContent = "Local preview · no new Astra request";
   state.unfurnished = !state.unfurnished;
+  if (!state.unfurnished) state.hiddenItems = [];
   refresh();
   message(
     state.unfurnished
@@ -746,8 +764,11 @@ $("#unfurnished").onclick = () => {
   );
 };
 $("#evening").onclick = () => {
+  $("#astra-status").hidden = false;
   $("#astra-status").textContent = "Local preview · no new Astra request";
   state.evening = !state.evening;
+  sceneRevision++;
+  $("#astra-reply").hidden = true;
   light();
   message(
     state.evening
@@ -756,6 +777,8 @@ $("#evening").onclick = () => {
   );
 };
 $("#reset").onclick = () => {
+  state.hiddenItems = [];
+  $("#astra-status").hidden = false;
   $("#astra-status").textContent = "Local preview · no new Astra request";
   state.largeBed = false;
   state.unfurnished = false;
@@ -894,7 +917,6 @@ function syncComposer() {
   const form = $("#astra-form");
   $("#astra-submit").disabled =
     form.dataset.ready !== "true" ||
-    !homes[state.home].studio ||
     form.getAttribute("aria-busy") === "true" ||
     !$("#astra-prompt").value.trim();
 }
@@ -927,20 +949,21 @@ fetch("/api/astra/status")
     astraReady = data.configured === true;
     $("#astra-form").dataset.ready = String(astraReady);
     syncComposer();
-    $("#astra-status").textContent = astraReady
-      ? "Connected · ask about bed size in the 95 Wall studio"
-      : "Astra unavailable · quick previews work locally";
+    $("#astra-status").hidden = true;
+    $("#astra-status").textContent = "";
+    $("#astra-submit").title = astraReady
+      ? "Send message (Enter)"
+      : "Astra is unavailable. Local scene previews still work.";
   })
   .catch(() => {
-    $("#astra-status").textContent =
-      "Astra unavailable · quick previews work locally";
+    $("#astra-submit").title =
+      "Astra is unavailable. Local scene previews still work.";
   });
 $("#astra-form").addEventListener("submit", async (event) => {
   event.preventDefault();
   const prompt = $("#astra-prompt").value.trim();
   if (
     !astraReady ||
-    !homes[state.home].studio ||
     !prompt ||
     $("#astra-form").getAttribute("aria-busy") === "true"
   )
@@ -950,35 +973,75 @@ $("#astra-form").addEventListener("submit", async (event) => {
   $("#astra-form").setAttribute("aria-busy", "true");
   $("#astra-form").dataset.error = "false";
   syncComposer();
+  $("#astra-status").hidden = false;
   $("#astra-status").textContent = "Updating scene…";
   $("#astra-status").removeAttribute("title");
   $("#astra-request").textContent = prompt;
   $("#astra-answer").textContent = "Updating scene…";
   $("#astra-reply").hidden = false;
   try {
-    const response = await fetch("/api/astra/edit", {
+    const response = await fetch("/api/astra/scene-edit", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ prompt, scene: "wall2308-inferred-v2" }),
+      body: JSON.stringify({
+        prompt,
+        scene: {
+          version: 1,
+          width: sceneAtRequest.width,
+          depth: sceneAtRequest.depth,
+          provenance: sceneAtRequest.studio ? "inferred" : "synthetic",
+          bedSize: state.largeBed ? "king" : "queen",
+          lighting: state.evening ? "evening" : "day",
+          unfurnished: state.unfurnished,
+          hiddenItems: [...state.hiddenItems].sort(),
+        },
+      }),
     });
     const result = await response.json();
     if (!response.ok) throw new Error(result.error || "Astra edit failed.");
-    const edit = validateBedEdit(result.edit);
+    const edit = validateSceneEdit(result.edit);
     if (
       homes[state.home] !== sceneAtRequest ||
-      !homes[state.home].studio ||
       sceneRevision !== revisionAtRequest
     )
       throw new Error(
         "Scene changed while Astra was working. Edit was not applied. Send your request again.",
       );
-    state.largeBed = edit.size === "king";
-    state.unfurnished = false;
+    let reply;
+    if (edit.action === "resize_bed") {
+      state.largeBed = edit.value === "king";
+      state.unfurnished = false;
+      state.hiddenItems = state.hiddenItems.filter((item) => item !== "bed");
+      reply = `${edit.value === "king" ? "King" : "Queen"} bed placed.`;
+    } else if (edit.action === "set_lighting") {
+      state.evening = edit.value === "evening";
+      reply = `${state.evening ? "Evening light" : "Daylight"} applied. Lighting is illustrative, not a solar study.`;
+    } else if (edit.target === "furniture") {
+      state.unfurnished = edit.value === "hide";
+      if (!state.unfurnished) state.hiddenItems = [];
+      reply = state.unfurnished
+        ? "Loose furnishings hidden."
+        : "Furnishings restored.";
+    } else {
+      if (edit.value === "show") {
+        // Showing a single item from the unfurnished state keeps the other editable items hidden.
+        if (state.unfurnished) state.hiddenItems = ["bed", "sofa", "table"];
+        state.unfurnished = false;
+        state.hiddenItems = state.hiddenItems.filter(
+          (item) => item !== edit.target,
+        );
+      } else if (!state.hiddenItems.includes(edit.target))
+        state.hiddenItems.push(edit.target);
+      reply = `${edit.target === "table" ? "Tables and their attached chairs" : edit.target[0].toUpperCase() + edit.target.slice(1)} ${edit.value === "show" ? "restored" : "hidden"}.`;
+    }
     refresh();
     if (state.mode === "walk") setMode("walk");
     $("#astra-reply").hidden = false;
     $("#astra-answer").textContent =
-      `${edit.size === "king" ? "King" : "Queen"} bed placed. ${$("#scene-clearance").textContent}. Room dimensions are estimated; verify measurements before deciding fit.`;
+      reply +
+      (edit.action === "resize_bed"
+        ? ` ${$("#scene-clearance").textContent}. Verify real room measurements before deciding fit.`
+        : "");
     $("#astra-status").textContent =
       `${result.cached ? "Cached Astra edit" : "Live Astra edit"} · ${result.model}`;
     $("#astra-status").title =

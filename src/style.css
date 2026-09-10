@@ -1000,3 +1000,11 @@ aside::-webkit-scrollbar,
     animation: none;
   }
 }
+
+/* No idle banners: request feedback takes space only when it is relevant. */
+.astra-panel output[hidden] {
+  display: none;
+}
+.changes {
+  justify-content: flex-end;
+}
