@@ -299,8 +299,10 @@ body.desktop-shell {
 .desktop-shell #commute-form :is(input, select) { width: 100%; min-height: var(--ui-control-height); border: 1px solid var(--ui-color-border); border-radius: var(--ui-radius-control); padding: var(--ui-space-2); font: inherit; font-size: var(--ui-text-base); background: white; }
 .desktop-shell #commute-form button { min-height: var(--ui-control-primary); background: var(--ui-color-accent); color: white; margin-top: var(--ui-space-1); }
 .desktop-shell #journey-external { color: var(--ui-color-accent); font-size: var(--ui-text-sm); }
-/* Inside content has its own surface row; no fixed330px overlay allowance. */
-.desktop-shell #inside-surface { padding: var(--ui-space-4); display: block; overflow: auto; background: #e9ede5; }
+/* View modules own their content; the shell reserves their available surface. */
+.desktop-shell #inside-surface { padding: 0; display: block; overflow: hidden; background: var(--ui-color-surface); }
+.desktop-shell #inside-surface .inside-view { padding: var(--ui-space-4); }
+.desktop-shell #commute-panel.commute-view { padding: 0; border: 0; border-radius: var(--ui-radius-panel); background: transparent; box-shadow: none; width: min(300px, calc(100% - 76px)); }
 .desktop-shell #inside-plan { width: 100%; height: 100%; max-width: 900px; margin: 0 auto; }
 .desktop-shell #inside-plan svg { display: block; width: 100%; height: 100%; max-height: 100%; }
 .desktop-shell #inside-empty { max-width: 480px; margin: var(--ui-space-8) auto; padding: var(--ui-space-4); border: 1px solid var(--ui-color-border); border-radius: var(--ui-radius-panel); background: var(--ui-color-surface); }
@@ -330,6 +332,10 @@ body.desktop-shell {
   .desktop-shell #evidence-stage :is(h1,#evidence-facts,#overview-price,#overview-freshness) { grid-column: 1; grid-row: auto; }
   .desktop-shell #evidence-stage h1 { font-size: 20px; }
   .desktop-shell #commute-panel { width: calc(100% - 76px); }
+  .desktop-shell.evidence-only[data-view="commute"] #viewport { grid-template: "surface" minmax(180px,1fr) "journey" minmax(0,auto) "facts" auto / minmax(0,1fr); }
+  .desktop-shell[data-view="commute"] #commute-panel.commute-view { grid-area: journey; width: 100%; margin: 0; max-height: 36dvh; border-top: 1px solid var(--ui-color-border); border-radius: 0; }
+  .desktop-shell[data-view="commute"] #commute-panel .cv-card { border: 0; border-radius: 0; box-shadow: none; }
+  .desktop-shell[data-view="commute"] #evidence-stage { max-height: 26dvh; }
 }
 @media (prefers-reduced-motion: reduce) {
   .desktop-shell *, .desktop-shell *::before, .desktop-shell *::after { scroll-behavior: auto !important; animation: none !important; transition: none !important; }

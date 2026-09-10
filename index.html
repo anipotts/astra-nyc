@@ -198,7 +198,7 @@
           </h1>
           <form id="address-form">
             <label class="sr-only" for="listing-address"
-              >Address, building or listing URL in NYC or Jersey City</label
+              >Address, building or listing URL in NYC</label
             >
             <div class="entry-search-field">
             <input
@@ -246,7 +246,7 @@
             Search online for more listings →
           </button>
         </section>
-        <p class="entry-region">NYC &amp; Jersey City</p>
+        <p class="entry-region">New York City</p>
         <p class="entry-art-source">Illustrative city art · AI generated</p>
         <div
           id="scene"
@@ -256,51 +256,8 @@
         <div id="map-view" hidden aria-label="Geographic neighborhood">
           <div id="map-canvas"></div>
         </div>
-        <section id="inside-surface" hidden aria-label="Inside source view">
-          <div id="inside-plan"></div>
-          <div id="inside-empty">
-            <h2>Start with the real source</h2>
-            <p id="inside-explanation">
-              A matching plan or photo source can show what is known inside.
-              Unseen rooms remain absent.
-            </p>
-            <a id="inside-source" target="_blank" rel="noopener noreferrer"
-              >Open source photos &amp; details ↗</a
-            >
-          </div>
-        </section>
-        <section id="commute-panel" class="ui-panel" hidden aria-label="Plan a regular journey">
-          <h2>Your regular journey</h2>
-          <p>Directions from this listing.</p>
-          <form id="commute-form">
-            <label for="journey-destination">Where do you go regularly?</label>
-            <input
-              id="journey-destination"
-              required
-              maxlength="180"
-              class="ui-field"
-              placeholder="Destination address or place"
-            />
-            <label for="journey-mode">Your usual mode</label>
-            <select id="journey-mode" class="ui-field">
-              <option value="walking">Walk</option>
-              <option value="bicycling">Bike</option>
-              <option value="transit">Transit</option>
-              <option value="driving">Drive</option>
-            </select>
-            <button type="submit">Prepare directions</button>
-          </form>
-          <p id="journey-summary" role="status">
-            Travel times and routes are not connected to this map yet.
-          </p>
-          <a
-            id="journey-external"
-            target="_blank"
-            rel="noopener noreferrer"
-            hidden
-            >Open route in Google Maps ↗</a
-          >
-        </section>
+        <section id="inside-surface" hidden aria-label="Inside source view"></section>
+        <section id="commute-panel" hidden aria-label="Plan a regular journey"></section>
         <section id="evidence-stage" class="ui-panel" hidden aria-label="Listing evidence only">
           <div class="summary-heading">
             <span id="summary-view-label">Your next place</span
@@ -460,7 +417,7 @@
             </div>
             <div class="plan-footer">
               <span id="plan-revision"></span
-              ><button id="plan-svg">Download SVG</button
+              ><a id="plan-svg" class="ui-button" download>Download SVG</a
               ><button id="plan-print">Print / PDF</button>
             </div>
             <small id="plan-persistence">Saved on this browser only</small>

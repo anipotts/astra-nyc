@@ -27,10 +27,10 @@ function normalize(value) {
     .replace(/[^a-z0-9]+/g, " ")
     .trim();
 }
-export function findKnownListings(query) {
+export function findKnownListings(query, catalog = listings) {
   const tokens = normalize(query).split(/\s+/).filter(Boolean);
   if (query.trim().length < 3 || !tokens.length) return [];
-  return listings.filter((l) =>
+  return catalog.filter((l) =>
     tokens.every((token) =>
       normalize(aliases[l.id] || `${l.name} ${l.mapAddress || l.location}`)
         .split(" ")
@@ -73,9 +73,11 @@ export function candidateListing(candidate, checkedAt) {
       "Confirm the exact building and unit, listing date, availability, rent and permission to use a matching floor plan. Search results may include building pages or archived listings.",
   };
 }
-export function setupListingIntake(onSelect) {
+export function setupListingIntake(onSelect, catalog = [...auditedExamples, ...additionalExamples]) {
   const $ = (s) => document.querySelector(s);
-  const picker = createListingPicker($("#listing-select"), [...auditedExamples, ...additionalExamples], (listing) => {
+  const findMatches = (query) => findKnownListings(query, catalog);
+  const identify = (url) => identifyListing(url, catalog);
+  const picker = createListingPicker($("#listing-select"), catalog, (listing) => {
     cancel();
     onSelect(listing);
   });
@@ -99,7 +101,7 @@ export function setupListingIntake(onSelect) {
       title.textContent = item.name;
       const description = document.createElement("p");
       description.textContent = item.location || item.address;
-      const known = meta ? identifyListing(item.url) : item;
+      const known = meta ? identify(item.url) : item;
       const status = document.createElement("p");
       status.textContent = meta
         ? `${known?.archived ? "Archived · " : ""}Search candidate · confirm building and unit`
@@ -124,7 +126,7 @@ export function setupListingIntake(onSelect) {
   }
   function localMatches(showResults = false) {
     cancel();
-    const found = findKnownListings($("#listing-address").value);
+    const found = findMatches($("#listing-address").value);
     if (showResults) render(found);
     else $("#listing-results").hidden = true;
     $("#listing-status").textContent = "";
@@ -151,7 +153,7 @@ export function setupListingIntake(onSelect) {
       if (!response.ok)
         throw new Error(
           data.error ||
-            "Listing search is unavailable. Try an example or a direct link.",
+            "Listing search is unavailable. Choose a saved source or try a direct link.",
         );
       if (!Array.isArray(data.candidates) || data.candidates.length > 3)
         throw new Error("Search returned an invalid candidate list.");
@@ -173,7 +175,7 @@ export function setupListingIntake(onSelect) {
   }
   $("#listing-address").addEventListener("input", () => localMatches());
   const suggestions = setupSearchSuggestions($("#listing-address"),
-    [...auditedExamples, ...additionalExamples], findKnownListings,
+    catalog, findMatches,
     (listing) => { cancel(); onSelect(listing); }, () => localMatches());
   $("#listing-url").addEventListener("input", () => {
     cancel();
@@ -202,7 +204,7 @@ export function setupListingIntake(onSelect) {
     cancel();
     try {
       const url = $("#listing-url").value.trim();
-      const known = identifyListing(url);
+      const known = identify(url);
       if (known) return onSelect(known);
       const source = new URL(safeListingUrl(url));
       source.search = "";
@@ -220,13 +222,13 @@ export function setupListingIntake(onSelect) {
   for (const button of document.querySelectorAll("[data-listing]"))
     button.onclick = () => {
       cancel();
-      onSelect(listings.find((l) => l.id === button.dataset.listing));
+      onSelect(catalog.find((l) => l.id === button.dataset.listing));
     };
   return {
     select(listing) {
       picker.select(listing);
       suggestions.close();
-      if (listings.some((item) => item.id === listing.id))
+      if (catalog.some((item) => item.id === listing.id))
         suggestions.remember({ kind: "listing", value: listing.id });
     },
   };

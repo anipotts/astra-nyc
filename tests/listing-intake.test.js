@@ -1,5 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
+import { nycListings } from "../src/nyc-listings.js";
+import { identifyListing } from "../src/listings.js";
 import {
   findKnownListings,
   safeListingUrl,
@@ -20,6 +22,15 @@ test("address aliases resolve building and exact units without inventing other u
   );
   assert.deepEqual(findKnownListings("95 Wall St #9999"), []);
   assert.deepEqual(findKnownListings("no such building"), []);
+});
+test("NYC entry searches and links use the selected catalog without losing archived research", () => {
+  assert.deepEqual(findKnownListings("689 Marin Blvd #501", nycListings), []);
+  assert.deepEqual(findKnownListings("The Set #20E", nycListings).map(l => l.id), ["set20e"]);
+  assert.deepEqual(findKnownListings("The Set F", nycListings).map(l => l.id), ["setftype"]);
+  for (const listing of nycListings) {
+    assert.equal(identifyListing(listing.url, nycListings)?.id, listing.id);
+    assert.equal(safeListingUrl(listing.url), listing.url);
+  }
 });
 test("candidate sources must be public HTTPS on supported sites", () => {
   for (const url of [

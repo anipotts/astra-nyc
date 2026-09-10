@@ -17,6 +17,8 @@ export const SOURCE_DOMAINS = Object.freeze([
   "live65newkirk.com",
   "rnhousing.org",
   "castironlofts.com",
+  "260gold.com",
+  "avaloncommunities.com",
 ]);
 
 // These audited tour/asset tenants may be cited or opened as source links.

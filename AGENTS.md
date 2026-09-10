@@ -38,6 +38,8 @@
 
 ## Shared interface contract
 
+- Work in focused independent worktrees, then hand off checked commits to Direction for combined verification and integration into main. The sole participant-facing preview is http://127.0.0.1:5174/ from the canonical main checkout. Do not keep per-worktree preview servers running or ask Ani to follow multiple ports. Temporary task-owned verification servers must be stopped after checks. Report separately what is implemented, checked, merged, and visible on 5174.
+
 - Every task and worktree must use the shared interface system for new or changed UI. The designer owns `src/ui/tokens.css`, `src/ui/components.css` and `docs/UI_SYSTEM.md`; consume their approved tokens and primitives instead of inventing parallel button, input, card, spacing or typography systems. Until those files land, coordinate against the designer's current token contract and keep fallback values consistent with it.
 - Preserve a compact, modern green/off-white interface: a 4px spacing scale, restrained headings, consistent control heights and radii, aligned labels/actions, readable metadata and quiet borders. Prefer shared component classes over repeated one-off overrides. Scope view-specific styling to its module.
 - Keep the map or plan visually primary. Supporting panels must remain compact and must not obscure essential scene controls. Put detailed provenance in accessible disclosures while keeping material uncertainty and listing status understandable.

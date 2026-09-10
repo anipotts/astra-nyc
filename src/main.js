@@ -13,7 +13,7 @@ import {
   savePlanHistory,
   cleanPlanState,
 } from "./plan-storage.js";
-import { listings } from "./listings.js";
+import { nycListings } from "./nyc-listings.js";
 import { setupPriorities } from "./priorities.js";
 import { setupListingIntake } from "./listing-intake.js";
 import { acceptInspectedRegion } from "./inspected-plan.js";
@@ -23,6 +23,8 @@ import { getExampleLocation } from "./example-locations.js";
 import { createViewTransition } from "./view-transition.js";
 import { setupPlanInspection } from "./plan-inspection.js";
 import { setupEvidenceReview } from "./listing-evidence.js";
+import { mountInsideView } from "./inside-view/index.js";
+import { mountCommuteView } from "./commute-view/index.js";
 const $ = (s) => document.querySelector(s);
 const container = $("#scene");
 const viewTransition = createViewTransition($("#viewport"));
@@ -33,6 +35,7 @@ let geoMap,
   shownLocation = null;
 const listingLocations = new Map();
 let mapLocationMessage = "";
+let priorities = [];
 const state = {
   home: "current",
   mode: "overview",
@@ -50,6 +53,7 @@ let entryKind = "empty";
 let plansOpen = false;
 let planZoom = 1;
 let selectedPlanObject = null;
+let planDownloadUrl = null;
 let histories = { current: [], potential: [] };
 let storageReady = false;
 let saveQueue = Promise.resolve();
@@ -430,6 +434,7 @@ function resetCamera() {
 }
 function setMode(mode) {
   if (mode === "nearby" && selectedListing) mode = "overview";
+  if (mode !== state.mode && mode !== "overview") $("#source-details").open = false;
   viewTransition.run();
   geoMap?.stop();
   document.body.dataset.view = mode;
@@ -443,6 +448,7 @@ function setMode(mode) {
   $("#neighborhood-view").hidden = true;
   $("#listing-map").hidden = selectedListing?.id !== "wall2308";
   state.mode = mode;
+  syncViewServices();
   if (entryKind === "empty") {
     $("#inside-surface").hidden = true;
     $("#commute-panel").hidden = true;
@@ -481,12 +487,6 @@ function setMode(mode) {
     $("#commute-panel").hidden = mode !== "commute";
     $("#view-unavailable").hidden = true;
     if (inside) {
-      $("#inside-plan").innerHTML = acceptedRegion
-        ? renderPlanSvg(acceptedRegion, { compact: true, showClearance: false })
-        : "";
-      $("#inside-plan").hidden = !acceptedRegion;
-      $("#inside-empty").hidden = Boolean(acceptedRegion);
-      $("#inside-source").href = selectedListing.url;
       $("#summary-next").textContent = acceptedRegion
         ? "Nominal plan region only. Ceiling height, openings and a walkable interior remain unknown."
         : "No inspected interior is available. Open the real source or inspect a matching plan.";
@@ -647,6 +647,38 @@ const evidenceReview = setupEvidenceReview({
 });
 const planInspection = setupPlanInspection();
 let selectedListing = null;
+const insideView = mountInsideView($("#inside-surface"), {
+  onOpenPlans: () => setPlansOpen(true),
+  onInspectPlan: ({ sourceUrl }) => {
+    setMode("overview");
+    $("#source-details").open = true;
+    planInspection.inspect(sourceUrl);
+  },
+});
+const commuteView = mountCommuteView($("#commute-panel"), {
+  routeLayer: {
+    setRoute: (route) => geoMap?.routeLayer.setRoute(route),
+    highlight: (step) => geoMap?.routeLayer.highlight(step),
+    fit: (options) => geoMap?.routeLayer.fit(options),
+    stop: () => geoMap?.routeLayer.stop(),
+  },
+});
+function syncViewServices() {
+  insideView.update({
+    selectedListing,
+    acceptedRegion,
+    priorities,
+    active: Boolean(selectedListing) && state.mode === "walk",
+  });
+  commuteView.update({
+    selectedListing,
+    resolvedLocation: selectedListing
+      ? listingLocations.get(selectedListing.id) || null
+      : null,
+    priorities,
+    active: Boolean(selectedListing && geoMap) && state.mode === "commute",
+  });
+}
 const syntheticPotential = { ...homes.potential };
 function showListing(listing) {
   if (!listing) return;
@@ -665,7 +697,6 @@ function showListing(listing) {
   $("#resolve-location").disabled = false;
   $("#source-details").open = false;
   $("#location-source").hidden = !listingLocations.has(listing.id);
-  resetJourney();
   acceptedRegion = null;
   for (const record of inspectedPlans) {
     try {
@@ -736,7 +767,7 @@ function showListing(listing) {
   if (!listingLocations.has(listing.id)) resolveListingLocation();
   else openNeighborhood(true);
 }
-const listingIntake = setupListingIntake(showListing);
+const listingIntake = setupListingIntake(showListing, nycListings);
 async function openNeighborhood(focus = false) {
   if (!selectedListing || state.mode === "walk") return;
   const selected = selectedListing;
@@ -747,7 +778,12 @@ async function openNeighborhood(focus = false) {
     mapInit ||= import("./neighborhood.js").then(({ createNeighborhood }) =>
       createNeighborhood($("#map-canvas"), (text) => {
         $("#map-status").textContent = mapLocationMessage || text;
-      }),
+      }, { routePadding: () => {
+        const mapRect = $("#map-canvas").getBoundingClientRect();
+        const panel = $("#commute-panel").getBoundingClientRect();
+        const overlaps = !$("#commute-panel").hidden && panel.top < mapRect.bottom && panel.bottom > mapRect.top;
+        return { left: overlaps ? Math.min(panel.right - mapRect.left + 24, mapRect.width - 100) : 40, right: 40, top: 40, bottom: 48 };
+      } }),
     );
     geoMap = await mapInit;
     const citySource = geoMap.getSourceDetails();
@@ -768,12 +804,14 @@ async function openNeighborhood(focus = false) {
       $("#location-source-date").textContent =
         `Approximate building location · source reviewed ${new Date(location.observedAt).toLocaleString()}`;
     }
+    syncViewServices();
     if (shownLocation !== selected.id) {
       geoMap.setLocation(location);
       shownLocation = selected.id;
     }
     geoMap.resize();
     if (focus && location) geoMap.direct();
+    else geoMap.resumeLocationFocus();
   } catch {
     mapInit = null;
     $("#map-status").textContent =
@@ -855,41 +893,17 @@ $("#change-location").onclick = () => {
   setMode("overview");
   resolveListingLocation();
 };
-setupPriorities();
-function resetJourney() {
-  $("#journey-external").hidden = true;
-  $("#journey-external").removeAttribute("href");
-  $("#journey-summary").textContent =
-    "Travel times and routes are not connected to this map yet.";
-}
-$("#journey-destination").addEventListener("input", resetJourney);
-$("#journey-mode").addEventListener("change", resetJourney);
-$("#commute-form").onsubmit = (event) => {
-  event.preventDefault();
-  if (!selectedListing) return;
-  const destination = $("#journey-destination").value.trim(),
-    mode = $("#journey-mode").value;
-  const origin =
-    selectedListing.mapAddress ||
-    selectedListing.name + ", " + selectedListing.location;
-  const params = new URLSearchParams({
-    api: "1",
-    origin,
-    destination,
-    travelmode: mode,
-  });
-  $("#journey-external").href = "https://www.google.com/maps/dir/?" + params;
-  $("#journey-external").hidden = false;
-  $("#journey-summary").textContent =
-    "Directions prepared for your chosen mode. Open Google Maps for the actual route, travel time and departure options; this map has no route yet.";
-};
+setupPriorities((selected) => { priorities = selected; syncViewServices(); });
 $("#listing-preview").addEventListener("click", () => {
   if (selectedListing) $("#evidence-stage").hidden = false;
 });
 for (const b of document.querySelectorAll("[data-mode]"))
   b.addEventListener("click", () => {
     setMode(b.dataset.mode);
-    if (state.mode === "walk") container.focus({ preventScroll: true });
+    if (state.mode === "walk") {
+      const target = selectedListing ? $("#inside-surface .iv-canvas") || $("#inside-surface a") : container;
+      target?.focus({ preventScroll: true });
+    }
   });
 for (const input of document.querySelectorAll("[name=home]"))
   input.addEventListener("change", () => {
@@ -1263,12 +1277,13 @@ $("#places-toggle").onclick = () => {
 window.scrollTo({ top: 0, left: 0, behavior: "instant" });
 
 function renderPlans() {
+  if (planDownloadUrl) URL.revokeObjectURL(planDownloadUrl);
+  planDownloadUrl = null;
   $("#plans-panel").hidden = !plansOpen;
   $("#plan-name").textContent =
     selectedListing?.name || currentLayout?.label || "Plans";
   const enabled = Boolean(currentLayout);
   for (const id of [
-    "plan-svg",
     "plan-print",
     "plan-zoom-in",
     "plan-zoom-out",
@@ -1276,6 +1291,17 @@ function renderPlans() {
     "plan-dimensions",
   ])
     $("#" + id).disabled = !enabled;
+  const download = $("#plan-svg");
+  download.setAttribute("aria-disabled", String(!enabled));
+  download.tabIndex = enabled ? 0 : -1;
+  download.removeAttribute("href");
+  if (enabled) {
+    planDownloadUrl = URL.createObjectURL(new Blob([renderPlanSvg(currentLayout)], { type: "image/svg+xml" }));
+    const subject = (selectedListing?.name || state.home)
+      .toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+    download.href = planDownloadUrl;
+    download.download = `elsewhere-${subject}-${currentLayout.revision.id.slice(0, 8)}.svg`;
+  }
   $("#plan-undo").disabled =
     !enabled || Boolean(selectedListing) || histories[state.home].length < 2;
   $("#plan-persistence").textContent = acceptedRegion
@@ -1444,18 +1470,6 @@ $("#plan-undo").onclick = () => {
   refresh();
   applyingHistory = false;
   persistPlans();
-};
-$("#plan-svg").onclick = () => {
-  if (!currentLayout) return;
-  const file = new Blob([renderPlanSvg(currentLayout)], {
-    type: "image/svg+xml",
-  });
-  const url = URL.createObjectURL(file);
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = `elsewhere-${state.home}-${currentLayout.revision.id.slice(0, 8)}.svg`;
-  a.click();
-  setTimeout(() => URL.revokeObjectURL(url), 1000);
 };
 $("#plan-print").onclick = () => {
   if (!currentLayout) return;

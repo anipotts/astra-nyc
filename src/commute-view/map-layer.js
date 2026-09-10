@@ -20,7 +20,7 @@ export function createCommuteMapLayer(map, { reducedMotion = () => globalThis.ma
   return {
     setRoute(value) { route = value; step = null; ensure(); },
     highlight(value) { step = value; ensure(); },
-    fit({ bounds, duration = 500 }) { if (!destroyed) { map.stop(); map.fitBounds(bounds, { padding, maxZoom: 16.5, pitch: 35, duration: reducedMotion() ? 0 : Math.min(duration, 650) }); } },
+    fit({ bounds, duration = 500 }) { if (!destroyed) { map.stop(); map.fitBounds(bounds, { padding: typeof padding === 'function' ? padding() : padding, maxZoom: 16.5, pitch: 35, duration: reducedMotion() ? 0 : Math.min(duration, 650) }); } },
     stop() { if (!destroyed) map.stop(); },
     destroy() { map.stop(); map.off('style.load', onStyleLoad); for (const id of [...ids].reverse()) if (map.getLayer(id)) map.removeLayer(id); for (const id of ['commute-highlight', 'commute-route']) if (map.getSource(id)) map.removeSource(id); destroyed = true; },
   };

@@ -2,6 +2,8 @@ import { Map, Marker, NavigationControl, setWorkerUrl } from "maplibre-gl";
 import workerUrl from "maplibre-gl/dist/maplibre-gl-worker.mjs?worker&url";
 import "maplibre-gl/dist/maplibre-gl.css";
 import { validateLocation, LOCATION_BOUNDS } from "./location.js";
+import { createCommuteMapLayer } from "./commute-view/map-layer.js";
+import { createMapFocus } from "./map-focus.js";
 setWorkerUrl(workerUrl);
 const regionalCamera = {
   center: [-74.009, 40.711],
@@ -35,10 +37,10 @@ export const CITY_SOURCE_DETAILS = Object.freeze({
   heightMethod:
     "https://github.com/openmaptiles/planetiler-openmaptiles/blob/main/src/main/java/org/openmaptiles/layers/Building.java",
   coverage:
-    "Available OpenStreetMap geometry in the NYC and Jersey City regional extent; completeness and currentness vary by building.",
+    "Available OpenStreetMap geometry around New York City; completeness and currentness vary by building.",
 });
 
-export async function createNeighborhood(container, onStatus = () => {}) {
+export async function createNeighborhood(container, onStatus = () => {}, { routePadding = 72 } = {}) {
   const response = await fetch("https://tiles.openfreemap.org/styles/liberty", {
     signal: AbortSignal.timeout(12000),
   });
@@ -76,6 +78,8 @@ export async function createNeighborhood(container, onStatus = () => {}) {
   let selected = null;
   let pin = null;
   let destroyed = false;
+  const focus = createMapFocus();
+  const routeLayer = createCommuteMapLayer(map, { padding: routePadding });
   const stop = () => {
     if (!destroyed) map.stop();
   };
@@ -85,15 +89,31 @@ export async function createNeighborhood(container, onStatus = () => {}) {
       map.easeTo({ ...camera, duration: duration() });
     }
   };
+  const focusLocation = () => {
+    if (!selected) return;
+    const camera = {
+      center: [selected.longitude, selected.latitude],
+      zoom: 17.5, pitch: 56, bearing: map.getBearing(),
+    };
+    focus.set(camera);
+    move(camera);
+  };
+  const directInteraction = () => { focus.cancel(); stop(); };
+  map.on("moveend", () => {
+    const center = map.getCenter();
+    focus.settled({ center: [center.lng, center.lat], zoom: map.getZoom() });
+  });
+  const observer = new ResizeObserver(() => { if (!destroyed) map.resize(); });
+  observer.observe(container);
   // Interrupt a prior programmatic tween before a fresh direct interaction.
   for (const event of ["pointerdown", "wheel", "keydown"])
-    container.addEventListener(event, stop, { capture: true, passive: true });
+    container.addEventListener(event, directInteraction, { capture: true, passive: true });
   map.addControl(new NavigationControl({ showCompass: true }), "top-right");
   const status = () =>
     onStatus(
       selected
         ? "Selected address · 3D city context · © OpenStreetMap contributors"
-        : "NYC + Jersey City · 3D city context · © OpenStreetMap contributors",
+        : "New York City · 3D city context · © OpenStreetMap contributors",
     );
   const timeout = setTimeout(() => {
     if (!destroyed && !map.loaded())
@@ -209,19 +229,19 @@ export async function createNeighborhood(container, onStatus = () => {}) {
         pin = new Marker({ element })
           .setLngLat([location.longitude, location.latitude])
           .addTo(map);
-        move({
-          center: [location.longitude, location.latitude],
-          zoom: 17.5,
-          pitch: 56,
-          bearing: map.getBearing(),
-        });
-      } else move(regionalCamera);
+        focusLocation();
+      } else { focus.cancel(); move(regionalCamera); }
       status();
     },
     resize: () => {
       if (!destroyed) map.resize();
     },
     stop,
+    resumeLocationFocus() { if (focus.pending) move(focus.pending); },
+    routeLayer: {
+      ...routeLayer,
+      fit(options) { focus.cancel(); routeLayer.fit(options); },
+    },
     getSourceDetails: () => CITY_SOURCE_DETAILS,
     getCamera: () => {
       if (destroyed) return null;
@@ -252,6 +272,7 @@ export async function createNeighborhood(container, onStatus = () => {}) {
         !Number.isFinite(camera.bearing)
       )
         return false;
+      focus.cancel();
       move({
         center: camera.center,
         zoom: camera.zoom,
@@ -261,6 +282,7 @@ export async function createNeighborhood(container, onStatus = () => {}) {
       return true;
     },
     pullback() {
+      focus.cancel();
       if (selected)
         move({
           center: [selected.longitude, selected.latitude],
@@ -272,12 +294,7 @@ export async function createNeighborhood(container, onStatus = () => {}) {
     },
     direct() {
       if (selected) {
-        move({
-          center: [selected.longitude, selected.latitude],
-          zoom: 17.5,
-          pitch: 56,
-          bearing: map.getBearing(),
-        });
+        focusLocation();
         status();
       } else onStatus("Choose a location match before focusing the map.");
     },
@@ -286,8 +303,10 @@ export async function createNeighborhood(container, onStatus = () => {}) {
       stop();
       destroyed = true;
       clearTimeout(timeout);
+      observer.disconnect();
+      routeLayer.destroy();
       for (const event of ["pointerdown", "wheel", "keydown"])
-        container.removeEventListener(event, stop, { capture: true });
+        container.removeEventListener(event, directInteraction, { capture: true });
       pin?.remove();
       map.remove();
     },

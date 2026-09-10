@@ -233,7 +233,7 @@ test("request preserves source unit path and returns needs_review with actual co
   assert.equal(sent.max_output_tokens, 3000);
   assert.equal(sent.tools[0].type, "web_search");
   assert.equal(sent.tools[0].search_context_size, "low");
-  assert.equal(sent.tools[0].filters.allowed_domains.length, 16);
+  assert.equal(sent.tools[0].filters.allowed_domains.length, 18);
   assert.deepEqual(sent.include, ["web_search_call.action.sources"]);
   assert.equal(sent.text.format.strict, true);
   assert.match(sent.instructions, /untrusted data/);

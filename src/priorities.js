@@ -36,7 +36,7 @@ export function createPriorities(getStorage) {
     },
   };
 }
-export function setupPriorities() {
+export function setupPriorities(onChange = () => {}) {
   const preferences = createPriorities(() => window.localStorage);
   const choices = document.querySelector("#priority-choices");
   const buttons = PRIORITIES.map((label) => {
@@ -55,11 +55,12 @@ export function setupPriorities() {
       button.disabled = !active && selected.length === 3;
     });
     document.querySelector("#priority-status").textContent = selected.length === 3
-      ? "3 of 3 selected. Deselect one to change."
-      : `${selected.length} of 3 selected.`;
+      ? "3/3 selected. Deselect to change."
+      : `${selected.length}/3 selected.`;
     document.querySelector("#priority-storage").textContent = preferences.persisted
-      ? "Saved in this browser."
+      ? "Saved here."
       : "Changes last for this visit; browser storage is unavailable.";
+    onChange(selected);
   }
   window.addEventListener("storage", (event) => {
     if (event.key !== null && event.key !== PRIORITY_KEY) return;
@@ -68,4 +69,5 @@ export function setupPriorities() {
     render();
   });
   render();
+  return preferences;
 }

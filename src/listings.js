@@ -294,7 +294,7 @@ export const listings = [
     planUrl: "https://castironlofts.com/assets/files/Binder1-31.pdf",
   },
 ];
-export function identifyListing(input) {
+export function identifyListing(input, catalog = listings) {
   let url;
   try {
     url = new URL(input.trim());
@@ -308,10 +308,10 @@ export function identifyListing(input) {
   const host = url.hostname.replace(/^www\./, "");
   const path = url.pathname.replace(/\/+$/, "");
   return (
-    listings.find((listing) => {
+    catalog.find((listing) => {
       const known = new URL(listing.url);
       return (
-        host === known.hostname.replace(/^www\./, "") && path === known.pathname
+        host === known.hostname.replace(/^www\./, "") && path === known.pathname.replace(/\/+$/, "")
       );
     }) ?? null
   );

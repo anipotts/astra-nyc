@@ -96,3 +96,11 @@ The existing OpenAI service now provides bounded source-text evidence assessment
 ## Landing asset tooling and original artwork
 
 Existing local cwebp1.6.0 (libwebp, BSD-3-Clause; [upstream source](https://github.com/webmproject/libwebp)) compressed the supplied current-event hero toWebP at quality86. License verified from installed COPYING. This is an offline asset utility, not an added runtime or npm dependency. The original generated illustration is separately described in `public/hudson-daylight-illustration.provenance.json`; it is decorative artwork, not a sourced geographic dataset.
+
+## Integrated commute and view modules — September 10, 2026
+
+No new npm dependencies. Inside uses the existing DOM/SVG renderer; Commute uses existing MapLibre GL6.9.0 with GeoJSON line/point layers. Shared controls use the original event-created CSS token system.
+
+The automatic lookup for resolved routes uses the [FOSSGIS routing service](https://routing.openstreetmap.de/about.html) and its separately deployed OSRM foot, bike and car profiles ([published configuration](https://github.com/fossgis-routing-server/osrm-frontend/blob/master/src/leaflet_options.js), [OSRM API](https://project-osrm.org/docs/v5.24.0/api/)). This is a hosted community service, not a pinned npm package; upstream deployed revision is not supplied by the response. Respect the [FOSSGIS usage conditions](https://fossgis.de/arbeitsgruppen/osm-server/nutzungsbedingungen/). Route data derives from OpenStreetMap under ODbL; attribution and a map-correction link remain visible. Requests are bounded, coalesced and cached for30minutes with a shared cross-process gate. No traffic, transit itinerary or schedule inference is added.
+
+The finite 3WorldTradeCenter destination uses a public approximate point from [OpenStreetMap way166839381](https://www.openstreetmap.org/way/166839381), reviewed during the event. It is not an entrance survey. Source locations and provider acquisition timestamps remain inspectable. No source artwork or user photos are bundled by these modules.

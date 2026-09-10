@@ -4,6 +4,7 @@ import { createListingSearchMiddleware } from "./server/listing-search.js";
 import { createPlanInspectionMiddleware } from "./server/plan-inspection.js";
 import { createListingEvidenceMiddleware } from "./server/listing-evidence.js";
 import { createLocationMiddleware } from "./server/location.js";
+import { createCommuteMiddleware } from "./server/commute-view/provider.js";
 export default defineConfig(({ mode }) => {
   const env = loadEnv(
     mode,
@@ -24,11 +25,13 @@ export default defineConfig(({ mode }) => {
     apiKey: process.env.OPENAI_API_KEY || env.OPENAI_API_KEY,
   });
   const location = createLocationMiddleware();
+  const commute = createCommuteMiddleware();
   return {
     plugins: [
       {
         name: "elsewhere-local-astra",
         configureServer(server) {
+          server.middlewares.use(commute);
           server.middlewares.use(location);
           server.middlewares.use(planInspection);
           server.middlewares.use(listingEvidence);
@@ -36,6 +39,7 @@ export default defineConfig(({ mode }) => {
           server.middlewares.use(middleware);
         },
         configurePreviewServer(server) {
+          server.middlewares.use(commute);
           server.middlewares.use(location);
           server.middlewares.use(planInspection);
           server.middlewares.use(listingEvidence);

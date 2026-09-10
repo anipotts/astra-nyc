@@ -47,6 +47,7 @@ export function setupPlanInspection() {
     const receipt = document.createElement("small");
     receipt.textContent = `${report.cached ? "Local result replay" : "Astra media inspection"} · ${new Date(report.observedAt).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })} · source date: ${report.sourceDate || "unknown"}`;
     panel.append(notice, source, receipt);
+    panel.scrollIntoView({ block: "start" });
   }
   $("#plan-inspection-form").onsubmit = async (event) => {
     event.preventDefault();

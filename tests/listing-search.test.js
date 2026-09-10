@@ -213,6 +213,8 @@ test("search request uses documented bounded controls and returns discovery-only
     "live65newkirk.com",
     "rnhousing.org",
     "castironlofts.com",
+    "260gold.com",
+    "avaloncommunities.com",
   ]);
   assert.deepEqual(sent.include, ["web_search_call.action.sources"]);
   assert.equal(sent.text.format.strict, true);
@@ -317,6 +319,9 @@ test("every candidate needs real search receipt and an allowed HTTPS source URL"
     response({
       candidates: [candidate({ address: "10 Main Street, Hoboken, NJ 07030" })],
     }),
+    response({
+      candidates: [candidate({ address: "200 Greene Street, Jersey City, NJ 07311" })],
+    }),
     response({ candidates: [candidate(), candidate()] }),
   ];
   for (const provider of invalid) {
@@ -333,10 +338,10 @@ test("every candidate needs real search receipt and an allowed HTTPS source URL"
   );
   assert.equal((await invoke(byCitation.middleware)).status, 200);
   const unitCandidate = candidate({
-    name: "Jersey City Urby",
-    address: "200 Greene Street, Jersey City, NJ 07311",
-    unit: "409",
-    url: "https://www.urby.com/jersey-city",
+    name: "95 Wall Street #2308",
+    address: "95 Wall Street, Manhattan, NY 10005",
+    unit: "2308",
+    url: "https://streeteasy.com/building/95-wall-street-new_york/2308",
     note: "Possible address match; confirm details on the original listing.",
   });
   const unit = setup(async () =>
