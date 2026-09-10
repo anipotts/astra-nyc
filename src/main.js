@@ -14,6 +14,7 @@ import {
   cleanPlanState,
 } from "./plan-storage.js";
 import { nycListings } from "./nyc-listings.js";
+import { listingSummary } from "./listing-summary.js";
 import { setupPriorities } from "./priorities.js";
 import { setupListingIntake } from "./listing-intake.js";
 import { acceptInspectedRegion } from "./inspected-plan.js";
@@ -743,21 +744,20 @@ function showListing(listing) {
       }) +
       " ET · not a live refresh";
   $("#listing-unknowns").textContent = listing.questions;
-  $("#overview-price").textContent = listing.price;
+  const summary = listingSummary(listing);
+  $("#overview-price").textContent = summary.price;
+  $("#overview-price").classList.toggle("unverified-rent", !summary.rentKnown);
+  $("#evidence-availability").textContent = summary.status;
+  $("#evidence-context").textContent = summary.details;
   $("#overview-freshness").textContent = $("#listing-checked").textContent;
   $("#listing-preview").hidden = true;
   $("#listing-map").hidden = listing.id !== "wall2308";
   $("#listing-status").textContent = acceptedRegion
     ? "Inspected nominal 2D region available in Plans."
     : "Evidence only · a usable dimensioned plan is needed.";
-  $("#evidence-title").textContent = listing.name;
-  $("#evidence-facts").textContent =
-    listing.facts +
-    (listing.historical
-      ? " · Historical source"
-      : listing.archived
-        ? " · Archived"
-        : "");
+  $("#evidence-title").textContent = summary.address;
+  $("#evidence-facts").textContent = summary.facts;
+  $("#evidence-facts").hidden = !summary.facts;
   $("#evidence-reason").textContent =
     listing.readinessReason ||
     "A matching, authorized plan with usable scale is needed before creating a dimensional interior. Reported square footage is not enough.";

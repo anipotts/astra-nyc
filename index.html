@@ -71,7 +71,7 @@
           <h1>See what life could be like in your next home</h1>
         </div>
         <div class="panel-heading">
-          <span>Your places</span
+          <span>Selected place</span
           ><button
             id="places-toggle"
             aria-expanded="true"
@@ -115,7 +115,7 @@
             </select>
           </section>
           <div class="listing-picker">
-            <label for="listing-select">Browse listings</label>
+            <label for="listing-select" class="sr-only">Browse listings</label>
             <div class="listing-picker-row">
               <select id="listing-select" class="ui-field" aria-label="Browse listings">
                 <option value="" disabled selected>Choose a place</option>
@@ -127,6 +127,7 @@
             <h1 id="evidence-title"></h1>
             <p id="evidence-facts"></p>
             <p id="overview-price"></p>
+            <p id="evidence-availability"></p>
             <p id="view-unavailable" role="status" hidden></p>
             <details id="source-details" class="ui-disclosure">
               <summary>Sources &amp; details</summary>
@@ -135,6 +136,7 @@
                 ><button id="change-listing" type="button">Change</button>
               </div>
               <small id="overview-freshness"></small>
+              <p id="evidence-context"></p>
               <p id="summary-next"></p>
               <details
                 id="location-review"

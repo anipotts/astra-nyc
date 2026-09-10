@@ -255,6 +255,9 @@ body.desktop-shell {
 .desktop-shell #evidence-stage p { font-size: var(--ui-text-sm); line-height: var(--ui-line-height); margin: 0; }
 .desktop-shell #evidence-facts { color: var(--ui-color-muted); }
 .desktop-shell #evidence-stage #overview-price { margin-top: var(--ui-space-2); font-size: var(--ui-text-base) !important; font-weight: 650; }
+.desktop-shell #evidence-stage #overview-price.unverified-rent { font-size: var(--ui-text-sm) !important; font-weight: 400; color: var(--ui-color-muted); }
+.desktop-shell #evidence-stage #evidence-availability { margin-top: var(--ui-space-1); color: var(--ui-color-muted); }
+.desktop-shell #evidence-facts[hidden] { display: none; }
 .desktop-shell #overview-freshness { display: block; font-size: var(--ui-text-sm); line-height: var(--ui-line-height); color: var(--ui-color-muted); }
 .desktop-shell :is(#summary-next, #view-unavailable) { grid-column: 1 / -1; color: var(--ui-color-muted); }
 .desktop-shell #summary-next { margin-top: var(--ui-space-1); }
@@ -301,7 +304,7 @@ body.desktop-shell {
 .desktop-shell #inside-source { color: var(--ui-color-accent); font-size: var(--ui-text-base); }
 .desktop-shell :is(#inside-surface,#inside-plan,#inside-empty,#location-review,#commute-panel,#evidence-stage,#map-view)[hidden] { display: none !important; }
 .desktop-shell .listing-picker { margin-top: 0; }
-.desktop-shell .listing-picker label { display: block; margin-bottom: var(--ui-space-1); color: var(--ui-color-muted); font-size: var(--ui-text-sm); font-weight: 500; }
+.desktop-shell .listing-picker label:not(.sr-only) { display: block; margin-bottom: var(--ui-space-1); color: var(--ui-color-muted); font-size: var(--ui-text-sm); font-weight: 500; }
 .desktop-shell .listing-picker-row { display: flex; align-items: center; gap: var(--ui-space-1); }
 .desktop-shell #listing-select { flex: 1; width: 100%; min-width: 0; min-height: var(--ui-control-height); padding: 6px 8px; border: 1px solid var(--ui-color-border); border-radius: var(--ui-radius-control); background: white; color: var(--ui-color-text); font: inherit; font-size: var(--ui-text-sm); appearance: auto; text-overflow: ellipsis; }
 .desktop-shell #add-listing { flex: 0 0 auto; width: auto; min-height: var(--ui-control-height); margin: 0; padding: 6px 8px; text-align: center; border-color: transparent; background: transparent; color: var(--ui-color-accent); font-size: var(--ui-text-sm); }
