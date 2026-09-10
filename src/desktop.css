@@ -1,4 +1,148 @@
 /* The public product targets desktop windows throughout this project. */
+.entry-region,
+.entry-art-source {
+  display: none;
+}
+/* Approved current-event art is decorative, separate from the sourced map. */
+.desktop-shell.empty-state #viewport {
+  background: #e4edf0 url('/hudson-daylight-illustration.webp') center center / cover no-repeat;
+}
+.desktop-shell.empty-state header {
+  padding: 28px 40px;
+}
+.desktop-shell.empty-state #entry-stage {
+  top: 10.5%;
+  width: min(820px, calc(100% - 64px));
+  max-height: 78%;
+  text-align: center;
+  padding: 0 12px 16px;
+  border-radius: 16px;
+  scrollbar-width: thin;
+}
+.desktop-shell #entry-stage .entry-eyebrow {
+  margin: 0 0 24px;
+  color: var(--green);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+}
+.desktop-shell #entry-stage h1 {
+  max-width: 800px;
+  margin: 0 auto 30px;
+  font-size: clamp(40px, 4vw, 60px);
+  line-height: 1.02;
+  letter-spacing: -2.5px;
+  font-weight: 650;
+}
+.desktop-shell #entry-title span {
+  display: block;
+}
+.desktop-shell #address-form {
+  align-items: stretch;
+  margin: 0 auto 10px;
+  gap: 10px;
+  max-width: 742px;
+}
+.desktop-shell .entry-search-field {
+  display: flex;
+  flex: 1;
+  min-width: 0;
+  align-items: center;
+  padding: 7px;
+  gap: 6px;
+  border: 1px solid #d5dbd9;
+  border-radius: 14px;
+  background: #fffffff5;
+}
+.desktop-shell .entry-search-field:focus-within {
+  outline: 3px solid #387954;
+  outline-offset: 3px;
+}
+.desktop-shell #listing-address {
+  width: 100%;
+  min-height: 40px;
+  padding: 8px 10px;
+  border: 0;
+  border-radius: 7px;
+  background: transparent;
+  font-size: 16px;
+}
+.desktop-shell #listing-address:focus-visible {
+  outline: 0;
+}
+.desktop-shell .listing-input-badge {
+  flex-shrink: 0;
+  padding: 10px 16px;
+  border: 1px solid #d2dfd2;
+  border-radius: 16px;
+  background: #e7eee5;
+  color: var(--green);
+  font-size: 14px;
+  white-space: nowrap;
+  cursor: text;
+}
+.desktop-shell #address-form button {
+  min-width: 140px;
+  border-radius: 13px;
+  font-size: 17px;
+}
+.desktop-shell #entry-stage .intake-note {
+  width: fit-content;
+  margin: 10px auto;
+  padding: 5px 10px;
+  border-radius: 8px;
+  background: #fafaf6e8;
+  color: #344d42;
+}
+.desktop-shell .landing-examples {
+  margin: 4px auto 0;
+  width: fit-content;
+  max-width: 100%;
+  padding: 0 12px;
+  border-radius: 10px;
+  background: #fafaf6f2;
+  color: var(--green);
+}
+.desktop-shell .entry-examples {
+  justify-content: center;
+  max-height: 180px;
+  overflow: auto;
+  padding: 4px 0 12px;
+}
+.desktop-shell #listing-results,
+.desktop-shell .intake-status:not(:empty) {
+  display: block;
+  text-align: left;
+  background: #fafaf6;
+  border-radius: 12px;
+  padding: 14px;
+}
+.desktop-shell #listing-results[hidden] {
+  display: none;
+}
+.desktop-shell.empty-state :is(.entry-region, .entry-art-source) {
+  display: block;
+  position: absolute;
+  z-index: 21;
+  margin: 0;
+  font-size: 11px;
+}
+.desktop-shell.empty-state .entry-region {
+  top: 40px;
+  right: 40px;
+  color: var(--green);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+.desktop-shell.empty-state .entry-art-source {
+  bottom: 24px;
+  left: 28px;
+  padding: 6px 10px;
+  background: #fafaf6e8;
+  border-radius: 7px;
+  color: #344d42;
+}
 body.desktop-shell {
   display: grid;
   grid-template-columns: 312px minmax(0, 1fr);

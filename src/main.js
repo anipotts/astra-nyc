@@ -762,7 +762,6 @@ async function openNeighborhood(focus = false) {
     )
       return;
     const location = listingLocations.get(selected.id) || null;
-    $("#map-direct").disabled = !location;
     $("#location-source").hidden = !location;
     if (location) {
       $("#location-source-link").href = location.source;
@@ -784,9 +783,6 @@ async function openNeighborhood(focus = false) {
 }
 $("#listing-map").onclick = () => setMode("overview");
 $("#neighborhood-view").onclick = () => setMode("overview");
-$("#map-pullback").onclick = () => geoMap?.pullback();
-$("#map-direct").onclick = () => geoMap?.direct();
-$("#map-enter").onclick = () => setMode("walk");
 async function resolveListingLocation() {
   if (!selectedListing || locationRequest) return;
   const selected = selectedListing,

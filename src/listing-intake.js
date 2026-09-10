@@ -77,16 +77,10 @@ export function setupListingIntake(onSelect) {
     ".listing-examples, .entry-examples",
   )) {
     container.replaceChildren();
-    for (const [index, listing] of [
+    for (const listing of [
       ...auditedExamples,
       ...additionalExamples,
-    ].entries()) {
-      if (index === auditedExamples.length) {
-        const heading = document.createElement("span");
-        heading.className = "examples-heading";
-        heading.textContent = "More saved places";
-        container.append(heading);
-      }
+    ]) {
       const button = document.createElement("button");
       button.type = "button";
       button.dataset.listing = listing.id;
