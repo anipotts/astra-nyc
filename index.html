@@ -112,19 +112,11 @@
               <option value="">Choose an item</option>
             </select>
           </section>
-          <div class="examples-heading">Browse listings</div>
-          <div class="listing-examples">
-            <button type="button" data-listing="wall2308">
-              95 Wall studio <span aria-hidden="true">↗</span></button
-            ><button type="button" data-listing="zephyr501">
-              Zephyr #501 <small>Archived</small>
-            </button>
-            <button type="button" data-listing="urby409">
-              Urby #409 <small>Evidence only</small>
-            </button>
-            <button type="button" data-listing="urby1504">
-              Urby #1504 <small>Evidence only</small>
-            </button>
+          <div class="listing-picker">
+            <label for="listing-select">Browse listings</label>
+            <select id="listing-select" aria-label="Browse listings">
+              <option value="" disabled selected>Choose a place</option>
+            </select>
           </div>
           <details class="evidence">
             <summary>
@@ -182,6 +174,13 @@
             </p>
           </section>
         </div>
+        <section id="priorities-panel" aria-labelledby="priorities-title">
+          <h2 id="priorities-title">Your priorities</h2>
+          <p>What matters nearby? Choose up to three.</p>
+          <div id="priority-choices" aria-label="Nearby priorities"></div>
+          <p id="priority-status" role="status"></p>
+          <small id="priority-storage">Saved in this browser.</small>
+        </section>
         <small id="collapsed-model-status">Illustrative model</small>
       </aside>
       <section id="viewport" aria-label="Interactive 3D home preview">
@@ -205,7 +204,7 @@
               placeholder="Address, building or apartment"
               autocomplete="off"
               spellcheck="false"
-              aria-describedby="search-disclosure listing-input-hint"
+              aria-describedby="listing-input-hint"
             />
             <label id="listing-input-hint" class="listing-input-badge" for="listing-address">or paste a listing</label>
             </div>
@@ -227,10 +226,6 @@
               <button type="submit">Find listing →</button>
             </form>
           </details>
-          <p id="search-disclosure" class="intake-note">
-            NYC &amp; Jersey City · Online searches go to OpenAI only when you
-            submit.
-          </p>
           <output
             id="listing-status"
             class="intake-status"
@@ -244,16 +239,6 @@
           <button id="search-online" class="text-action" type="button" hidden>
             Search online for more listings →
           </button>
-          <details class="landing-examples">
-          <summary>Browse listings</summary>
-          <div class="entry-examples" aria-label="Available listings">
-            <button type="button" data-listing="wall2308">
-              95 Wall studio
-            </button>
-            <button type="button" data-listing="urby409">Urby #409</button>
-            <button type="button" data-listing="urby1504">Urby #1504</button>
-          </div>
-          </details>
         </section>
         <p class="entry-region">NYC &amp; Jersey City</p>
         <p class="entry-art-source">Illustrative city art · AI generated</p>
@@ -309,17 +294,6 @@
             >Open route in Google Maps ↗</a
           >
         </section>
-        <details id="lifestyle-panel" hidden>
-          <summary>What matters nearby?</summary>
-          <p>
-            Choose up to three priorities. Places and detour times appear only
-            when sourced.
-          </p>
-          <div id="lifestyle-choices"></div>
-          <p id="lifestyle-status" role="status">
-            Your priorities are optional.
-          </p>
-        </details>
         <section id="evidence-stage" hidden aria-label="Listing evidence only">
           <div class="summary-heading">
             <span id="summary-view-label">Your next place</span

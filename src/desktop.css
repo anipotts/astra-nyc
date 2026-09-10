@@ -56,8 +56,9 @@
   background: #fffffff5;
 }
 .desktop-shell .entry-search-field:focus-within {
-  outline: 3px solid #387954;
-  outline-offset: 3px;
+  outline: none;
+  border-color: #84968d;
+  box-shadow: 0 3px 14px #203c2f12;
 }
 .desktop-shell #listing-address {
   width: 100%;
@@ -291,7 +292,7 @@ body.desktop-shell {
   font-size: 11px;
 }
 .desktop-shell
-  :is(#evidence-stage, #location-review, #commute-panel, #lifestyle-panel) {
+  :is(#evidence-stage, #location-review, #commute-panel) {
   position: relative;
   inset: auto;
   transform: none;
@@ -368,7 +369,7 @@ body.desktop-shell {
   margin: 0 0 10px;
   font-size: 21px;
 }
-.desktop-shell :is(#location-review, #commute-panel, #lifestyle-panel) p {
+.desktop-shell :is(#location-review, #commute-panel) p {
   font-size: 13px;
   line-height: 1.5;
 }
@@ -387,27 +388,6 @@ body.desktop-shell {
 .desktop-shell #location-candidates button {
   text-align: left;
   overflow-wrap: anywhere;
-}
-.desktop-shell #lifestyle-panel {
-  justify-self: start;
-  align-self: start;
-  width: 230px;
-  padding: 4px 14px;
-  max-height: calc(100% - 350px);
-}
-.desktop-shell #lifestyle-choices {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-}
-.desktop-shell #lifestyle-choices button {
-  min-height: 36px;
-  font-size: 12px;
-  padding: 6px 8px;
-}
-.desktop-shell #lifestyle-choices button[aria-pressed="true"] {
-  color: white;
-  background: var(--green);
 }
 .desktop-shell #commute-panel {
   justify-self: end;
@@ -491,7 +471,6 @@ body.desktop-shell {
     #inside-empty,
     #location-review,
     #commute-panel,
-    #lifestyle-panel,
     #evidence-stage,
     #map-view
   )[hidden] {
@@ -554,12 +533,34 @@ body.desktop-shell {
   .desktop-shell[data-view="commute"] #commute-panel {
     max-height: calc(100% - 370px);
   }
-  .desktop-shell #lifestyle-panel {
-    margin-top: 136px;
-    /* End above the bottom summary, keeping every priority scrollable. */
-    max-height: calc(68% - 182px);
-  }
-  .desktop-shell:has(#location-review:not([hidden])) #lifestyle-panel {
-    display: none;
-  }
+
 }
+
+/* Listing and preference controls share the persistent desktop sidebar. */
+.desktop-shell .listing-picker { margin-top: 18px; }
+.desktop-shell .listing-picker label { display: block; margin-bottom: 8px; color: var(--muted); font-size: 12px; font-weight: 600; }
+.desktop-shell #listing-select { width: 100%; min-width: 0; min-height: 44px; padding: 10px 12px; border: 1px solid var(--border); border-radius: 10px; background: #fff; color: var(--ink); font: inherit; font-size: 14px; }
+.desktop-shell #priorities-panel { margin-top: 24px; padding-top: 20px; border-top: 1px solid var(--border); }
+.desktop-shell #priorities-panel h2 { margin: 0; font-size: 14px; font-weight: 650; }
+.desktop-shell #priorities-panel p { margin: 8px 0 12px; color: var(--muted); font-size: 12px; line-height: 1.5; }
+.desktop-shell #priority-choices { display: flex; flex-wrap: wrap; gap: 7px; }
+.desktop-shell #priority-choices button { min-height: 34px; padding: 7px 9px; border-radius: 9px; font-size: 12px; }
+.desktop-shell #priority-choices button[aria-pressed="true"] { color: white; background: var(--green); border-color: var(--green); }
+.desktop-shell #priority-choices button:disabled { opacity: .5; cursor: default; }
+.desktop-shell #priority-storage { display: block; color: var(--muted); font-size: 11px; line-height: 1.5; }
+
+.desktop-shell #address-form { position: relative; }
+.desktop-shell #entry-stage:has(#search-suggestions:not([hidden])) { overflow: visible; }
+.desktop-shell .entry-search-field.keyboard-focus #listing-address:focus-visible { outline: 2px solid #566860; outline-offset: -2px; }
+.desktop-shell #listing-address:focus:not(:focus-visible) { outline: none; }
+.desktop-shell .search-suggestions { position: absolute; z-index: 35; top: calc(100% + 10px); left: 0; right: 0; max-height: min(320px, 38vh); overflow-y: auto; overscroll-behavior: contain; padding: 8px; border: 1px solid #d9e0db; border-radius: 14px; background: #fffffff9; box-shadow: 0 14px 40px #173a2b24; text-align: left; animation: suggestions-enter 140ms ease-out; }
+.desktop-shell .search-suggestions[hidden] { display: none; }
+.desktop-shell .suggestion-heading { padding: 10px 12px 6px; color: var(--muted); font-size: 11px; font-weight: 650; letter-spacing: .6px; text-transform: uppercase; }
+.desktop-shell .search-option { padding: 10px 12px; border-radius: 8px; cursor: pointer; }
+.desktop-shell .search-option:hover, .desktop-shell .search-option[aria-selected="true"] { background: #eaf0e9; }
+.desktop-shell .search-option strong, .desktop-shell .search-option small { display: block; }
+.desktop-shell .search-option strong { font-size: 14px; font-weight: 550; }
+.desktop-shell .search-option small { margin-top: 3px; color: var(--muted); font-size: 12px; line-height: 1.4; }
+.desktop-shell #entry-stage .suggestion-empty { margin: 0; padding: 14px; color: var(--muted); font-size: 13px; }
+@keyframes suggestions-enter { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: translateY(0); } }
+@media (prefers-reduced-motion: reduce) { .desktop-shell .search-suggestions { animation: none; } }

@@ -14,6 +14,7 @@ import {
   cleanPlanState,
 } from "./plan-storage.js";
 import { listings } from "./listings.js";
+import { setupPriorities } from "./priorities.js";
 import { setupListingIntake } from "./listing-intake.js";
 import { acceptInspectedRegion } from "./inspected-plan.js";
 import { inspectedPlans } from "./inspected-plan-records.js";
@@ -445,7 +446,6 @@ function setMode(mode) {
   if (entryKind === "empty") {
     $("#inside-surface").hidden = true;
     $("#commute-panel").hidden = true;
-    $("#lifestyle-panel").hidden = true;
     $("#location-review").hidden = true;
     state.playing = false;
     keys.clear();
@@ -453,7 +453,6 @@ function setMode(mode) {
   }
   $("#inside-surface").hidden = true;
   $("#commute-panel").hidden = true;
-  $("#lifestyle-panel").hidden = true;
   $("#location-review").hidden = true;
   if (selectedListing) {
     state.playing = false;
@@ -480,7 +479,6 @@ function setMode(mode) {
     const inside = mode === "walk";
     $("#inside-surface").hidden = !inside;
     $("#commute-panel").hidden = mode !== "commute";
-    $("#lifestyle-panel").hidden = mode !== "overview";
     $("#view-unavailable").hidden = true;
     if (inside) {
       $("#inside-plan").innerHTML = acceptedRegion
@@ -654,6 +652,7 @@ function showListing(listing) {
   if (!listing) return;
   entryKind = "listing";
   selectedListing = listing;
+  listingIntake.select(listing);
   const reviewedLocation = getExampleLocation(listing.id);
   if (reviewedLocation && !listingLocations.has(listing.id))
     listingLocations.set(listing.id, reviewedLocation);
@@ -737,7 +736,7 @@ function showListing(listing) {
   if (!listingLocations.has(listing.id)) resolveListingLocation();
   else openNeighborhood(true);
 }
-setupListingIntake(showListing);
+const listingIntake = setupListingIntake(showListing);
 async function openNeighborhood(focus = false) {
   if (!selectedListing || state.mode === "walk") return;
   const selected = selectedListing;
@@ -856,7 +855,7 @@ $("#change-location").onclick = () => {
   setMode("overview");
   resolveListingLocation();
 };
-const priorities = new Set();
+setupPriorities();
 function resetJourney() {
   $("#journey-external").hidden = true;
   $("#journey-external").removeAttribute("href");
@@ -865,29 +864,6 @@ function resetJourney() {
 }
 $("#journey-destination").addEventListener("input", resetJourney);
 $("#journey-mode").addEventListener("change", resetJourney);
-for (const label of [
-  "Work & study",
-  "People & community",
-  "Daily essentials",
-  "Food & social",
-  "Fitness & outdoors",
-  "Care & services",
-  "Getting around",
-]) {
-  const button = document.createElement("button");
-  button.type = "button";
-  button.textContent = label;
-  button.setAttribute("aria-pressed", "false");
-  button.onclick = () => {
-    if (priorities.has(label)) priorities.delete(label);
-    else if (priorities.size < 3) priorities.add(label);
-    button.setAttribute("aria-pressed", String(priorities.has(label)));
-    $("#lifestyle-status").textContent = priorities.size
-      ? `Selected: ${[...priorities].join(", ")}. Nearby place lookup is not connected yet.`
-      : "Your priorities are optional.";
-  };
-  $("#lifestyle-choices").append(button);
-}
 $("#commute-form").onsubmit = (event) => {
   event.preventDefault();
   if (!selectedListing) return;
@@ -1056,20 +1032,6 @@ function resize() {
 }
 new ResizeObserver(resize).observe(container);
 refresh();
-try {
-  const recent = listings.find(
-    (l) => l.id === localStorage.getItem("elsewhere-last-real-home"),
-  );
-  if (recent) {
-    const resume = document.createElement("button");
-    resume.id = "resume-listing";
-    resume.type = "button";
-    resume.textContent = `Resume ${recent.name}`;
-    resume.className = "text-action";
-    resume.onclick = () => showListing(recent);
-    $("#address-form").before(resume);
-  }
-} catch {}
 setMode("overview");
 resize();
 let last = performance.now();

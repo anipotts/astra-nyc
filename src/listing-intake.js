@@ -1,3 +1,5 @@
+import { setupSearchSuggestions } from "./search-suggestions.js";
+import { createListingPicker } from "./listing-picker.js";
 import { normalizeSourceUrl } from "./source-policy.js";
 import {
   listings,
@@ -73,23 +75,10 @@ export function candidateListing(candidate, checkedAt) {
 }
 export function setupListingIntake(onSelect) {
   const $ = (s) => document.querySelector(s);
-  for (const container of document.querySelectorAll(
-    ".listing-examples, .entry-examples",
-  )) {
-    container.replaceChildren();
-    for (const listing of [
-      ...auditedExamples,
-      ...additionalExamples,
-    ]) {
-      const button = document.createElement("button");
-      button.type = "button";
-      button.dataset.listing = listing.id;
-      button.textContent = listing.name;
-      button.title = `View building · ${listing.mapAddress || listing.location}`;
-      button.setAttribute("aria-pressed", "false");
-      container.append(button);
-    }
-  }
+  const picker = createListingPicker($("#listing-select"), [...auditedExamples, ...additionalExamples], (listing) => {
+    cancel();
+    onSelect(listing);
+  });
   let request = null;
   let generation = 0;
   function cancel() {
@@ -133,12 +122,13 @@ export function setupListingIntake(onSelect) {
       results.append(card);
     }
   }
-  function localMatches() {
+  function localMatches(showResults = false) {
     cancel();
     const found = findKnownListings($("#listing-address").value);
-    render(found);
+    if (showResults) render(found);
+    else $("#listing-results").hidden = true;
     $("#listing-status").textContent = "";
-    $("#search-online").hidden = !found.length;
+    $("#search-online").hidden = !showResults || !found.length;
     return found;
   }
   async function online(query) {
@@ -181,7 +171,10 @@ export function setupListingIntake(onSelect) {
       }
     }
   }
-  $("#listing-address").addEventListener("input", localMatches);
+  $("#listing-address").addEventListener("input", () => localMatches());
+  const suggestions = setupSearchSuggestions($("#listing-address"),
+    [...auditedExamples, ...additionalExamples], findKnownListings,
+    (listing) => { cancel(); onSelect(listing); }, () => localMatches());
   $("#listing-url").addEventListener("input", () => {
     cancel();
     $("#listing-status").textContent = "";
@@ -191,12 +184,16 @@ export function setupListingIntake(onSelect) {
   $("#address-form").onsubmit = (event) => {
     event.preventDefault();
     const query = $("#listing-address").value.trim();
+    suggestions.close();
+    suggestions.remember({ kind: "query", value: query });
     if (/^https?:\/\//i.test(query)) {
       $("#listing-url").value = query;
       $("#listing-form").requestSubmit();
       return;
     }
-    if (!localMatches().length) online(query);
+    const found = localMatches(true);
+    if (found.length === 1) onSelect(found[0]);
+    else if (!found.length) online(query);
   };
   $("#search-online").onclick = () =>
     online($("#listing-address").value.trim());
@@ -225,4 +222,12 @@ export function setupListingIntake(onSelect) {
       cancel();
       onSelect(listings.find((l) => l.id === button.dataset.listing));
     };
+  return {
+    select(listing) {
+      picker.select(listing);
+      suggestions.close();
+      if (listings.some((item) => item.id === listing.id))
+        suggestions.remember({ kind: "listing", value: listing.id });
+    },
+  };
 }
