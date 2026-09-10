@@ -31,3 +31,14 @@ test("rejects credential-bearing and non-HTTPS URLs", () => {
   ])
     assert.throws(() => identifyListing(value));
 });
+
+test("listing area and plan references never unlock unverified dimensional interiors", () => {
+  for (const listing of listings) assert.equal(listing.scene, null);
+  for (const id of ["urby409", "urby1504"]) {
+    const listing = listings.find((l) => l.id === id);
+    assert.equal(identifyListing(listing.url).id, id);
+    assert.equal(listing.dimensionalReadiness, "needs-measurement");
+    assert.equal(listing.furnishingStatus, "unknown");
+    assert.ok(listing.planUrl.startsWith("https://"));
+  }
+});

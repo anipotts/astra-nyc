@@ -3,19 +3,27 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="theme-color" content="#ffffff" />
-    <title>Elsewhere — try living here</title>
-    <link rel="icon" href="data:," />
+    <meta name="theme-color" content="#FAFAF6" />
+    <title>Elsewhere</title>
+    <link rel="icon" type="image/svg+xml" href="/elsewhere-mark.svg" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
   </head>
   <body>
     <header>
-      <a class="wordmark" href="/">Elsewhere<span>↗</span></a
-      ><span class="local" hidden></span>
+      <a class="wordmark" href="/" aria-label="Elsewhere home"
+        ><img
+          src="/elsewhere-mark.svg"
+          width="36"
+          height="36"
+          alt=""
+        />Elsewhere</a
+      >
     </header>
     <main>
       <aside aria-label="Your homes">
         <div class="intro" hidden>
-          <h1>Decide where to move. Before you visit.</h1>
+          <h1>See what life could be like in your next home</h1>
         </div>
         <div class="panel-heading">
           <span>Your places</span
@@ -44,14 +52,18 @@
               ><span class="selection-mark" aria-hidden="true">✓</span></label
             >
           </fieldset>
-          <div class="examples-heading">
-            Examples <span>Source snapshots</span>
-          </div>
+          <div class="examples-heading">Examples</div>
           <div class="listing-examples">
             <button type="button" data-listing="wall2308">
               95 Wall studio <span aria-hidden="true">↗</span></button
             ><button type="button" data-listing="zephyr501">
               Zephyr #501 <small>Archived</small>
+            </button>
+            <button type="button" data-listing="urby409">
+              Urby #409 <small>Evidence only</small>
+            </button>
+            <button type="button" data-listing="urby1504">
+              Urby #1504 <small>Evidence only</small>
             </button>
           </div>
           <form id="listing-form" hidden>
@@ -73,12 +85,13 @@
           ></output>
           <details class="evidence">
             <summary>
-              Illustrative model <span aria-hidden="true">ⓘ</span>
+              <span id="model-status">Illustrative model</span>
+              <span aria-hidden="true">ⓘ</span>
             </summary>
             <p>
-              Room shape, dimensions, furnishings, light and conditions are
-              inferred. Reported area does not establish room dimensions or
-              prove fit.
+              Demo room dimensions and furnishings are synthetic. Real listings
+              remain evidence only until usable measurements are available.
+              Reported area alone does not establish room dimensions or fit.
             </p>
             <section
               id="listing-evidence"
@@ -99,10 +112,10 @@
                 <p id="listing-unknowns"></p>
               </details>
               <button id="listing-preview" type="button">
-                Explore inferred interior →
+                Needs a dimensioned plan
               </button>
               <p>
-                Photos have not been reconstructed. Source facts are a dated
+                No dimensional interior is available. Source facts are a dated
                 snapshot, not a live refresh.
               </p>
             </section>
@@ -110,7 +123,7 @@
               Other homes, streets and places are synthetic examples. Live map
               data is identified in Nearby.
             </p>
-            <output id="status" aria-live="polite">Current home loaded.</output>
+            <output id="status" aria-live="polite">Current home loaded</output>
           </details>
           <section
             id="clearance-panel"
@@ -118,7 +131,7 @@
             hidden
             aria-label="Bed clearance"
           >
-            <h2>Estimated room · measured scene</h2>
+            <h2>Synthetic room · model clearance</h2>
             <output id="clearance-values" aria-live="polite"></output>
             <p>
               Clearance from bed frame to scene obstacles. Verify actual
@@ -126,6 +139,7 @@
             </p>
           </section>
         </div>
+        <small id="collapsed-model-status">Illustrative model</small>
       </aside>
       <section id="viewport" aria-label="Interactive 3D home preview">
         <div class="modebar" role="group" aria-label="View mode">
@@ -133,6 +147,7 @@
           ><button data-mode="walk" aria-pressed="false">Walk</button
           ><button data-mode="commute" aria-pressed="false">Commute</button
           ><button data-mode="nearby" aria-pressed="false">Nearby</button>
+          <button id="plans-toggle" aria-pressed="false">Plans</button>
         </div>
         <div
           id="scene"
@@ -149,13 +164,82 @@
           <div class="map-actions">
             <button id="map-pullback">Pull out</button
             ><button id="map-direct">Go directly</button
-            ><button id="map-enter" class="primary">Enter the home →</button>
+            ><button id="map-enter" class="primary">Listing evidence →</button>
           </div>
           <p class="map-note">
             Approximate listing pin · building heights may be inferred · no
             driving route or travel time
           </p>
         </div>
+        <section id="evidence-stage" hidden aria-label="Listing evidence only">
+          <span class="eyebrow">SOURCE EVIDENCE</span>
+          <h1 id="evidence-title"></h1>
+          <p id="evidence-facts"></p>
+          <p id="evidence-reason">
+            A matching, authorized plan with usable scale is needed before
+            creating a dimensional interior. Reported square footage is not
+            enough.
+          </p>
+          <a id="evidence-source" target="_blank" rel="noopener noreferrer"
+            >View original listing ↗</a
+          >
+          <a
+            id="evidence-plan-source"
+            target="_blank"
+            rel="noopener noreferrer"
+            hidden
+            >View original plan reference ↗</a
+          >
+          <p class="evidence-note">
+            No room dimensions or furniture fit have been established. Listing
+            furnishing status is unknown; photo staging does not establish what
+            is included.
+          </p>
+          <button id="evidence-demo" type="button">
+            Explore a synthetic demo →
+          </button>
+        </section>
+        <section id="plans-panel" hidden aria-label="Synchronized floor plan">
+          <div class="plan-heading">
+            <div>
+              <span class="eyebrow">PLANS</span>
+              <h2 id="plan-name">Current home</h2>
+            </div>
+            <button id="plans-close" aria-label="Close plans">×</button>
+          </div>
+          <div class="plan-documents" role="group" aria-label="Plan document">
+            <button data-document="source">Source plan</button
+            ><button data-document="empty">Empty layout</button
+            ><button data-document="offered">As offered</button
+            ><button data-document="arrangement" aria-pressed="true">
+              My arrangement
+            </button>
+          </div>
+          <p id="plan-notice" role="status"></p>
+          <div class="plan-tools">
+            <button id="plan-zoom-out" aria-label="Zoom plan out">−</button
+            ><button id="plan-fit">Fit</button
+            ><button id="plan-zoom-in" aria-label="Zoom plan in">+</button
+            ><label
+              ><input id="plan-dimensions" type="checkbox" checked />
+              Dimensions</label
+            ><button id="plan-undo" disabled>Undo</button>
+          </div>
+          <div
+            id="plan-drawing"
+            tabindex="0"
+            aria-label="Floor plan; select an object to inspect its model dimensions"
+          ></div>
+          <div id="plan-selection" role="status">
+            Select an object to inspect its dimensions
+          </div>
+          <div class="plan-footer">
+            <span id="plan-revision"></span
+            ><button id="plan-svg">Download SVG</button
+            ><button id="plan-print">Print / PDF</button>
+          </div>
+          <small id="plan-persistence">Saved on this browser only</small>
+        </section>
         <form id="astra-form" class="astra-panel">
           <div id="astra-reply" class="agent-reply" hidden>
             <div class="reply-heading">
@@ -209,7 +293,7 @@
           <div
             class="changes"
             aria-label="Local scene changes"
-            title="Instant local previews"
+            title="Local edits · no model request"
           >
             <button id="bed" type="button" aria-pressed="false">
               <span>King bed</span></button

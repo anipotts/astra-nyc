@@ -5,13 +5,13 @@
     BlinkMacSystemFont,
     "Segoe UI",
     sans-serif;
-  color: #17201f;
+  color: #18231f;
   background: #a8b39e;
   font-synthesis: none;
-  --green: #214b39;
+  --green: #204d3d;
   --border: #dce2df;
-  --muted: #647268;
-  --glass: #fffffff0;
+  --muted: #59665e;
+  --glass: #fafaf6;
 }
 * {
   box-sizing: border-box;
@@ -88,7 +88,6 @@ header {
   font-size: 25px;
   font-weight: 650;
   letter-spacing: -1px;
-  text-shadow: 0 1px 15px #fffa;
 }
 .wordmark span {
   color: var(--green);
@@ -128,7 +127,6 @@ aside {
   border-radius: 15px;
   padding: 16px;
   box-shadow: 0 8px 35px #1c302013;
-  backdrop-filter: blur(16px);
 }
 .panel-heading {
   display: flex;
@@ -344,7 +342,6 @@ output {
   border-radius: 23px;
   padding: 10px 10px 11px;
   box-shadow: 0 8px 35px #182d181b;
-  backdrop-filter: blur(16px);
 }
 .composer-input {
   border: 1px solid var(--border);
@@ -1007,4 +1004,623 @@ aside::-webkit-scrollbar,
 }
 .changes {
   justify-content: flex-end;
+}
+
+/* Plans and the scene share a layout revision; no document scrolling. */
+#plans-toggle {
+  border-left: 1px solid var(--border);
+  border-radius: 0 8px 8px 0;
+}
+#plans-panel {
+  position: absolute;
+  z-index: 24;
+  inset: 86px auto 22px 20px;
+  width: calc(48% - 30px);
+  display: flex;
+  flex-direction: column;
+  padding: 20px;
+  border-radius: 18px;
+  background: #fbfcf9f5;
+  box-shadow: 0 8px 30px #213b2418;
+  overflow: hidden;
+}
+#plans-panel[hidden],
+#evidence-stage[hidden] {
+  display: none;
+}
+.plan-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.plan-heading h2 {
+  margin: 4px 0 14px;
+  font-size: 19px;
+}
+.plan-heading > button {
+  align-self: flex-start;
+  background: transparent;
+  border: 0;
+  font-size: 22px;
+}
+.plan-documents {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+.plan-documents button {
+  flex: 1;
+  min-width: 75px;
+  font-size: 11px;
+  padding: 6px;
+}
+.plan-tools {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin: 7px 0;
+}
+.plan-tools button {
+  min-height: 30px;
+  font-size: 11px;
+  padding: 5px 9px;
+}
+.plan-tools label {
+  font-size: 11px;
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+}
+#plan-notice {
+  font-size: 11px;
+  line-height: 1.5;
+  margin: 10px 0 4px;
+  color: var(--muted);
+}
+#plan-drawing {
+  flex: 1;
+  min-height: 100px;
+  overflow: auto;
+  scrollbar-width: none;
+  overscroll-behavior: contain;
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+#plan-drawing::-webkit-scrollbar {
+  display: none;
+}
+#plan-drawing svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  min-height: 180px;
+}
+#plan-drawing [data-object-id] {
+  cursor: pointer;
+}
+#plan-selection {
+  font-size: 11px;
+  min-height: 42px;
+  padding: 10px 0;
+  line-height: 1.5;
+}
+.plan-footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  border-top: 1px solid var(--border);
+  padding-top: 9px;
+}
+.plan-footer span {
+  font-size: 10px;
+  color: var(--muted);
+  margin-right: auto;
+}
+.plan-footer button {
+  font-size: 11px;
+  padding: 6px 9px;
+  min-height: 31px;
+}
+#plan-persistence {
+  font-size: 9px;
+  margin-top: 6px;
+  color: var(--muted);
+}
+body.plans-open aside {
+  display: none;
+}
+body.plans-open #scene {
+  left: 48%;
+  width: 52%;
+}
+body.plans-open .astra-panel {
+  left: 74%;
+  width: calc(52% - 42px);
+  bottom: 22px;
+}
+body.plans-open .caption {
+  left: 74%;
+}
+body.plans-open .walk-controls {
+  left: 74%;
+}
+#evidence-stage {
+  position: absolute;
+  z-index: 15;
+  left: calc(50% - 170px);
+  top: 150px;
+  width: min(560px, calc(100% - 355px));
+  background: var(--glass);
+  border-radius: 20px;
+  padding: 28px;
+}
+#evidence-stage h1 {
+  font-size: 25px;
+  margin: 10px 0;
+}
+#evidence-stage p {
+  font-size: 14px;
+  line-height: 1.65;
+}
+#evidence-stage a {
+  display: block;
+  margin: 15px 0;
+  font-size: 13px;
+}
+#evidence-stage .evidence-note {
+  font-size: 11px;
+  color: var(--muted);
+}
+body.evidence-only #scene,
+body.evidence-only .astra-panel,
+body.evidence-only .caption,
+body.evidence-only .walk-controls,
+body.evidence-only .journey,
+body.evidence-only .nearby-panel {
+  display: none !important;
+}
+body.evidence-only.plans-open #evidence-stage {
+  left: 51%;
+  width: 46%;
+  padding: 20px;
+}
+@media (max-width: 650px) {
+  #plans-panel {
+    inset: 102px 12px 44%;
+    width: auto;
+    padding: 12px;
+    border-radius: 12px;
+  }
+  .plan-heading h2 {
+    font-size: 15px;
+    margin-bottom: 8px;
+  }
+  #plan-notice {
+    font-size: 9px;
+    margin: 5px 0;
+  }
+  .plan-documents button {
+    min-width: 0;
+    min-height: 27px;
+    font-size: 9px;
+  }
+  #plan-drawing {
+    min-height: 60px;
+  }
+  #plan-drawing svg {
+    min-height: 60px;
+  }
+  #plan-selection {
+    padding: 5px 0;
+    font-size: 9px;
+    min-height: 22px;
+  }
+  #plan-revision,
+  #plan-persistence {
+    display: none;
+  }
+  .plan-footer {
+    padding-top: 5px;
+  }
+  .plan-footer button {
+    min-height: 25px;
+    padding: 4px 8px;
+    font-size: 9px;
+  }
+  .plan-tools {
+    margin: 4px 0;
+    gap: 3px;
+  }
+  .plan-tools button {
+    font-size: 9px;
+    min-height: 25px;
+    padding: 3px 8px;
+  }
+  .plan-tools label {
+    font-size: 9px;
+  }
+  body.plans-open #scene {
+    inset: 56% 0 0;
+    width: 100%;
+    height: 44%;
+  }
+  body.plans-open .astra-panel {
+    display: none;
+  }
+  body.plans-open .caption,
+  body.plans-open .walk-controls {
+    display: none;
+  }
+  #evidence-stage,
+  body.evidence-only.plans-open #evidence-stage {
+    left: 12px;
+    right: 12px;
+    top: 160px;
+    width: auto;
+    padding: 20px;
+  }
+  body.evidence-only.plans-open #evidence-stage {
+    display: none;
+  }
+  body.evidence-only.plans-open #plans-panel {
+    bottom: 20px;
+  }
+}
+
+@media (max-width: 650px) {
+  #plans-panel {
+    bottom: 36%;
+  }
+  body.plans-open #scene {
+    top: 64%;
+    height: 36%;
+  }
+}
+#plan-drawing [data-object-id]:focus rect {
+  stroke: #146c4e;
+  stroke-width: 3px;
+}
+
+/* DESIGN.md: a quiet frame around the home, with accessible existing controls. */
+.wordmark {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  min-height: 44px;
+  color: var(--green);
+  font-size: 28px;
+  font-weight: 850;
+  letter-spacing: -1.2px;
+}
+.wordmark img {
+  display: block;
+  width: 36px;
+  height: 36px;
+}
+header {
+  top: 18px;
+  left: 24px;
+}
+aside {
+  width: 296px;
+  padding: 12px 16px 16px;
+  border-color: var(--border);
+  border-radius: 14px;
+}
+button {
+  min-height: 44px;
+  border-radius: 11px;
+  font-size: 14px;
+}
+.panel-heading {
+  font-size: 13px;
+  margin-bottom: 4px;
+}
+.panel-heading button,
+#dismiss-reply,
+#help-toggle {
+  min-height: 44px;
+  min-width: 44px;
+}
+.homes {
+  margin-bottom: 16px;
+}
+.home {
+  padding: 10px 12px;
+  border-radius: 10px;
+  min-height: 60px;
+}
+.home strong {
+  font-size: 14px;
+}
+.home small,
+.examples-heading,
+.listing-examples button small {
+  font-size: 12px;
+}
+.listing-examples {
+  gap: 4px;
+}
+.listing-examples button {
+  font-size: 14px;
+  background: transparent;
+}
+.listing-examples button[aria-pressed="true"] {
+  background: #e6eee6;
+  color: var(--green);
+  border-color: #cbd9ca;
+}
+.listing-examples button small {
+  color: #665337;
+  background: #eee5d5;
+}
+.evidence {
+  margin-top: 12px;
+  padding-top: 4px;
+  font-size: 12px;
+}
+.evidence > summary {
+  align-items: center;
+  min-height: 44px;
+}
+.evidence p,
+.listing-card p,
+.listing-card small,
+.listing-card a {
+  font-size: 12px;
+}
+.clearance-panel {
+  margin-top: 4px;
+  padding-top: 12px;
+}
+.clearance-panel h2,
+.clearance-panel p,
+.clearance-panel output {
+  font-size: 12px;
+}
+.clearance-panel p {
+  line-height: 1.5;
+}
+.modebar {
+  border-color: var(--border);
+  border-radius: 14px;
+}
+.modebar button {
+  min-height: 44px;
+  font-size: 14px;
+  padding: 8px 16px;
+  border-radius: 10px;
+}
+#plans-toggle {
+  border-left: 1px solid var(--border);
+  margin-left: 4px;
+}
+.astra-panel {
+  border-color: var(--border);
+  border-radius: 20px;
+  padding: 8px;
+}
+.composer-input {
+  position: relative;
+  border-radius: 13px;
+  padding: 14px 60px 14px 14px;
+  min-height: 94px;
+}
+.composer-toolbar {
+  position: absolute;
+  bottom: 8px;
+  right: 8px;
+  margin: 0;
+}
+#astra-submit {
+  width: 44px;
+  height: 44px;
+  min-height: 44px;
+  flex-basis: 44px;
+}
+#astra-prompt {
+  font-size: 16px;
+  min-height: 64px;
+}
+.changes {
+  margin-top: 4px;
+  gap: 4px;
+}
+.changes button {
+  min-height: 44px;
+  font-size: 12px;
+  border-radius: 12px;
+  padding: 6px 10px;
+  border-color: transparent;
+}
+.changes button:hover {
+  border-color: var(--border);
+}
+#reset {
+  min-width: 44px;
+}
+.astra-panel output {
+  font-size: 12px;
+  margin: 8px 6px 2px;
+}
+#help-toggle {
+  border-radius: 50%;
+}
+.walk-controls button,
+.map-actions button,
+.nearby-panel button {
+  min-height: 44px;
+  font-size: 13px;
+}
+:where(button, a, summary, input, textarea, [tabindex]):focus-visible {
+  outline: 3px solid #387954;
+  outline-offset: 3px;
+}
+#evidence-stage {
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  max-height: calc(100dvh - 170px);
+  overflow: auto;
+  scrollbar-width: none;
+}
+#evidence-stage::-webkit-scrollbar {
+  display: none;
+}
+#plans-panel {
+  border-radius: 14px;
+}
+.plan-documents button,
+.plan-tools button,
+.plan-footer button {
+  min-height: 44px;
+  font-size: 12px;
+}
+.plan-tools label {
+  min-height: 44px;
+  font-size: 12px;
+}
+#plan-notice,
+#plan-selection {
+  font-size: 12px;
+}
+@media (max-width: 1000px) and (min-width: 651px) {
+  aside {
+    width: 260px;
+  }
+  .modebar button {
+    padding: 8px 12px;
+  }
+}
+@media (max-width: 650px) {
+  header {
+    top: 8px;
+    left: 12px;
+  }
+  .wordmark {
+    font-size: 25px;
+    gap: 8px;
+  }
+  .wordmark img {
+    width: 32px;
+    height: 32px;
+  }
+  .modebar {
+    top: 60px;
+  }
+  .modebar button {
+    font-size: 12px;
+    padding: 6px;
+  }
+  aside {
+    top: 120px;
+    width: 272px;
+    padding: 4px 12px 12px;
+    max-height: calc(100dvh - 310px);
+  }
+  aside:has(#places-content[hidden]) {
+    width: 160px;
+    padding: 2px 8px 2px 14px;
+  }
+  aside:has(#places-content[hidden]) .panel-heading {
+    margin: 0;
+  }
+  .home strong,
+  .listing-examples button {
+    font-size: 14px;
+  }
+  .home small,
+  .evidence,
+  .examples-heading {
+    font-size: 12px;
+  }
+  .astra-panel {
+    bottom: max(12px, env(safe-area-inset-bottom));
+    padding: 8px;
+  }
+  #astra-prompt {
+    min-height: 48px;
+  }
+  .composer-input {
+    min-height: 78px;
+  }
+  .changes button {
+    font-size: 12px;
+    padding: 6px 8px;
+  }
+  #evidence-stage {
+    top: 180px;
+    max-height: calc(100dvh - 200px);
+  }
+  body:has(aside #places-content:not([hidden])) #evidence-stage {
+    visibility: hidden;
+  }
+  #plans-panel {
+    top: 120px;
+    bottom: 23%;
+    padding: 10px;
+  }
+  body.plans-open #scene {
+    top: 77%;
+    height: 23%;
+  }
+  .plan-documents button {
+    font-size: 11px;
+    padding: 5px;
+  }
+  .plan-tools button,
+  .plan-footer button {
+    font-size: 12px;
+  }
+  #plan-notice,
+  #plan-selection {
+    font-size: 11px;
+  }
+  .plan-tools {
+    gap: 3px;
+  }
+  #help-toggle {
+    top: 8px;
+    right: 12px;
+  }
+  #help-panel {
+    top: 112px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
+#collapsed-model-status {
+  display: none;
+}
+aside:has(#places-content[hidden]) #collapsed-model-status {
+  display: block;
+  font-size: 12px;
+  color: var(--muted);
+  padding-bottom: 8px;
+}
+#evidence-stage a {
+  color: var(--green);
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  margin: 4px 0;
+}
+@media (max-height: 600px) and (min-width: 651px) {
+  aside:has(#places-content[hidden]) {
+    width: 180px;
+    padding: 2px 12px 2px 14px;
+  }
+  aside:has(#places-content[hidden]) .panel-heading {
+    margin-bottom: 0;
+  }
 }

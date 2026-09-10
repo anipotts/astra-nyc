@@ -416,7 +416,7 @@ export function updateCutaway(group, enabled) {
   group.traverse((mesh) => {
     if (mesh.userData.cutaway) {
       mesh.scale.y = enabled ? 0.19 : 1;
-      mesh.position.y = 1.425 * mesh.scale.y;
+      mesh.position.y = (mesh.userData.fullY ?? 1.425) * mesh.scale.y;
     }
   });
 }

@@ -4,7 +4,15 @@ import { homes, pointOnRoute, blocked } from "./model.js";
 import "./style.css";
 import { clearanceAround } from "./clearance.js";
 import { validateSceneEdit } from "./scene-edit.js";
-import { buildStudio, updateCutaway } from "./interior.js";
+import { updateCutaway } from "./interior.js";
+import { createLayout } from "./layout.js";
+import { buildLayoutScene } from "./layout-scene.js";
+import { renderPlanSvg, renderPlanPrintDocument } from "./plan-svg.js";
+import {
+  loadPlanHistory,
+  savePlanHistory,
+  cleanPlanState,
+} from "./plan-storage.js";
 import { listings, identifyListing } from "./listings.js";
 const $ = (s) => document.querySelector(s);
 const container = $("#scene");
@@ -18,6 +26,49 @@ const state = {
   progress: 0,
   playing: false,
 };
+let currentLayout = null;
+let plansOpen = false;
+let planZoom = 1;
+let selectedPlanObject = null;
+let histories = { current: [], potential: [] };
+let storageReady = false;
+let saveQueue = Promise.resolve();
+let applyingHistory = false;
+function arrangementState() {
+  return cleanPlanState(state);
+}
+function persistPlans() {
+  if (!storageReady) return;
+  const snapshot = structuredClone(histories);
+  saveQueue = saveQueue
+    .catch(() => {})
+    .then(() => savePlanHistory(snapshot))
+    .catch(() => {
+      $("#plan-persistence").textContent =
+        "Browser storage unavailable; export to keep this revision.";
+    });
+}
+function recordArrangement() {
+  const entries = histories[state.home];
+  const next = arrangementState();
+  if (
+    !applyingHistory &&
+    JSON.stringify(entries.at(-1)?.state) !== JSON.stringify(next)
+  ) {
+    entries.push({
+      id: crypto.randomUUID(),
+      createdAt: new Date().toISOString(),
+      summary: entries.length
+        ? "Arrangement changed"
+        : "Synthetic starting layout",
+      state: next,
+      layout: structuredClone(currentLayout),
+    });
+    if (entries.length > 30) entries.shift();
+    persistPlans();
+  }
+  return entries.at(-1);
+}
 let renderer;
 try {
   renderer = new THREE.WebGLRenderer({ antialias: true });
@@ -182,142 +233,21 @@ function buildHome() {
   clear(house);
   solids.length = 0;
   house.userData.bedFootprint = null;
-  if (homes[state.home].studio) {
-    buildStudio(house, solids, state, homes[state.home]);
-    updateCutaway(house, state.mode === "overview");
+  house.visible = !selectedListing;
+  if (selectedListing) {
+    currentLayout = null;
     return;
   }
-  const { width: w, depth: d, sofa } = homes[state.home];
-  box(house, w + 0.35, 0.2, d + 0.35, 0, -0.1, 0, "#b6a78a");
-  for (let i = 0; i < Math.ceil(w / 0.28); i++)
-    box(
-      house,
-      0.275,
-      0.025,
-      d - 0.12,
-      -w / 2 + 0.14 + i * 0.28,
-      0.012,
-      0,
-      ["#c7b597", "#cbb99b", "#c3af91", "#d0bea2"][i % 4],
-    );
-  // Back wall has a continuous window band; all wall bases remain collidable.
-  box(house, w, 1.18, 0.18, 0, 0.59, -d / 2, "#efede4", true);
-  box(house, w, 0.25, 0.18, 0, 2.82, -d / 2, "#efede4");
-  for (const x of [-w / 2, 0, w / 2])
-    box(house, 0.22, 3, 0.2, x, 1.5, -d / 2, "#efede4");
-  frameWindow(-w / 4, -d / 2, w / 2 - 0.25);
-  frameWindow(w / 4, -d / 2, w / 2 - 0.25);
-  box(house, 0.18, 3, d, -w / 2, 1.5, 0, "#e9e6db", true);
-  box(house, 0.18, 3, d, w / 2, 1.5, 0, "#efede4", true);
-  const frontWidth = w / 2 - 0.9;
-  box(
-    house,
-    frontWidth,
-    3,
-    0.18,
-    -(0.9 + frontWidth / 2),
-    1.5,
-    d / 2,
-    "#efede4",
-    true,
-  );
-  box(
-    house,
-    frontWidth,
-    3,
-    0.18,
-    0.9 + frontWidth / 2,
-    1.5,
-    d / 2,
-    "#efede4",
-    true,
-  );
-  box(house, 1.8, 0.65, 0.18, 0, 2.675, d / 2, "#efede4");
-  // Bedroom divider includes a walkable opening near the entry.
-  if (!homes[state.home].studio)
-    box(house, 0.14, 2.9, d - 2.5, w * 0.19, 1.45, -1.25, "#ece9df", true);
-  if (state.unfurnished) return;
-  box(house, w * 0.32, 0.09, d * 0.65, -w * 0.22, 0.075, -0.45, "#ded4bf");
-  const sofaX = -w * 0.25,
-    sofaZ = -d * 0.13;
-  if (!state.hiddenItems.includes("sofa")) {
-    box(house, 1.05, 0.4, 2.8, sofaX, 0.43, sofaZ, sofa, true);
-    box(house, 0.24, 0.9, 2.8, sofaX - 0.45, 0.8, sofaZ, sofa);
-    for (const z of [sofaZ - 1.25, sofaZ + 1.25])
-      box(house, 1.15, 0.7, 0.23, sofaX, 0.64, z, sofa);
-    for (let i = 0; i < 3; i++)
-      box(
-        house,
-        0.87,
-        0.18,
-        0.77,
-        sofaX + 0.04,
-        0.71,
-        sofaZ - 0.84 + i * 0.84,
-        "#839274",
-      );
-  }
-  if (!state.hiddenItems.includes("table")) {
-    box(house, 1.15, 0.1, 1.4, sofaX + 1.65, 0.5, sofaZ, "#b49c76", true);
-    for (const x of [-0.44, 0.44])
-      for (const z of [-0.55, 0.55])
-        box(
-          house,
-          0.055,
-          0.44,
-          0.055,
-          sofaX + 1.65 + x,
-          0.23,
-          sofaZ + z,
-          "#8a775d",
-        );
-    box(house, 0.32, 0.035, 0.42, sofaX + 1.65, 0.58, sofaZ + 0.1, "#eee9db");
-    plant(house, sofaX + 1.65, sofaZ - 0.4, 0.42, 0.55);
-  }
-  if (!state.hiddenItems.includes("bed")) {
-    const bedX = w * 0.34,
-      bedZ = -d * 0.18,
-      bedWidth = state.largeBed ? 1.93 : 1.52;
-    box(house, bedWidth, 0.32, 2.1, bedX, 0.27, bedZ, "#a89372", true);
-    house.userData.bedFootprint = solids[solids.length - 1];
-    box(house, bedWidth, 0.22, 2.03, bedX, 0.54, bedZ, "#e6e2d8");
-    box(house, bedWidth, 0.07, 1.55, bedX, 0.7, bedZ + 0.4, "#899982");
-    for (const x of [-0.38, 0.38])
-      box(house, 0.62, 0.14, 0.46, bedX + x, 0.76, bedZ - 0.87, "#f5f1e5");
-    box(house, bedWidth + 0.12, 1, 0.12, bedX, 0.55, bedZ - 1.12, "#b19b79");
-  }
-  // Kitchen on the entrance side, leaving the doorway clear.
-  box(
-    house,
-    w * 0.26,
-    0.86,
-    0.65,
-    -w * 0.32,
-    0.43,
-    d / 2 - 0.46,
-    "#d5d1c2",
-    true,
-  );
-  box(house, w * 0.27, 0.07, 0.71, -w * 0.32, 0.9, d / 2 - 0.46, "#f1eddf");
-  box(house, 0.6, 0.035, 0.46, -w * 0.34, 0.96, d / 2 - 0.46, "#434b42");
-  for (const x of [-0.14, 0.14])
-    for (const z of [-0.1, 0.1])
-      cylinder(
-        house,
-        0.095,
-        0.014,
-        -w * 0.34 + x,
-        0.99,
-        d / 2 - 0.46 + z,
-        "#737c70",
-      );
-  plant(house, -w / 2 + 0.5, -d / 2 + 0.65, 1.15);
-  plant(house, w / 2 - 0.55, -d / 2 + 0.6, 0.95);
-  plant(house, w / 2 - 0.55, d / 2 - 0.55, 1.15);
-  // Framed wall art and entrance mat.
-  box(house, 0.06, 0.95, 0.72, -w / 2 + 0.11, 1.8, 1.25, "#9b8865");
-  box(house, 0.065, 0.8, 0.58, -w / 2 + 0.13, 1.8, 1.25, "#a0ab88");
-  box(house, 1.45, 0.035, 0.8, 0, 0.05, d / 2 - 0.6, "#8e9a81");
+  currentLayout = createLayout(state.home, state);
+  const revision = recordArrangement();
+  currentLayout.revision = {
+    id: revision.id,
+    createdAt: revision.createdAt,
+    summary: revision.summary,
+  };
+  buildLayoutScene(house, solids, currentLayout, {
+    cutaway: state.mode === "overview",
+  });
 }
 function buildNeighborhood() {
   clear(neighborhood);
@@ -478,11 +408,21 @@ function resetCamera() {
   controls.update();
 }
 function setMode(mode) {
+  if (selectedListing && !["overview", "nearby"].includes(mode))
+    mode = "overview";
+  if (plansOpen && mode !== "overview") {
+    plansOpen = false;
+    document.body.classList.remove("plans-open");
+    $("#plans-panel").hidden = true;
+    $("#plans-toggle").setAttribute("aria-pressed", "false");
+  }
+  document.body.classList.toggle("evidence-only", Boolean(selectedListing));
+  $("#evidence-stage").hidden = !selectedListing || mode === "nearby";
   $("#map-view").hidden = true;
   $("#astra-form").hidden = !["walk", "overview"].includes(mode);
   syncComposer();
   $("#neighborhood-view").hidden = true;
-  $("#listing-map").hidden = !homes[state.home].studio;
+  $("#listing-map").hidden = selectedListing?.id !== "wall2308";
   state.mode = mode;
   updateCutaway(house, mode === "overview");
   keys.clear();
@@ -542,7 +482,13 @@ function setMode(mode) {
     );
     updateCar();
   }
-  if (mode === "nearby" && homes[state.home].studio) openNeighborhood();
+  if (mode === "nearby" && selectedListing?.id === "wall2308")
+    openNeighborhood();
+  else if (mode === "nearby" && selectedListing) {
+    $("#evidence-stage").hidden = false;
+    $("#evidence-reason").textContent =
+      "A verified neighborhood adapter is not connected for this listing. View the original source for location information.";
+  }
 }
 function updateCar() {
   const p = pointOnRoute(homes[state.home].route, state.progress),
@@ -589,7 +535,21 @@ function refresh() {
         ? "Inferred layout · "
         : "Synthetic layout · ") + $("#clearance-values").textContent
     : "";
-  $("#place").textContent = homes[state.home].label;
+  $("#place").textContent = selectedListing?.name || homes[state.home].label;
+  for (const button of document.querySelectorAll("[data-listing]"))
+    button.setAttribute(
+      "aria-pressed",
+      String(button.dataset.listing === selectedListing?.id),
+    );
+  for (const input of document.querySelectorAll("[name=home]"))
+    input.checked = !selectedListing && input.value === state.home;
+  for (const id of ["model-status", "collapsed-model-status"]) {
+    const modelStatus = $("#" + id);
+    if (modelStatus)
+      modelStatus.textContent = selectedListing
+        ? "Evidence only"
+        : "Illustrative model";
+  }
   light();
   $("#bed").setAttribute("aria-pressed", String(state.largeBed));
   $("#bed span:last-child").textContent = state.largeBed
@@ -599,11 +559,18 @@ function refresh() {
   $("#unfurnished span:last-child").textContent = state.unfurnished
     ? "Furnished"
     : "Unfurnished";
+  renderPlans();
 }
 let selectedListing = null;
 const syntheticPotential = { ...homes.potential };
 function showListing(listing) {
   selectedListing = listing;
+  if (matchMedia("(max-width: 650px)").matches) {
+    $("#places-content").hidden = true;
+    $("#places-toggle").setAttribute("aria-expanded", "false");
+    $("#places-toggle").setAttribute("aria-label", "Expand places");
+    $("#places-toggle").textContent = "+";
+  }
   $("#listing-evidence").hidden = false;
   for (const key of ["name", "location", "facts", "price", "availability"])
     $("#listing-" + key).textContent = listing[key];
@@ -619,21 +586,22 @@ function showListing(listing) {
     }) +
     " ET · not a live refresh";
   $("#listing-unknowns").textContent = listing.questions;
-  $("#listing-preview").hidden = !listing.scene;
-  $("#listing-map").hidden = !listing.scene;
-  $("#listing-status").textContent = listing.archived
-    ? "Archived listing. No interior is available; current availability is unknown."
-    : "Source snapshot loaded. Inferred studio is ready to explore.";
-  document.querySelector(".evidence").open = listing.archived;
-  if (listing.scene) {
-    $("#listing-preview").click();
-    setMode("overview");
-    if (
-      matchMedia("(max-width: 650px)").matches &&
-      !$("#places-content").hidden
-    )
-      $("#places-toggle").click();
-  }
+  $("#listing-preview").hidden = true;
+  $("#listing-map").hidden = listing.id !== "wall2308";
+  $("#listing-status").textContent =
+    "Evidence only · a usable dimensioned plan is needed.";
+  $("#evidence-title").textContent = listing.name;
+  $("#evidence-facts").textContent =
+    listing.facts + (listing.archived ? " · Archived" : "");
+  $("#evidence-reason").textContent =
+    listing.readinessReason ||
+    "A matching, authorized plan with usable scale is needed before creating a dimensional interior. Reported square footage is not enough.";
+  $("#evidence-source").href = listing.url;
+  $("#evidence-plan-source").hidden = !listing.planUrl;
+  if (listing.planUrl) $("#evidence-plan-source").href = listing.planUrl;
+  document.querySelector(".evidence").open = false;
+  refresh();
+  setMode("overview");
 }
 $("#listing-form").addEventListener("submit", (event) => {
   event.preventDefault();
@@ -641,8 +609,8 @@ $("#listing-form").addEventListener("submit", (event) => {
   $("#listing-evidence").hidden = true;
   // Do not leave a previously selected listing scene attached to a new URL.
   Object.assign(homes.potential, syntheticPotential, { studio: false });
-  state.home = "current";
-  $("input[value=current]").checked = true;
+  // Listing evidence does not change either synthetic home or its arrangement.
+  $("input[value=" + state.home + "]").checked = true;
   $("#potential-name").textContent = "Potential home";
   $("#potential-note").textContent = "Synthetic example · more space";
   refresh();
@@ -687,7 +655,7 @@ async function openNeighborhood() {
     geoMap.pullback();
   } catch {
     $("#map-status").textContent =
-      "Map could not load. You can still enter the local interior.";
+      "Map could not load. The listing source evidence is still available.";
   }
 }
 $("#listing-map").onclick = openNeighborhood;
@@ -696,28 +664,14 @@ $("#map-pullback").onclick = () => geoMap?.pullback();
 $("#map-direct").onclick = () => geoMap?.direct();
 $("#map-enter").onclick = async () => {
   const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  $("#transition span").textContent = "Opening listing evidence…";
   $("#transition").classList.add("active");
   if (!reduced) await new Promise((resolve) => setTimeout(resolve, 350));
-  $("#listing-preview").click();
+  setMode("overview");
   $("#transition").classList.remove("active");
 };
 $("#listing-preview").addEventListener("click", () => {
-  if (!selectedListing?.scene) return;
-  Object.assign(homes.potential, selectedListing.scene, {
-    label: selectedListing.name,
-  });
-  $("#potential-name").textContent = selectedListing.name;
-  $("#potential-note").textContent = "575 ft² reported · inferred layout";
-  $("input[value=potential]").checked = true;
-  state.home = "potential";
-  state.largeBed = state.unfurnished = state.evening = false;
-  state.hiddenItems = [];
-  refresh();
-  setMode("walk");
-  message(
-    "575 ft² reported by listing. Shape, windows and furnishings are inferred; this is not a reconstruction. Streets remain synthetic.",
-  );
-  container.focus({ preventScroll: true });
+  if (selectedListing) $("#evidence-stage").hidden = false;
 });
 for (const b of document.querySelectorAll("[data-mode]"))
   b.addEventListener("click", () => {
@@ -726,11 +680,19 @@ for (const b of document.querySelectorAll("[data-mode]"))
   });
 for (const input of document.querySelectorAll("[name=home]"))
   input.addEventListener("change", () => {
+    selectedListing = null;
+    $("#listing-evidence").hidden = true;
     state.home = input.value;
-    state.hiddenItems = [];
-    state.largeBed = false;
-    state.unfurnished = false;
-    state.evening = false;
+    Object.assign(
+      state,
+      histories[state.home].at(-1)?.state || {
+        largeBed: false,
+        unfurnished: false,
+        evening: false,
+        hiddenItems: [],
+      },
+    );
+    state.hiddenItems = [...state.hiddenItems];
     refresh();
     setMode("overview");
     message(
@@ -739,7 +701,7 @@ for (const input of document.querySelectorAll("[name=home]"))
   });
 $("#bed").onclick = () => {
   $("#astra-status").hidden = false;
-  $("#astra-status").textContent = "Local preview · no new Astra request";
+  $("#astra-status").textContent = "Local edit · no model request";
   state.largeBed = !state.largeBed;
   state.hiddenItems = state.hiddenItems.filter((item) => item !== "bed");
   state.unfurnished = false;
@@ -753,7 +715,7 @@ $("#bed").onclick = () => {
 };
 $("#unfurnished").onclick = () => {
   $("#astra-status").hidden = false;
-  $("#astra-status").textContent = "Local preview · no new Astra request";
+  $("#astra-status").textContent = "Local edit · no model request";
   state.unfurnished = !state.unfurnished;
   if (!state.unfurnished) state.hiddenItems = [];
   refresh();
@@ -765,11 +727,9 @@ $("#unfurnished").onclick = () => {
 };
 $("#evening").onclick = () => {
   $("#astra-status").hidden = false;
-  $("#astra-status").textContent = "Local preview · no new Astra request";
+  $("#astra-status").textContent = "Local edit · no model request";
   state.evening = !state.evening;
-  sceneRevision++;
-  $("#astra-reply").hidden = true;
-  light();
+  refresh();
   message(
     state.evening
       ? "Evening lighting applied. Illustrative light, not a solar study."
@@ -779,7 +739,7 @@ $("#evening").onclick = () => {
 $("#reset").onclick = () => {
   state.hiddenItems = [];
   $("#astra-status").hidden = false;
-  $("#astra-status").textContent = "Local preview · no new Astra request";
+  $("#astra-status").textContent = "Local edit · no model request";
   state.largeBed = false;
   state.unfurnished = false;
   state.evening = false;
@@ -848,6 +808,7 @@ for (const ev of ["pointerup", "pointercancel"])
   container.addEventListener(ev, () => (drag = false));
 function resize() {
   const { width, height } = container.getBoundingClientRect();
+  if (width < 1 || height < 1) return;
   renderer.setSize(width, height);
   camera.aspect = width / height;
   camera.updateProjectionMatrix();
@@ -910,6 +871,13 @@ window.__elsewhere = {
     objects: scene.children.length,
     solids: solids.length,
     webgl: renderer.capabilities.isWebGL2,
+    layout: currentLayout,
+    revisionId: currentLayout?.revision?.id,
+    evidenceOnly: Boolean(selectedListing),
+    visibleElementIds: house.children
+      .filter((n) => n.visible)
+      .map((n) => n.userData.elementId)
+      .filter(Boolean),
   }),
 };
 
@@ -917,6 +885,7 @@ function syncComposer() {
   const form = $("#astra-form");
   $("#astra-submit").disabled =
     form.dataset.ready !== "true" ||
+    Boolean(selectedListing) ||
     form.getAttribute("aria-busy") === "true" ||
     !$("#astra-prompt").value.trim();
 }
@@ -964,6 +933,7 @@ $("#astra-form").addEventListener("submit", async (event) => {
   const prompt = $("#astra-prompt").value.trim();
   if (
     !astraReady ||
+    Boolean(selectedListing) ||
     !prompt ||
     $("#astra-form").getAttribute("aria-busy") === "true"
   )
@@ -1074,6 +1044,13 @@ $("#help-toggle").onclick = () => {
   $("#help-panel").hidden = !open;
   $("#help-toggle").setAttribute("aria-expanded", String(open));
 };
+// Initialize once; later resizing must not override the user's panel choice.
+if (matchMedia("(max-width: 650px), (max-height: 600px)").matches) {
+  $("#places-content").hidden = true;
+  $("#places-toggle").setAttribute("aria-expanded", "false");
+  $("#places-toggle").setAttribute("aria-label", "Expand places");
+  $("#places-toggle").textContent = "+";
+}
 $("#places-toggle").onclick = () => {
   const open = $("#places-content").hidden;
   $("#places-content").hidden = !open;
@@ -1087,3 +1064,196 @@ $("#places-toggle").onclick = () => {
 
 // Clear a retained document offset when this viewport layout replaces an older HMR page.
 window.scrollTo({ top: 0, left: 0, behavior: "instant" });
+
+function renderPlans() {
+  $("#plans-panel").hidden = !plansOpen;
+  $("#plan-name").textContent =
+    selectedListing?.name || currentLayout?.label || "Plans";
+  const enabled = Boolean(currentLayout) && !selectedListing;
+  for (const id of [
+    "plan-svg",
+    "plan-print",
+    "plan-zoom-in",
+    "plan-zoom-out",
+    "plan-fit",
+    "plan-dimensions",
+  ])
+    $("#" + id).disabled = !enabled;
+  $("#plan-undo").disabled = !enabled || histories[state.home].length < 2;
+  for (const button of document.querySelectorAll("[data-document]"))
+    button.setAttribute(
+      "aria-pressed",
+      String(
+        enabled &&
+          button.dataset.document ===
+            (state.unfurnished ? "empty" : "arrangement"),
+      ),
+    );
+  if (!enabled) {
+    $("#plan-drawing").replaceChildren();
+    $("#plan-notice").textContent =
+      "Needs measurement. Source plan, Empty layout, As offered and My arrangement stay unavailable until usable scale and authorized plan evidence are established.";
+    $("#plan-selection").textContent =
+      "Reported area is not a substitute for room dimensions.";
+    $("#plan-revision").textContent = "Evidence only";
+    return;
+  }
+  $("#plan-notice").textContent =
+    "Synthetic demonstration · 2D and 3D share this layout. Empty hides movable furniture; fixed fixtures remain.";
+  $("#plan-drawing").innerHTML = renderPlanSvg(currentLayout, {
+    selectedId: selectedPlanObject,
+    showDimensions: $("#plan-dimensions").checked,
+    showClearance: true,
+    compact: true,
+  });
+  const svg = $("#plan-drawing svg");
+  if (svg) {
+    svg.style.width = `${planZoom * 100}%`;
+    svg.style.height = `${planZoom * 100}%`;
+  }
+  $("#plan-revision").textContent =
+    "Revision " + currentLayout.revision.id.slice(0, 8);
+  const element = currentLayout.elements.find(
+    (e) => e.id === selectedPlanObject,
+  );
+  $("#plan-selection").textContent = element
+    ? `${element.label} · outer ${element.width.toFixed(2)} × ${element.depth.toFixed(2)} m · ${element.evidence.basis} · ${element.category === "fixtures" ? "Fixed fixture" : element.category}`
+    : "Select an object to inspect its model dimensions.";
+}
+function setPlansOpen(open) {
+  plansOpen = open;
+  document.body.classList.toggle("plans-open", open);
+  $("#plans-toggle").setAttribute("aria-pressed", String(open));
+  if (open) setMode("overview");
+  renderPlans();
+}
+$("#plans-toggle").onclick = () => setPlansOpen(!plansOpen);
+$("#plans-close").onclick = () => setPlansOpen(false);
+$("#plan-dimensions").onchange = renderPlans;
+$("#plan-fit").onclick = () => {
+  planZoom = 1;
+  renderPlans();
+};
+$("#plan-zoom-in").onclick = () => {
+  planZoom = Math.min(3, planZoom + 0.25);
+  renderPlans();
+};
+$("#plan-zoom-out").onclick = () => {
+  planZoom = Math.max(0.75, planZoom - 0.25);
+  renderPlans();
+};
+$("#plan-drawing").onclick = (event) => {
+  const target = event.target.closest("[data-object-id]");
+  if (!target || !currentLayout) return;
+  selectedPlanObject = target.dataset.objectId;
+  renderPlans();
+  const object = house.children.find(
+    (n) => n.userData.elementId === selectedPlanObject,
+  );
+  if (object) {
+    controls.target.set(object.position.x, 0.7, object.position.z);
+    controls.update();
+  }
+};
+for (const button of document.querySelectorAll("[data-document]"))
+  button.onclick = () => {
+    const kind = button.dataset.document;
+    if (kind === "source") {
+      $("#plan-notice").textContent = selectedListing?.planUrl
+        ? "Original plan reference is linked in the source evidence. Scale and permission for reuse remain unverified."
+        : "No source plan is available for this home. This demonstration was authored during the event.";
+      return;
+    }
+    if (kind === "offered") {
+      $("#plan-notice").textContent =
+        "As offered is unavailable: included furnishings have not been confirmed. Photo staging is not evidence of inclusion.";
+      return;
+    }
+    if (!currentLayout || selectedListing) {
+      $("#plan-notice").textContent =
+        "Needs measurement: supply an authorized plan with usable scale before planning this listing.";
+      return;
+    }
+    state.unfurnished = kind === "empty";
+    refresh();
+  };
+$("#plan-undo").onclick = () => {
+  const entries = histories[state.home];
+  if (selectedListing || entries.length < 2) return;
+  entries.pop();
+  Object.assign(state, cleanPlanState(entries.at(-1).state));
+  applyingHistory = true;
+  refresh();
+  applyingHistory = false;
+  persistPlans();
+};
+$("#plan-svg").onclick = () => {
+  if (!currentLayout || selectedListing) return;
+  const file = new Blob([renderPlanSvg(currentLayout)], {
+    type: "image/svg+xml",
+  });
+  const url = URL.createObjectURL(file);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `elsewhere-${state.home}-${currentLayout.revision.id.slice(0, 8)}.svg`;
+  a.click();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+};
+$("#plan-print").onclick = () => {
+  if (!currentLayout || selectedListing) return;
+  const popup = window.open("", "_blank");
+  if (!popup) {
+    $("#plan-notice").textContent = "Allow a print window, then try again.";
+    return;
+  }
+  popup.document.write(renderPlanPrintDocument(currentLayout));
+  popup.document.close();
+  setTimeout(() => popup.print(), 300);
+};
+$("#evidence-demo").onclick = () => {
+  $("input[value=current]").checked = true;
+  $("input[value=current]").dispatchEvent(new Event("change"));
+};
+loadPlanHistory()
+  .then((saved) => {
+    for (const key of ["current", "potential"]) {
+      if (!saved[key]?.length) continue;
+      // The first local entry is the temporary startup preset. Subsequent
+      // entries are actual edits made while IndexedDB was opening. Keep those
+      // edits after the saved history, and always restore untouched homes.
+      const localEdits = histories[key].slice(1);
+      const merged = [...saved[key]];
+      for (const entry of localEdits) {
+        if (
+          JSON.stringify(merged.at(-1)?.state) !== JSON.stringify(entry.state)
+        )
+          merged.push(entry);
+      }
+      histories[key] = merged.slice(-30);
+    }
+    const active = histories[state.home].at(-1);
+    if (active) Object.assign(state, cleanPlanState(active.state));
+    applyingHistory = true;
+    try {
+      refresh();
+    } finally {
+      applyingHistory = false;
+    }
+    storageReady = true;
+    persistPlans();
+  })
+  .catch(() => {
+    $("#plan-persistence").textContent =
+      "Browser storage unavailable; export to keep this revision.";
+  });
+
+$("#plan-drawing").addEventListener("keydown", (event) => {
+  const target = event.target.closest("[data-object-id]");
+  if (!target || !["Enter", " "].includes(event.key)) return;
+  event.preventDefault();
+  const id = target.dataset.objectId;
+  target.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+  $("#plan-drawing [data-object-id='" + CSS.escape(id) + "']")?.focus({
+    preventScroll: true,
+  });
+});

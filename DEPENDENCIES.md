@@ -57,9 +57,9 @@ License identifiers checked against installed package manifests. Full shipped li
 
 The HTML, CSS, scene construction, synthetic world data, interactions, and tests in this repository were authored in this event task. See BUILD_LOG.md for boundaries and actual milestones.
 
-The generated design concept is a separate event-created reference, not a runtime image, listing photo, or verified reconstruction. The rendered product uses original procedural geometry. No third-party photos, textures, maps, listings, or datasets are bundled.
+The generated design concept is a separate event-created reference, not a runtime image, listing photo, or verified reconstruction. The rendered product uses original procedural geometry. No third-party photos, textures, map tiles, floor plans or page copies are bundled; selected public listing facts are separately attributed below.
 
-Codex/Astra assisted development. No model API calls occur in the running product. Runtime generation/editing and real listing retrieval are not connected. OpenAI services are governed by provider terms, not the application's dependency licenses.
+Codex/Astra assisted development. The running product optionally calls the OpenAI Responses API for bounded scene edits, with validated results and an application cache. Real listing retrieval and reconstruction are not connected. OpenAI services are governed by provider terms, not the application's dependency licenses.
 
 Playwright 1.63.0 (Apache-2.0) and Prettier 3.9.6 (MIT) were installed as external local QA/formatting tools outside this repository. Their code is not bundled in the app. The recording uses locally installed Chromium and ffmpeg; their artifacts are not runtime application dependencies.
 
@@ -74,3 +74,9 @@ Facts only from [95 Wall Street #2308](https://streeteasy.com/building/95-wall-s
 MapLibre GL JS 6.9.0 is BSD-3-Clause. OpenFreeMap hosting is free with no API key or registration and no SLA. OpenFreeMap project code is MIT; OpenStreetMap data is ODbL, and [OpenMapTiles code is BSD-3-Clause with design/cartography CC-BY 4.0](https://github.com/openmaptiles/openmaptiles/blob/master/LICENSE.md). Keep the map attribution visible, including in recordings. No map tiles are bundled or bulk-downloaded. Opening the map sends tile requests to OpenFreeMap/its CDN; no device location is requested.
 
 Reviewed current official [MapLibre setup](https://maplibre.org/maplibre-gl-js/docs/), [OpenFreeMap guide](https://openfreemap.org/quick_start/), [terms](https://openfreemap.org/tos/), [privacy](https://openfreemap.org/privacy/), and [attribution](https://openfreemap.org/#attribution). Service is provided as-is; accuracy, availability, and current building heights are not guaranteed. The one supported pin uses rounded coordinates linked by the public listing, not a surveyed entrance. No routing service is adopted.
+
+## Event-created branding and additional source references
+
+The original SVG home-to-home mark and PNG favicon exports were created during this event from the participant's approved event-generated raster reference. They are original project assets, not third-party icons. The wordmark uses the existing system font stack; no font files are bundled, remotely loaded, or claimed to match the unidentified generated typeface. No new runtime dependency was introduced for branding or Plans.
+
+Additional facts-only references: [Journal Square Urby #409](https://www.urby.com/location/journal-square/availability/unit-409-1-5031127) and [#1504](https://www.urby.com/location/journal-square/availability/unit-1504-0-5031283), checked September 10, 2026. Official plan links are outbound references only. No plans or photos were copied, traced, or bundled. Usable scale and permission for reproduction have not been established. The official [Urby terms](https://www.urby.com/terms-of-service) were reviewed; these records stay evidence only.

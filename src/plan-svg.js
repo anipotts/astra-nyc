@@ -111,7 +111,9 @@ export function renderPlanSvg(layout, options = {}) {
     const selected = element.id === selectedId;
     const title = `${element.label || element.kind || element.id}: ${number(w)} × ${number(d)} m; ${element.evidence?.basis || layout.measurementStatus || "unknown"}; ${element.evidence?.source || "source not supplied"}`;
     const label =
-      category !== "structure" && Math.min(w, d) >= 0.3
+      category !== "structure" &&
+      element.kind !== "rug" &&
+      Math.min(w, d) >= 0.3
         ? text(
             x,
             y + 4,
@@ -120,7 +122,7 @@ export function renderPlanSvg(layout, options = {}) {
           )
         : "";
     layers[category].push(
-      `<g data-object-id="${escape(element.id)}" role="img" aria-label="${escape(title)}"><title>${escape(title)}</title><rect x="${number(x - (w * scale) / 2)}" y="${number(y - (d * scale) / 2)}" width="${number(w * scale)}" height="${number(d * scale)}" transform="rotate(${number(element.rotation)} ${number(x)} ${number(y)})" fill="${fill}" stroke="${selected ? "#146c4e" : "#707b71"}" stroke-width="${selected ? 3 : 1.3}"/>${label}</g>`,
+      `<g data-object-id="${escape(element.id)}" role="button" tabindex="0" aria-label="${escape(title)}"><title>${escape(title)}</title><rect x="${number(x - (w * scale) / 2)}" y="${number(y - (d * scale) / 2)}" width="${number(w * scale)}" height="${number(d * scale)}" transform="rotate(${number(element.rotation)} ${number(x)} ${number(y)})" fill="${fill}" stroke="${selected ? "#146c4e" : "#707b71"}" stroke-width="${selected ? 3 : 1.3}"/>${label}</g>`,
     );
     if (showDimensions && selected && category !== "structure")
       layers.dimensions.push(
@@ -220,6 +222,7 @@ export function renderPlanSvg(layout, options = {}) {
     "Geometric distances only. Verify real dimensions; this does not establish real-world fit.",
     `Revision ${revision.id || "unversioned"} · ${revision.createdAt || "Timestamp not supplied"}`,
     revision.summary || "Generated from the current canonical layout",
+    `Exported ${new Date().toISOString()}`,
     ...(sourceLines.length
       ? sourceLines
       : ["Event-authored demonstration; no verified property plan supplied."]

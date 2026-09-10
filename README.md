@@ -1,6 +1,6 @@
 # Elsewhere
 
-Decide where to move. Before you visit.
+See what life could be like in your next home
 
 A local prototype for comparing the space, commute, and daily essentials around a possible home. Built during the Astra NYC hackathon hosted by Cerebral Valley.
 
@@ -21,10 +21,10 @@ npm run build
 
 ## What works
 
-- Pick a researched example: 95 Wall Street #2308 or archived Zephyr Lofts #501. The disconnected URL importer is hidden until arbitrary listing imports work.
+- Pick a researched example: 95 Wall Street #2308, archived Zephyr Lofts #501, or Journal Square Urby #409/#1504. The disconnected URL importer is hidden until arbitrary listing imports work.
 - Use a compact, full-viewport canvas with one mode selector and one change field. The document does not scroll; places and accuracy details can be collapsed.
-- Review dated source facts and unknowns, then walk an inferred 95 Wall studio sketch. Its 575 ft² area and studio type come from the listing; the rectangular footprint, windows, furnishings, and placement are invented.
-- Switch between a synthetic current home and a potential home with illustrative routes.
+- Review dated source facts and unknowns. Real listings are evidence only: no dimensional interior or fit result is generated from reported square footage. Linked Urby plan references have not established usable scale or authorization for reproduction.
+- Switch between a synthetic current home and a potential home with illustrative routes. Plans, 3D geometry, collision boundaries, clearance and SVG/PDF exports share one canonical layout. Select objects, toggle dimensions, inspect empty/furnished states, undo changes and retain arrangements in this browser using IndexedDB. Empty removes movable furniture while keeping fixed kitchen fixtures.
 - Orbit the home or walk at eye level. Focus the scene, use WASD to move, arrow keys to turn, or drag to look. On-screen buttons also support movement. Walls and furniture have collision boundaries; the front doorway leads outside.
 - Ask Astra to resize the bed, hide or restore the bed, sofa, table group, or all furnishings, and change daylight/evening lighting in any existing home preview. Table edits affect the full table group and attached chairs. Local preview buttons still work without API access.
 - Follow an animated car along an invented road route. Pause, replay, or scrub the commute; reduced-motion users start paused.
@@ -32,17 +32,19 @@ npm run build
 
 ## What the demo does not establish
 
-Public listing facts were researched during development on September 10, 2026 and bundled in src/listings.js. The example picker opens these snapshots; it does not fetch arbitrary pages or analyze photographs. Source links open the original listing and gallery. Listing availability and prices can change. The interior and car-demo streets, routes, and example nearby places are synthetic. The separate 95 Wall neighborhood map uses live OpenFreeMap tiles sourced from OpenStreetMap; the listing map pin is approximate. Only the studio type and reported floor area inform the interior sketch. The scene is not a verified reconstruction, furniture-fit guarantee, current-condition inspection, or solar study.
+Public listing facts were researched during development on September 10, 2026 and bundled in src/listings.js. The example picker opens these snapshots; it does not fetch arbitrary pages or analyze photographs. Source links open the original listing and gallery. Listing availability and prices can change. The interior and car-demo streets, routes, and example nearby places are synthetic. The separate 95 Wall neighborhood map uses live OpenFreeMap tiles sourced from OpenStreetMap; the listing map pin is approximate. Earlier recordings contain an inferred studio sketch; the current interface no longer enables it from listing area. Synthetic scenes are not a verified reconstruction, furniture-fit guarantee, current-condition inspection, or solar study.
 
-Astra assists development of the scene and app. The running product has an optional localhost-only Astra endpoint for validated scene edits across synthetic and inferred home previews. Live gpt-6-astra bed resizing, sofa hiding, evening lighting, and cached replay were verified during the event. The client supplies the current model dimensions, lighting, bed size, and visibility state; the endpoint does not require a particular address or listing ID. The server reads OPENAI_API_KEY from the local environment or ignored .env.local; credentials are never bundled into the client. Local controls still work without credentials. The endpoint validates the returned edit, caches it in server memory, and leaves movement/rendering local. It does not launch runtime agents or reconstruct listing photos.
+Astra assists development of the scene and app. The running product has an optional localhost-only Astra endpoint for validated scene edits across the two synthetic home previews. Earlier runtime evidence also includes an inferred studio that is now gated from the listing interface. Live gpt-6-astra bed resizing, sofa hiding, evening lighting, and cached replay were verified during the event. The client supplies the current model dimensions, lighting, bed size, and visibility state; the endpoint does not require a particular address or listing ID. The server reads OPENAI_API_KEY from the local environment or ignored .env.local; credentials are never bundled into the client. Local controls still work without credentials. The endpoint validates the returned edit, caches it in server memory, and leaves movement/rendering local. It does not launch runtime agents or reconstruct listing photos.
 
-## Current graphics and geographic experiment
+## Interface and geographic context
 
-The inferred 95 Wall studio has procedural materials, rounded furniture, a cutaway overview, and geometry-derived bed clearance. These dimensions are inferred and cannot establish real fit. Its neighborhood opens a separate MapLibre/OpenFreeMap map with source attribution, camera pullback, “Go directly,” and a fade into the interior. The listing pin is approximate; no verified driving route is available. The initial recording remains the baseline.
+The interface uses an original SVG mark recreated from a participant-approved event design reference, live system-font text, compact listing controls, one view selector and one chat composer. The places drawer starts collapsed on small or short screens. Source status stays visible and full uncertainty details remain accessible. Plans is retained alongside the four geographic/home modes. No font or icon library was added.
+
+95 Wall opens a separate MapLibre/OpenFreeMap neighborhood map with source attribution, camera pullback and “Go directly.” A fade returns to listing evidence. The pin is approximate; no verified driving route is available. Original recordings are preserved; they show earlier scope and are not proof of the current source gate.
 
 ## Next integration, not implemented
 
-Replace the two bundled snapshots with a live, bounded listing importer. Use the participant's listing inputs to collect attributable photo evidence with source URLs and observation dates. Separate visible details from inferred geometry and unknown conditions. Generate a validated scene description and bounded edits, then render locally with Three.js. Verified driving routes, travel times, and filtered nearby-business details remain unimplemented. A photo cannot establish every issue or guarantee a listing's present condition.
+Replace the bundled snapshots with a live, bounded listing importer. Use the participant's listing inputs to collect attributable photo evidence with source URLs and observation dates. Separate visible details from inferred geometry and unknown conditions. Generate a validated scene description and bounded edits, then render locally with Three.js. Verified driving routes, travel times, and filtered nearby-business details remain unimplemented. A photo cannot establish every issue or guarantee a listing's present condition.
 
 ## Build provenance
 
