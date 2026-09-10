@@ -32,7 +32,7 @@ npm run build
 
 Public listing facts were researched during development on September 10, 2026 and bundled in src/listings.js. The running app matches two exact listing URLs to these snapshots; it does not fetch arbitrary pages or analyze photographs. Source links open the original listing and gallery. Listing availability and prices can change. All streets, routes, nearby locations, and scene arrangements are synthetic; only the 95 Wall sketch area and studio type are source-informed. The scene is not a verified reconstruction, furniture-fit guarantee, current-condition inspection, or solar study.
 
-Astra assists development of the scene and app. The running product now has an optional localhost-only Astra endpoint for bounded king/queen bed edits. It remains unavailable until secure API configuration is complete; no live model proof has been recorded yet. Local controls still work without credentials. The endpoint validates the returned edit, caches it in server memory, and leaves movement/rendering local. It does not launch runtime agents or reconstruct listing photos.
+Astra assists development of the scene and app. The running product now has an optional localhost-only Astra endpoint for bounded king/queen bed edits. One live gpt-6-astra king-bed edit and cached replay were verified during the event. The server reads OPENAI_API_KEY from the local environment or ignored .env.local; credentials are never bundled into the client. Local controls still work without credentials. The endpoint validates the returned edit, caches it in server memory, and leaves movement/rendering local. It does not launch runtime agents or reconstruct listing photos.
 
 ## Current graphics and geographic experiment
 
@@ -47,3 +47,7 @@ Replace the two bundled snapshots with a live, bounded listing importer. Use the
 See [BUILD_LOG.md](BUILD_LOG.md) for the event boundary, actual milestones, verification, and remaining work. This task encountered earlier context during initial scaffolding; the log records that exposure. Timestamps alone are not proof of originality.
 
 See [DEPENDENCIES.md](DEPENDENCIES.md) and [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) for external dependencies and licenses. Private event details, credentials, and conversation exports are excluded from this repository.
+
+## Runtime scope
+
+The local Vite dev/preview endpoint accepts at most ten model attempts per server start, caps output at 2,048 tokens, and caches equivalent requests. Supported model edits are king/queen sizing of the existing bed only. Invalid responses leave the scene unchanged. The deployed static bundle alone does not include a hosted API. Do not expose the local development endpoint publicly.

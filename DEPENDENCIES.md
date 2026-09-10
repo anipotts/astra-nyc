@@ -71,6 +71,6 @@ Facts only from [95 Wall Street #2308](https://streeteasy.com/building/95-wall-s
 
 ## Geographic experiment
 
-MapLibre GL JS 6.9.0 is BSD-3-Clause. OpenFreeMap hosting is free with no API key or registration and no SLA. OpenFreeMap project code is MIT; OpenStreetMap data is ODbL, and the OpenMapTiles schema is BSD with cartography CC-BY. Keep the map attribution visible, including in recordings. No map tiles are bundled or bulk-downloaded. Opening the map sends tile requests to OpenFreeMap/its CDN; no device location is requested.
+MapLibre GL JS 6.9.0 is BSD-3-Clause. OpenFreeMap hosting is free with no API key or registration and no SLA. OpenFreeMap project code is MIT; OpenStreetMap data is ODbL, and [OpenMapTiles code is BSD-3-Clause with design/cartography CC-BY 4.0](https://github.com/openmaptiles/openmaptiles/blob/master/LICENSE.md). Keep the map attribution visible, including in recordings. No map tiles are bundled or bulk-downloaded. Opening the map sends tile requests to OpenFreeMap/its CDN; no device location is requested.
 
 Reviewed current official [MapLibre setup](https://maplibre.org/maplibre-gl-js/docs/), [OpenFreeMap guide](https://openfreemap.org/quick_start/), [terms](https://openfreemap.org/tos/), [privacy](https://openfreemap.org/privacy/), and [attribution](https://openfreemap.org/#attribution). Service is provided as-is; accuracy, availability, and current building heights are not guaranteed. The one supported pin uses rounded coordinates linked by the public listing, not a surveyed entrance. No routing service is adopted.
