@@ -1,5 +1,10 @@
 import { normalizeSourceUrl } from "./source-policy.js";
-import { listings, identifyListing } from "./listings.js";
+import {
+  listings,
+  identifyListing,
+  auditedExamples,
+  additionalExamples,
+} from "./listings.js";
 const aliases = {
   charles345: "charles co 345 272 grove street jersey city new jersey",
   wall2308: "95 wall street 2308 financial district manhattan new york",
@@ -25,7 +30,9 @@ export function findKnownListings(query) {
   if (query.trim().length < 3 || !tokens.length) return [];
   return listings.filter((l) =>
     tokens.every((token) =>
-      aliases[l.id].split(" ").some((word) => word.startsWith(token)),
+      normalize(aliases[l.id] || `${l.name} ${l.mapAddress || l.location}`)
+        .split(" ")
+        .some((word) => word.startsWith(token)),
     ),
   );
 }
@@ -66,6 +73,29 @@ export function candidateListing(candidate, checkedAt) {
 }
 export function setupListingIntake(onSelect) {
   const $ = (s) => document.querySelector(s);
+  for (const container of document.querySelectorAll(
+    ".listing-examples, .entry-examples",
+  )) {
+    container.replaceChildren();
+    for (const [index, listing] of [
+      ...auditedExamples,
+      ...additionalExamples,
+    ].entries()) {
+      if (index === auditedExamples.length) {
+        const heading = document.createElement("span");
+        heading.className = "examples-heading";
+        heading.textContent = "More saved places";
+        container.append(heading);
+      }
+      const button = document.createElement("button");
+      button.type = "button";
+      button.dataset.listing = listing.id;
+      button.textContent = listing.name;
+      button.title = `View building · ${listing.mapAddress || listing.location}`;
+      button.setAttribute("aria-pressed", "false");
+      container.append(button);
+    }
+  }
   let request = null;
   let generation = 0;
   function cancel() {

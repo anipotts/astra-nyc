@@ -38,12 +38,29 @@ export const CITY_SOURCE_DETAILS = Object.freeze({
     "Available OpenStreetMap geometry in the NYC and Jersey City regional extent; completeness and currentness vary by building.",
 });
 
-export function createNeighborhood(container, onStatus = () => {}) {
+export async function createNeighborhood(container, onStatus = () => {}) {
+  const response = await fetch("https://tiles.openfreemap.org/styles/liberty", {
+    signal: AbortSignal.timeout(12000),
+  });
+  if (!response.ok) throw new Error("Map style unavailable");
+  const style = await response.json();
+  // Exclude unused POI sprites and road shields before their first render.
+  // Otherwise the upstream style requests missing icons before load handlers run.
+  style.layers = style.layers.filter(
+    (layer) =>
+      !["poi", "housenumber"].includes(layer["source-layer"]) &&
+      !/shield/.test(layer.id),
+  );
   const map = new Map({
     container,
-    style: "https://tiles.openfreemap.org/styles/liberty",
+    style,
     ...regionalCamera,
     attributionControl: { compact: false },
+    canvasContextAttributes: {
+      antialias: true,
+      powerPreference: "high-performance",
+    },
+    pixelRatio: Math.min(2, globalThis.devicePixelRatio || 1),
     maxZoom: 19,
     minZoom: 10,
     maxPitch: 70,
@@ -115,7 +132,7 @@ export function createNeighborhood(container, onStatus = () => {}) {
       }
     }
     map.setLight({
-      anchor: "viewport",
+      anchor: "map",
       color: "#fff5e8",
       intensity: 0.5,
       position: [1.5, 210, 35],
@@ -194,8 +211,8 @@ export function createNeighborhood(container, onStatus = () => {}) {
           .addTo(map);
         move({
           center: [location.longitude, location.latitude],
-          zoom: 16.5,
-          pitch: 60,
+          zoom: 17.5,
+          pitch: 56,
           bearing: map.getBearing(),
         });
       } else move(regionalCamera);
@@ -258,7 +275,7 @@ export function createNeighborhood(container, onStatus = () => {}) {
         move({
           center: [selected.longitude, selected.latitude],
           zoom: 17.5,
-          pitch: 64,
+          pitch: 56,
           bearing: map.getBearing(),
         });
         status();

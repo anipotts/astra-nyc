@@ -17,7 +17,8 @@ import { listings } from "./listings.js";
 import { setupListingIntake } from "./listing-intake.js";
 import { acceptInspectedRegion } from "./inspected-plan.js";
 import { inspectedPlans } from "./inspected-plan-records.js";
-import { lookupLocation } from "./location.js";
+import { lookupLocation, confidentLocationMatch } from "./location.js";
+import { getExampleLocation } from "./example-locations.js";
 import { createViewTransition } from "./view-transition.js";
 import { setupPlanInspection } from "./plan-inspection.js";
 import { setupEvidenceReview } from "./listing-evidence.js";
@@ -30,6 +31,7 @@ let geoMap,
   locationGeneration = 0,
   shownLocation = null;
 const listingLocations = new Map();
+let mapLocationMessage = "";
 const state = {
   home: "current",
   mode: "overview",
@@ -492,9 +494,9 @@ function setMode(mode) {
         : "No inspected interior is available. Open the real source or inspect a matching plan.";
     } else {
       openNeighborhood();
-      $("#location-review").hidden = Boolean(
-        listingLocations.get(selectedListing.id),
-      );
+      $("#location-review").hidden =
+        !mapLocationMessage ||
+        Boolean(listingLocations.get(selectedListing.id));
     }
     return;
   }
@@ -649,14 +651,18 @@ const planInspection = setupPlanInspection();
 let selectedListing = null;
 const syntheticPotential = { ...homes.potential };
 function showListing(listing) {
+  if (!listing) return;
   entryKind = "listing";
   selectedListing = listing;
+  const reviewedLocation = getExampleLocation(listing.id);
+  if (reviewedLocation && !listingLocations.has(listing.id))
+    listingLocations.set(listing.id, reviewedLocation);
   locationGeneration++;
   locationRequest?.abort();
   locationRequest = null;
   $("#location-candidates").replaceChildren();
-  $("#location-progress").textContent =
-    "Confirm the address to place its map pin.";
+  $("#location-progress").textContent = "Locating the building automatically…";
+  mapLocationMessage = "";
   $("#resolve-location").disabled = false;
   $("#source-details").open = false;
   $("#location-source").hidden = !listingLocations.has(listing.id);
@@ -683,16 +689,19 @@ function showListing(listing) {
   for (const key of ["name", "location", "facts", "price", "availability"])
     $("#listing-" + key).textContent = listing[key];
   $("#listing-source").href = listing.url;
-  $("#listing-checked").textContent =
-    (listing.discovery ? "Search observed " : "Source checked ") +
-    new Date(listing.checkedAt).toLocaleString("en-US", {
-      timeZone: "America/New_York",
-      month: "short",
-      day: "numeric",
-      hour: "numeric",
-      minute: "2-digit",
-    }) +
-    " ET · not a live refresh";
+  $("#listing-checked").textContent = /^\d{4}-\d{2}-\d{2}$/.test(
+    listing.checkedAt,
+  )
+    ? `Source reviewed ${listing.checkedAt} · saved snapshot`
+    : (listing.discovery ? "Search observed " : "Source checked ") +
+      new Date(listing.checkedAt).toLocaleString("en-US", {
+        timeZone: "America/New_York",
+        month: "short",
+        day: "numeric",
+        hour: "numeric",
+        minute: "2-digit",
+      }) +
+      " ET · not a live refresh";
   $("#listing-unknowns").textContent = listing.questions;
   $("#overview-price").textContent = listing.price;
   $("#overview-freshness").textContent = $("#listing-checked").textContent;
@@ -725,9 +734,11 @@ function showListing(listing) {
   document.querySelector(".evidence").open = false;
   refresh();
   setMode("overview");
+  if (!listingLocations.has(listing.id)) resolveListingLocation();
+  else openNeighborhood(true);
 }
 setupListingIntake(showListing);
-async function openNeighborhood() {
+async function openNeighborhood(focus = false) {
   if (!selectedListing || state.mode === "walk") return;
   const selected = selectedListing;
   $("#map-view").hidden = false;
@@ -736,7 +747,7 @@ async function openNeighborhood() {
   try {
     mapInit ||= import("./neighborhood.js").then(({ createNeighborhood }) =>
       createNeighborhood($("#map-canvas"), (text) => {
-        $("#map-status").textContent = text;
+        $("#map-status").textContent = mapLocationMessage || text;
       }),
     );
     geoMap = await mapInit;
@@ -757,13 +768,14 @@ async function openNeighborhood() {
       $("#location-source-link").href = location.source;
       $("#location-source-link").textContent = location.label;
       $("#location-source-date").textContent =
-        `Approximate address chosen from OpenStreetMap · looked up ${new Date(location.observedAt).toLocaleString()}`;
+        `Approximate building location · source reviewed ${new Date(location.observedAt).toLocaleString()}`;
     }
     if (shownLocation !== selected.id) {
       geoMap.setLocation(location);
       shownLocation = selected.id;
     }
     geoMap.resize();
+    if (focus && location) geoMap.direct();
   } catch {
     mapInit = null;
     $("#map-status").textContent =
@@ -775,19 +787,36 @@ $("#neighborhood-view").onclick = () => setMode("overview");
 $("#map-pullback").onclick = () => geoMap?.pullback();
 $("#map-direct").onclick = () => geoMap?.direct();
 $("#map-enter").onclick = () => setMode("walk");
-$("#resolve-location").onclick = async () => {
+async function resolveListingLocation() {
   if (!selectedListing || locationRequest) return;
   const selected = selectedListing,
     generation = locationGeneration;
   locationRequest = new AbortController();
   $("#resolve-location").disabled = true;
   $("#location-progress").textContent = "Looking up the listing address…";
+  mapLocationMessage = `Locating ${selected.name}…`;
+  $("#map-status").textContent = mapLocationMessage;
   try {
     const result = await lookupLocation(
       selected.mapAddress || selected.name + ", " + selected.location,
       { signal: locationRequest.signal },
     );
     if (generation !== locationGeneration) return;
+    const automatic = confidentLocationMatch(
+      selected.mapAddress || selected.location,
+      result.candidates,
+    );
+    if (automatic) {
+      listingLocations.set(selected.id, automatic);
+      shownLocation = null;
+      mapLocationMessage = "";
+      $("#location-review").hidden = true;
+      await openNeighborhood(true);
+      return;
+    }
+    mapLocationMessage = "Address needs review in Sources & details.";
+    $("#map-status").textContent = mapLocationMessage;
+    $("#location-review").hidden = false;
     $("#location-candidates").replaceChildren();
     $("#location-progress").textContent = result.candidates.length
       ? "Choose the matching address. This is an approximate location."
@@ -800,21 +829,28 @@ $("#resolve-location").onclick = async () => {
         if (selectedListing?.id !== selected.id) return;
         listingLocations.set(selected.id, candidate);
         shownLocation = null;
+        mapLocationMessage = "";
         $("#location-review").hidden = true;
-        openNeighborhood();
+        openNeighborhood(true);
       };
       $("#location-candidates").append(button);
     }
   } catch (error) {
-    if (generation === locationGeneration && error.name !== "AbortError")
+    if (generation === locationGeneration && error.name !== "AbortError") {
       $("#location-progress").textContent = error.message;
+      mapLocationMessage =
+        "Location lookup unavailable. Retry in Sources & details.";
+      $("#map-status").textContent = mapLocationMessage;
+      $("#location-review").hidden = false;
+    }
   } finally {
     if (generation === locationGeneration) {
       locationRequest = null;
       $("#resolve-location").disabled = false;
     }
   }
-};
+}
+$("#resolve-location").onclick = resolveListingLocation;
 $("#change-listing").onclick = () => $("#add-listing").click();
 $("#change-location").onclick = () => {
   if (!selectedListing) return;
@@ -822,6 +858,7 @@ $("#change-location").onclick = () => {
   shownLocation = null;
   $("#source-details").open = false;
   setMode("overview");
+  resolveListingLocation();
 };
 const priorities = new Set();
 function resetJourney() {
@@ -1027,7 +1064,15 @@ try {
   const recent = listings.find(
     (l) => l.id === localStorage.getItem("elsewhere-last-real-home"),
   );
-  if (recent) showListing(recent);
+  if (recent) {
+    const resume = document.createElement("button");
+    resume.id = "resume-listing";
+    resume.type = "button";
+    resume.textContent = `Resume ${recent.name}`;
+    resume.className = "text-action";
+    resume.onclick = () => showListing(recent);
+    $("#address-form").before(resume);
+  }
 } catch {}
 setMode("overview");
 resize();
@@ -1360,6 +1405,8 @@ $("#plans-dialog").addEventListener("click", (event) => {
 $("#add-listing").onclick = () => {
   entryKind = "empty";
   selectedListing = null;
+  $("#listing-status").textContent = "";
+  mapLocationMessage = "";
   acceptedRegion = null;
   planInspection.reset(null);
   locationGeneration++;

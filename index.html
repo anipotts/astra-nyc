@@ -267,22 +267,6 @@
             ><button id="map-enter" class="primary">Inside →</button>
           </div>
         </div>
-        <section
-          id="location-review"
-          hidden
-          aria-label="Confirm listing location"
-        >
-          <h2>Locate this listing</h2>
-          <p id="location-progress" role="status">
-            Confirm the address to place its map pin.
-          </p>
-          <button id="resolve-location" type="button">Find on map</button>
-          <div id="location-candidates"></div>
-          <small
-            >Address lookup uses OpenStreetMap. A map pin does not establish an
-            entrance or interior.</small
-          >
-        </section>
         <section id="inside-surface" hidden aria-label="Inside source view">
           <div id="inside-plan"></div>
           <div id="inside-empty">
@@ -351,6 +335,29 @@
           <p id="summary-next"></p>
           <details id="source-details">
             <summary>Sources &amp; details</summary>
+            <details
+              id="location-review"
+              hidden
+              style="
+                position: static;
+                inset: auto;
+                width: auto;
+                max-height: none;
+                margin: 8px 0;
+                padding: 0;
+                border: 0;
+                box-shadow: none;
+                background: transparent;
+                transform: none;
+              "
+            >
+              <summary>Map location</summary>
+              <p id="location-progress" role="status"></p>
+              <button id="resolve-location" type="button">
+                Retry location lookup
+              </button>
+              <div id="location-candidates"></div>
+            </details>
             <details id="city-source-details">
               <summary>3D city sources</summary>
               <p id="city-source-description"></p>
