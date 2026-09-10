@@ -280,3 +280,11 @@ GitHub main was verified at 2b12ddd with successful CI after the participant's p
 - Added local Three.js furnished interior rendering, solid walls/ceiling, indoor third-person camera, local movement/collision/reset and source/assumption disclosure. Official drawings remain in Plans.
 - Verified 209 tests and production build in this worktree. Existing large-bundle warnings remain. Initial sandbox test run could not bind the source-preview test HTTP server; authorized rerun passed.
 - Live Astra generation, actual scene quality and combined preview visual acceptance remain pending Direction integration at this milestone. No new dependencies.
+
+## 2026-09-10 20:44 UTC — first-person refinement
+
+- Participant changed the default to first person and requested realism/speed improvements.
+- Replaced the shoulder camera/avatar with a 1.65m eye-level view. Initial heading searches existing clear space locally without changing the generated geometry.
+- Added procedural fabric/wood surface detail and door trim; reused static shadow maps and stopped animation frames while idle. Renderer module loading now overlaps generation.
+- Direction reported the first live source-bound MiMA generation succeeded and supplied a screenshot; inspected its overly close third-person entry view before this refinement. No extra model request or server/cache restart was performed here.
+- Focused 12 tests and production build passed. Combined first-person visual QA remains with Direction.
