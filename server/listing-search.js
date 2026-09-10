@@ -6,6 +6,8 @@ const DOMAINS = [
   "realtor.com",
   "apartments.com",
   "urby.com",
+  "apartmentfinder.com",
+  "redfin.com",
 ];
 const NOTES = [
   "Possible address match; confirm details on the original listing.",

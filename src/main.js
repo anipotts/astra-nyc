@@ -15,6 +15,7 @@ import {
 } from "./plan-storage.js";
 import { listings } from "./listings.js";
 import { setupListingIntake } from "./listing-intake.js";
+import { setupEvidenceReview } from "./listing-evidence.js";
 const $ = (s) => document.querySelector(s);
 const container = $("#scene");
 const state = {
@@ -593,11 +594,13 @@ function refresh() {
   renderPlans();
   renderObjectControls();
 }
+const evidenceReview = setupEvidenceReview();
 let selectedListing = null;
 const syntheticPotential = { ...homes.potential };
 function showListing(listing) {
   entryKind = "listing";
   selectedListing = listing;
+  evidenceReview.reset(listing);
   try {
     localStorage.setItem("elsewhere-last-real-home", listing.id);
   } catch {}
@@ -1150,12 +1153,12 @@ $("#plans-dialog").addEventListener("click", (event) => {
 $("#add-listing").onclick = () => {
   entryKind = "empty";
   selectedListing = null;
+  evidenceReview.reset(null);
   setPlansOpen(false);
   refresh();
   setMode("overview");
   $("#listing-address").focus();
 };
-$("#entry-demo").onclick = () => $("#evidence-demo").click();
 $("#plan-dimensions").onchange = renderPlans;
 $("#plan-fit").onclick = () => {
   planZoom = 1;
@@ -1240,10 +1243,15 @@ $("#plan-print").onclick = () => {
   popup.document.close();
   setTimeout(() => popup.print(), 300);
 };
-$("#evidence-demo").onclick = () => {
-  $("input[value=current]").checked = true;
-  $("input[value=current]").dispatchEvent(new Event("change"));
-};
+// Internal development fixtures remain callable for regression checks only.
+if (import.meta.env.DEV)
+  window.__elsewhere.loadFixture = (home = "current") => {
+    if (!["current", "potential"].includes(home))
+      throw new Error("Unknown fixture");
+    const input = document.querySelector(`input[value="${home}"]`);
+    input.checked = true;
+    input.dispatchEvent(new Event("change"));
+  };
 loadPlanHistory()
   .then((saved) => {
     for (const key of ["current", "potential"]) {

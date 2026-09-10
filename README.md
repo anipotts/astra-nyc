@@ -22,14 +22,14 @@ npm run build
 ## What works
 
 - Start with address/building search, with a secondary listing-link field and no synthetic apartment loaded. Local address aliases and known URLs resolve to bundled source snapshots: 95 Wall Street #2308, archived Zephyr Lofts #501, or Journal Square Urby #409/#1504. Explicit online submissions use a bounded Astra web search for up to three source-linked candidates in NYC or Jersey City. Discovery candidates open evidence-only Overview records; known archived records retain their warning. The last selected known real example resumes on reload. Geographic address validation, floor-plan upload and full listing import are not implemented.
-- Use a compact, full-viewport canvas with one mode selector and one change field. The document does not scroll; places and accuracy details can be collapsed.
+- Use a compact, full-viewport interface with one mode selector. The document does not scroll; places and accuracy details can be collapsed.
 - Review dated source facts and unknowns. Real listings are evidence only: no dimensional interior or fit result is generated from reported square footage. Linked Urby plan references have not established usable scale or authorization for reproduction.
-- Enter the explicitly labeled synthetic demo to switch between current and potential homes with illustrative routes. Plans, 3D geometry, collision boundaries, clearance and SVG/PDF exports share one canonical layout. Select objects, toggle dimensions, inspect empty/furnished states, undo changes and retain arrangements in this browser using IndexedDB. Empty removes movable furniture while keeping fixed kitchen fixtures.
-- Add approximate green-seat and black-shelf previews, select an item, nudge it, rotate it by quarter turns, remove it, or Undo. Personal objects persist with the arrangement. Actual product identities and dimensions are unknown; hypothetical preview sizes do not establish fit. Fixed fixtures remain inspect-only. These direct commands use the same validator as supported Astra scene edits, without model calls.
-- Orbit the home or walk at eye level. Focus the scene, use WASD to move, arrow keys to turn, or drag to look. On-screen buttons also support movement. Walls and furniture have collision boundaries; the front doorway leads outside.
-- Ask Astra to resize the bed, hide or restore the bed, sofa, table group, or all furnishings, and change daylight/evening lighting in any existing home preview. Table edits affect the full table group and attached chairs. Local preview buttons still work without API access.
-- Follow an animated car along an invented road route. Pause, replay, or scrub the commute; reduced-motion users start paused.
-- Explore example locations for groceries, transit, EV charging, gas, restaurants, shopping, healthcare, and airports.
+- Assess interior evidence from the selected source. Astra returns dated references, proposed exact-unit/building/other-unit classifications, subject levels, conflicts and gaps. The report separates available references from unverified geometry. It does not generate an interior.
+- The real 95 Wall neighborhood map remains available with attribution and an approximate pin. Other geographic adapters remain unimplemented.
+
+## Preserved development fixtures
+
+Synthetic apartments, invented journeys, furniture previews, canonical Plans, collision/clearance calculations, direct commands, Undo, persistence and exports remain internal regression fixtures. Normal navigation exposes no synthetic entry point or fallback rendering. Development browser tests can load fixtures explicitly through the development-only diagnostic hook. Existing recordings remain private artifacts of earlier scope. These fixtures do not demonstrate a real apartment reconstruction.
 
 ## What the demo does not establish
 
@@ -39,17 +39,26 @@ Astra assists development of the scene and app. The running product has an optio
 
 ## Interface and geographic context
 
-The interface uses PNG exports of the participant-approved event-generated home-to-home artwork, live system-font text, compact listing controls, one view selector and one chat composer. The places drawer starts collapsed on small or short screens. Source status stays visible and full uncertainty details remain accessible. Plans opens in a separate modal with native keyboard focus and Escape dismissal; opening it does not resize or move the scene. The four view tabs stay associated with the selected home, and unavailable real-home views explain the missing evidence. No font or icon library was added.
+The interface uses PNG exports of the participant-approved event-generated home-to-home artwork, with a header-only CSS/SVG color filter showing the symbol in forest green on the page background, live system-font text, compact listing controls, one view selector and one chat composer. The places drawer starts collapsed on small or short screens. Source status stays visible and full uncertainty details remain accessible. Plans opens in a separate modal with native keyboard focus and Escape dismissal; opening it does not resize or move the scene. The four view tabs stay associated with the selected home, and unavailable real-home views explain the missing evidence. No font or icon library was added.
 
 95 Wall opens a separate MapLibre/OpenFreeMap neighborhood map with source attribution, camera pullback and “Go directly.” A fade returns to listing evidence. The pin is approximate; no verified driving route is available. Original recordings are preserved; they show earlier scope and are not proof of the current source gate.
 
 ## Address and listing discovery
 
-Typing only searches bundled examples locally. Submit Search, Search online, or a supported unknown listing link to use OpenAI. The local endpoint accepts one query, allows three provider attempts per server start, and caches/coalesces equivalent queries for thirty minutes. Each request uses gpt-6-astra, low reasoning, at most two web-search tool calls and 2,048 output tokens. Results require a completed search receipt and supported HTTPS URLs present in actual tool sources/citations. Current domains: StreetEasy, Zillow, Realtor.com, Apartments.com and Urby. Links are shown for source review; no page copies, photos, resident information or inferred room geometry are imported. No geocoder or new SDK package was adopted. Search queries/results remain in server memory; store:false is set for the Responses request. Provider data handling still applies.
+Typing only searches bundled examples locally. Submit Search, Search online, or a supported unknown listing link to use OpenAI. The local endpoint accepts one query, allows three provider attempts per server start, and caches/coalesces equivalent queries for thirty minutes. Each request uses gpt-6-astra, low reasoning, at most two web-search tool calls and 2,048 output tokens. Results require a completed search receipt and supported HTTPS URLs present in actual tool sources/citations. Current domains: StreetEasy, Zillow, Realtor.com, Apartments.com, Urby, Apartment Finder and Redfin. Links are shown for source review; no page copies, photos, resident information or inferred room geometry are imported. No geocoder or new SDK package was adopted. Search queries/results remain in server memory; store:false is set for the Responses request. Provider data handling still applies.
 
 Live search and a cached browser replay were verified during the event; this is discovery proof, not a verified current listing or floor plan.
 
+## Interior evidence assessment
+
+The separate evidence endpoint accepts a selected address and source page, with two provider attempts per server start, thirty-minute result caching/coalescing, a 45-second timeout, up to three web-search tool calls and 3,000 output tokens. Each returned source URL must appear in actual tool sources or citations. Hierarchy (neighborhood/site/building/shared space/floor/unit/room/object) is separate from whether a source matches the exact unit. Source publication labels are model-extracted text; collection time is recorded separately. Source counts are not independent corroboration.
+
+A live report and cached browser replay were verified. The adapter examines search text and references, not original images or measured geometry. Application capability checks can identify available references and missing requirements; they cannot accept the model's claim as proof of scale, permission or rendering readiness. An inspected, accepted-plan/scan adapter remains unimplemented. A positive plan-derived geometry case is still required before claiming the general reconstruction path works. Completed reports remain visible after failed refreshes; timeout recovery of partial provider findings and durable background jobs are not implemented.
+
 ## Next integration, not implemented
+
+Prioritize a separate inspected-plan adapter that accepts source identity, use permissions and verified scale, produces canonical supported geometry, and passes a genuine positive rendering case. Preserve unknown portions and the unit-to-building relationship as unknown where unsupported. Evaluate multiple evidence-completeness cases with one code path; no property-specific reconstruction rules.
+
 
 Furniture evidence lookup should accept a photo, link, or description, use visual reasoning and bounded web search to find likely product variants and original specifications, and ask for confirmation when identity is ambiguous. No measurement form is required for previews. Automatic product search, matching, dimension recovery, and Astra manipulation of personal objects are not implemented. Single-image appearance alone does not establish real scale. Cache confirmed evidence per object; movement stays local.
 

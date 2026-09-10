@@ -33,6 +33,8 @@ const allowed = [
   "realtor.com",
   "apartments.com",
   "urby.com",
+  "apartmentfinder.com",
+  "redfin.com",
 ];
 export function safeListingUrl(value) {
   const url = new URL(value);
@@ -46,7 +48,7 @@ export function safeListingUrl(value) {
     )
   )
     throw new Error(
-      "Use a public StreetEasy, Zillow, Realtor.com, Apartments.com or Urby listing link. Other sites are not supported in this experiment.",
+      "Use a public StreetEasy, Zillow, Realtor.com, Apartments.com, Urby, Apartment Finder or Redfin listing link. Other sites are not supported in this experiment.",
     );
   return url.href;
 }
@@ -219,5 +221,4 @@ export function setupListingIntake(onSelect) {
       cancel();
       onSelect(listings.find((l) => l.id === button.dataset.listing));
     };
-  $("#entry-demo").addEventListener("click", cancel);
 }

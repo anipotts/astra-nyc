@@ -1296,6 +1296,7 @@ body.evidence-only.plans-open #evidence-stage {
   letter-spacing: -1.2px;
 }
 .wordmark img {
+  filter: url("#wordmark-ink");
   display: block;
   width: 36px;
   height: 36px;

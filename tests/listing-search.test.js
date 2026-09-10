@@ -177,6 +177,8 @@ test("search request uses documented bounded controls and returns discovery-only
     "realtor.com",
     "apartments.com",
     "urby.com",
+    "apartmentfinder.com",
+    "redfin.com",
   ]);
   assert.deepEqual(sent.include, ["web_search_call.action.sources"]);
   assert.equal(sent.text.format.strict, true);

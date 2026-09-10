@@ -22,6 +22,22 @@
     <link rel="apple-touch-icon" href="/apple-touch-approved-v2.png" />
   </head>
   <body class="empty-state">
+    <svg
+      width="0"
+      height="0"
+      aria-hidden="true"
+      focusable="false"
+      style="position: absolute"
+    >
+      <defs>
+        <filter id="wordmark-ink" color-interpolation-filters="sRGB">
+          <feColorMatrix
+            type="matrix"
+            values="0 0 0 0 0.12549  0 0 0 0 0.30196  0 0 0 0 0.23922  0 1.536145 0 0 -0.487952"
+          />
+        </filter>
+      </defs>
+    </svg>
     <header>
       <a class="wordmark" href="/" aria-label="Elsewhere home"
         ><img
@@ -218,9 +234,6 @@
             <button type="button" data-listing="urby409">Urby #409</button>
             <button type="button" data-listing="urby1504">Urby #1504</button>
           </div>
-          <button id="entry-demo" type="button" class="text-action">
-            Explore a synthetic example →
-          </button>
         </section>
         <div class="modebar" role="group" aria-label="View mode">
           <button data-mode="overview" aria-pressed="true">Overview</button
@@ -285,9 +298,20 @@
             furnishing status is unknown; photo staging does not establish what
             is included.
           </p>
-          <button id="evidence-demo" type="button">
-            Explore a synthetic demo →
-          </button>
+          <section
+            id="reconstruction-evidence"
+            aria-label="Interior evidence review"
+          >
+            <button id="collect-evidence" type="button">
+              Assess interior evidence →
+            </button>
+            <p class="intake-note">
+              Searches public sources with Astra. No images or plans are
+              imported.
+            </p>
+            <output id="evidence-progress" role="status"></output>
+            <div id="evidence-report" hidden></div>
+          </section>
         </section>
         <dialog id="plans-dialog" aria-labelledby="plan-name">
           <section id="plans-panel" hidden aria-label="Planning documents">

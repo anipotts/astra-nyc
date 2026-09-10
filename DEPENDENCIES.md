@@ -88,3 +88,7 @@ Green-seat and black-shelf geometry was authored during the event from participa
 ## Bounded address-to-listing discovery
 
 The existing OpenAI Responses API now uses its web_search tool for explicit address or public-listing-link submissions, following the official [web search guide](https://developers.openai.com/api/docs/guides/tools-web-search). This hosted service has provider pricing and data terms; no SDK package or new runtime dependency was installed. Candidate URLs are attributed in the interface and limited to existing public residential source domains. Source pages/photos are not copied or bundled. Public Nominatim was evaluated but not adopted: its [usage policy](https://operations.osmfoundation.org/policies/nominatim/) prohibits autocomplete and limits usage. No geocoding requests were made.
+
+## Interior evidence assessment and header treatment
+
+The existing OpenAI service now provides bounded source-text evidence assessments on the same listing domains, additionally allowing Apartment Finder and Redfin. No original images are inspected, copied or bundled by this adapter. The subject hierarchy and capability checks are original event code; search classifications are proposed model observations. No plan, scan, exterior-tile or reconstruction dependency was adopted. The header icon is recolored with a local CSS/SVG filter; approved source PNGs and favicons are unchanged.
