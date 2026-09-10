@@ -1,0 +1,11 @@
+/* Keep MapLibre's marker transform untouched. A single halo locates the selection. */
+.listing-pin {
+  animation: listing-selection-cue 600ms ease-out 1;
+}
+@keyframes listing-selection-cue {
+  from { box-shadow: 0 0 0 0 #204d3d70, 0 3px 15px #0003; }
+  to { box-shadow: 0 0 0 14px #204d3d00, 0 3px 15px #0003; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .listing-pin { animation: none; }
+}

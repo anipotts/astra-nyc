@@ -144,7 +144,7 @@
   border-radius: 7px;
   color: #344d42;
 }
-/* Composition: one sidebar, one visual surface and a non-overlapping fact strip. */
+/* Listing details live in the sidebar; the map keeps the full visual surface. */
 body.desktop-shell {
   display: grid;
   grid-template-columns: var(--ui-sidebar-width) minmax(0, 1fr);
@@ -199,7 +199,6 @@ body.desktop-shell {
   grid-template: "surface" minmax(0, 1fr) / minmax(0, 1fr);
   overflow: hidden;
 }
-.desktop-shell.evidence-only:not(.empty-state) #viewport { grid-template: "surface" minmax(0, 1fr) "facts" auto / minmax(0, 1fr); }
 .desktop-shell aside {
   position: relative;
   inset: auto;
@@ -235,37 +234,28 @@ body.desktop-shell {
 /* Keep provider controls' built-in icons and hit boxes intact. */
 .desktop-shell .maplibregl-ctrl-group button { min-height: 29px; padding: 0; border-radius: 0; }
 .desktop-shell #evidence-stage {
-  position: relative;
+  position: static;
   inset: auto;
   transform: none;
-  grid-area: facts;
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(190px, .7fr);
-  gap: var(--ui-space-1) var(--ui-space-6);
-  align-self: stretch;
-  justify-self: stretch;
-  width: auto;
+  display: block;
+  width: 100%;
   max-width: none;
-  max-height: 42dvh;
-  margin: 0;
-  padding: var(--ui-space-3) var(--ui-space-4);
+  max-height: none;
+  margin: var(--ui-space-4) 0 0;
+  padding: 0;
   border: 0;
-  border-top: 1px solid var(--ui-color-border);
   border-radius: 0;
-  background: var(--ui-color-surface);
+  background: transparent;
   box-shadow: none;
-  overflow: auto;
-  scrollbar-width: thin;
-  z-index: 21;
+  overflow: visible;
 }
-.desktop-shell #evidence-stage::-webkit-scrollbar { display: block; width: 6px; }
 .desktop-shell .summary-heading { grid-column: 1 / -1; display: flex; justify-content: space-between; align-items: center; color: var(--ui-color-muted); font-size: var(--ui-text-sm); }
 .desktop-shell #change-listing { padding: 4px 8px; min-height: var(--ui-control-compact); border-color: transparent; background: transparent; color: var(--ui-color-accent); font-size: var(--ui-text-sm); }
-.desktop-shell #evidence-stage h1 { grid-column: 1; grid-row: 2; font-size: var(--ui-text-title); line-height: 1.2; letter-spacing: -.5px; margin: 0; overflow-wrap: anywhere; }
+.desktop-shell #evidence-stage h1 { font-size: 18px; line-height: 1.25; letter-spacing: -.3px; margin: 0 0 var(--ui-space-2); overflow-wrap: anywhere; }
 .desktop-shell #evidence-stage p { font-size: var(--ui-text-sm); line-height: var(--ui-line-height); margin: 0; }
-.desktop-shell #evidence-facts { grid-column: 1; grid-row: 3; }
-.desktop-shell #overview-price { grid-column: 2; grid-row: 2; align-self: center; font-size: var(--ui-text-base) !important; }
-.desktop-shell #overview-freshness { grid-column: 2; grid-row: 3; font-size: var(--ui-text-sm); line-height: var(--ui-line-height); }
+.desktop-shell #evidence-facts { color: var(--ui-color-muted); }
+.desktop-shell #evidence-stage #overview-price { margin-top: var(--ui-space-2); font-size: var(--ui-text-base) !important; font-weight: 650; }
+.desktop-shell #overview-freshness { display: block; font-size: var(--ui-text-sm); line-height: var(--ui-line-height); color: var(--ui-color-muted); }
 .desktop-shell :is(#summary-next, #view-unavailable) { grid-column: 1 / -1; color: var(--ui-color-muted); }
 .desktop-shell #summary-next { margin-top: var(--ui-space-1); }
 .desktop-shell #source-details { grid-column: 1 / -1; border-top: 1px solid var(--ui-color-border); margin-top: var(--ui-space-2); padding-top: 0; }
@@ -328,14 +318,10 @@ body.desktop-shell {
 .desktop-shell #priority-status { display: inline; }
 .desktop-shell #priority-storage { display: inline; font-size: inherit; }
 @media (max-width: 900px) {
-  .desktop-shell #evidence-stage { grid-template-columns: minmax(0,1fr); gap: var(--ui-space-1); padding: var(--ui-space-3) var(--ui-space-4); }
-  .desktop-shell #evidence-stage :is(h1,#evidence-facts,#overview-price,#overview-freshness) { grid-column: 1; grid-row: auto; }
-  .desktop-shell #evidence-stage h1 { font-size: 20px; }
   .desktop-shell #commute-panel { width: calc(100% - 76px); }
-  .desktop-shell.evidence-only[data-view="commute"] #viewport { grid-template: "surface" minmax(180px,1fr) "journey" minmax(0,auto) "facts" auto / minmax(0,1fr); }
+  .desktop-shell.evidence-only[data-view="commute"] #viewport { grid-template: "surface" minmax(180px,1fr) "journey" minmax(0,auto) / minmax(0,1fr); }
   .desktop-shell[data-view="commute"] #commute-panel.commute-view { grid-area: journey; width: 100%; margin: 0; max-height: 36dvh; border-top: 1px solid var(--ui-color-border); border-radius: 0; }
   .desktop-shell[data-view="commute"] #commute-panel .cv-card { border: 0; border-radius: 0; box-shadow: none; }
-  .desktop-shell[data-view="commute"] #evidence-stage { max-height: 26dvh; }
 }
 @media (prefers-reduced-motion: reduce) {
   .desktop-shell *, .desktop-shell *::before, .desktop-shell *::after { scroll-behavior: auto !important; animation: none !important; transition: none !important; }
@@ -357,10 +343,12 @@ body.desktop-shell {
 @keyframes suggestions-enter { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: translateY(0); } }
 @media (prefers-reduced-motion: reduce) { .desktop-shell .search-suggestions { animation: none; } }
 
-/* Opening Plans must not resize the obscured source strip or map beneath it. */
+/* Keep the sidebar stable beneath the native Plans dialog. */
 .desktop-shell.evidence-only.plans-open #evidence-stage {
   inset: auto;
-  width: auto;
-  padding: var(--ui-space-3) var(--ui-space-4);
-  display: grid;
+  width: 100%;
+  padding: 0;
+  display: block;
 }
+.desktop-shell #source-details :is(input, button, select) { max-width: 100%; min-width: 0; }
+.desktop-shell #source-details input { width: 100%; }
