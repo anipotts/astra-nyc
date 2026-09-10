@@ -272,7 +272,7 @@ export async function createNeighborhood(container, onStatus = () => {}, { route
       };
       return {
         ...CITY_SOURCE_DETAILS,
-        description: NYC_BUILDING_SOURCE.description,
+        description: `${NYC_BUILDING_SOURCE.attribution}. ${NYC_BUILDING_SOURCE.description}`,
         heightMethod: NYC_BUILDING_SOURCE.metadata,
         coverage: `${evidence.counts.footprints} nearby footprints, ${evidence.counts.extrusions} with recorded heights. ${evidence.counts.unknownHeights} unknown heights remain flat. ${evidence.cached ? "Cached acquisition" : "Retrieved"} ${new Date(evidence.fetchedAt).toLocaleString()}. Feature edit dates ${evidence.oldestFeatureEditAt?.slice(0,10) || "unknown"}–${evidence.newestFeatureEditAt?.slice(0,10) || "unknown"}; these are not measurement dates. ${evidence.selected.kind === "nearby-only" ? "The map point is outside the returned footprints. " : "Point overlap does not verify an apartment or entrance. "}Outside this local area, OpenStreetMap massing remains.`,
       };

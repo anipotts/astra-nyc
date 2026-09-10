@@ -31,7 +31,8 @@ export function createNycBuildingOverlay(map, { client = createNycBuildingClient
     // The style.load event, rather than each source update, owns readiness.
     if (destroyed || !styleReady) return false;
     if (!map.getSource(SOURCE_ID)) map.addSource(SOURCE_ID, {
-      type: "geojson", data: empty(), attribution: NYC_BUILDING_SOURCE.attribution,
+      // The full NYC credit and acquisition details live in Sources & details.
+      type: "geojson", data: empty(),
     });
     const requestedBefore = typeof beforeLayerId === "function" ? beforeLayerId() : beforeLayerId;
     const before = requestedBefore && map.getLayer(requestedBefore) ? requestedBefore

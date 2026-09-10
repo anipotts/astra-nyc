@@ -8,7 +8,7 @@ This module supplies local building massing from NYC OTI's public footprint serv
 - `HEIGHT_ROOF` is roof height **above ground**, in feet. The module converts it using `feet * 0.3048` for rendering; it never subtracts `GROUND_ELEVATION`. Original values remain in feature properties. The flat base map does not establish terrain elevations.
 - `FEATURE_CODE=1003` is a placeholder, not a measured footprint. `GEOM_SOURCE` is text, not this code. Placeholders are rejected. Invalid, zero and null heights are never replaced with defaults.
 - Ordinary buildings (`2100`) and garages (`5110`) with usable heights receive vertical prisms. Other structure codes remain flat, avoiding invented ground-to-roof volumes for skybridges, canopies or unfinished buildings. These are neutral massing volumes, with no established roof shape, facade, materials, entrance or interior.
-- Keep the NYC OTI source attribution added to the GeoJSON source and existing map attribution. The data uses [NYC Open Data terms](https://opendata.cityofnewyork.us/overview/#termsofuse), not a newly asserted software license. Direction should add this hosted-data receipt to `DEPENDENCIES.md`; no package was installed here.
+- Keep the full NYC OTI credit and acquisition details in the sidebar's Sources & details disclosure. Do not duplicate that long credit in the map overlay. Existing OpenFreeMap, OpenMapTiles and OpenStreetMap map attribution stays visible. The data uses [NYC Open Data terms](https://opendata.cityofnewyork.us/overview/#termsofuse), not a newly asserted software license. The hosted-data receipt is recorded in `DEPENDENCIES.md`; no package was installed here.
 
 ## Mount and selected-location contract
 
