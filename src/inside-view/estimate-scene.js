@@ -78,6 +78,8 @@ export function createEstimateScene(host, data) {
   for(const x of [-.12,.12])box(avatar,.13,.6,.15,x,.49,0,dark,.04);
   let x=data.spawn.x,z=data.spawn.z,yaw=data.spawn.yaw*Math.PI/180,pitch=.05,active=true,frame=0,last=0,drag=null;
   const keys=new Set(),abort=new AbortController(),canvas=renderer.domElement;
+  const reduced=window.matchMedia('(prefers-reduced-motion: reduce)');
+  document.addEventListener('visibilitychange',()=>{if(document.hidden)keys.clear();},{signal:abort.signal});
   const listen=(type,fn)=>canvas.addEventListener(type,fn,{signal:abort.signal});
   function reset(){x=data.spawn.x;z=data.spawn.z;yaw=data.spawn.yaw*Math.PI/180;pitch=.05;keys.clear();draw();}
   function draw(){
@@ -98,7 +100,7 @@ export function createEstimateScene(host, data) {
     if(walkable(data,x+dx,z))x+=dx;if(walkable(data,x,z+dz))z+=dz;
     if(forward||side)draw();frame=requestAnimationFrame(tick);
   }
-  listen('keydown',e=>{const key=e.key.toLowerCase();if(['w','a','s','d','arrowup','arrowdown','arrowleft','arrowright','home'].includes(key)){e.preventDefault();if(key==='home')reset();else keys.add(key);}});
+  listen('keydown',e=>{const key=e.key.toLowerCase();if(['w','a','s','d','arrowup','arrowdown','arrowleft','arrowright','home'].includes(key)){e.preventDefault();if(key==='home')reset();else if(reduced.matches){if(e.repeat)return;const f=key==='w'||key==='arrowup'?1:key==='s'||key==='arrowdown'?-1:0,side=key==='d'||key==='arrowright'?1:key==='a'||key==='arrowleft'?-1:0;const dx=(-Math.sin(yaw)*f+Math.cos(yaw)*side)*.2,dz=(-Math.cos(yaw)*f-Math.sin(yaw)*side)*.2;if(walkable(data,x+dx,z))x+=dx;if(walkable(data,x,z+dz))z+=dz;draw();}else keys.add(key);}});
   listen('keyup',e=>keys.delete(e.key.toLowerCase()));listen('blur',()=>{keys.clear();drag=null;});
   listen('pointerdown',e=>{if(e.button!==0)return;canvas.focus();canvas.setPointerCapture(e.pointerId);drag={x:e.clientX,y:e.clientY};});
   listen('pointermove',e=>{if(!drag)return;yaw-=(e.clientX-drag.x)*.005;pitch=Math.max(-.35,Math.min(.35,pitch-(e.clientY-drag.y)*.003));drag={x:e.clientX,y:e.clientY};draw();});
