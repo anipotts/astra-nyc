@@ -915,7 +915,14 @@ $("#change-location").onclick = () => {
   setMode("overview");
   resolveListingLocation();
 };
-setupPriorities((selected) => { priorities = selected; syncViewServices(); });
+setupPriorities((selected) => {
+  priorities = selected;
+  const summary = $("#priority-summary");
+  if (summary) summary.textContent = selected.length
+    ? selected.join(", ")
+    : "Choose what matters nearby";
+  syncViewServices();
+});
 $("#listing-preview").addEventListener("click", () => {
   if (selectedListing) $("#evidence-stage").hidden = false;
 });
