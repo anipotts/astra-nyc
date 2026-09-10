@@ -10,9 +10,9 @@ const height = ["number", ["get", "heightMeters"], 0];
 
 export function createNycBuildingOverlay(map, { client = createNycBuildingClient(),
   onStatus = () => {}, onCoverageChange = () => {}, beforeLayerId = null,
-  radiusMeters = 400 } = {}) {
+  radiusMeters = 400, initialStyleReady = map.isStyleLoaded() } = {}) {
   let destroyed = false, sequence = 0, controller = null, key = null;
-  let styleReady = map.isStyleLoaded();
+  let styleReady = initialStyleReady;
   let data = null, lastSelection = null, pending = null;
   let state = { phase: "idle", listingId: null, source: NYC_BUILDING_SOURCE, rendered: false };
   const emit = patch => {

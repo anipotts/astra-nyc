@@ -1,6 +1,6 @@
 # Official NYC building overlay
 
-This module supplies local building massing from NYC OTI's public footprint service. Direction owns integration in the shared map; this branch changes no existing runtime files and starts no preview server.
+This module supplies local building massing from NYC OTI's public footprint service. Direction mounts it in the shared map once its base building layers are ready.
 
 ## Source and representation
 
@@ -24,6 +24,8 @@ const baseLayerId = "elsewhere-city-massing";
 const originalBaseFilter = map.getFilter(baseLayerId);
 const buildings = createNycBuildingOverlay(map, {
   radiusMeters: 400,
+  // Only when mounting inside map's load handler after other layer edits:
+  initialStyleReady: true,
   // Insert below route emphasis if it exists; otherwise before map labels.
   beforeLayerId: () => map.getLayer("commute-route-halo")
     ? "commute-route-halo" : null,

@@ -24,7 +24,7 @@ export function setupSearchSuggestions(input, examples, findMatches, onChoose, o
   popup.id = "search-suggestions";
   popup.className = "search-suggestions";
   popup.setAttribute("role", "listbox");
-  popup.setAttribute("aria-label", "Recent searches and available listings");
+  popup.setAttribute("aria-label", "Recent searches and listings");
   popup.hidden = true;
   input.closest("form").append(popup);
   input.setAttribute("role", "combobox");
@@ -90,7 +90,7 @@ export function setupSearchSuggestions(input, examples, findMatches, onChoose, o
       });
     }
     const matches = (query ? findMatches(query) : examples).filter((l) => !seen.has(l.id));
-    if (matches.length) heading(query ? "Matching listings" : "Available listings");
+    if (matches.length) heading(query ? "Matching listings" : "Browse listings");
     for (const listing of matches)
       option(listing.name, listing.mapAddress || listing.location, () => onChoose(listing));
     if (!actions.length) {

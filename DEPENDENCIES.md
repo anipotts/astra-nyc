@@ -1,6 +1,6 @@
 # Dependencies and attribution
 
-Direct dependencies: Three.js 0.186.0 (MIT), MapLibre GL JS 6.9.0 (BSD-3-Clause), Vite 8.3.0 (MIT). Versions are pinned in package.json and package-lock.json. The browser runtime uses Three.js; Vite and its dependency tree are build tools.
+Direct dependencies: Three.js0.186.0 (MIT), MapLibre GL JS6.9.0 (BSD-3-Clause), PDF.js/pdfjs-dist6.3.289 (Apache-2.0) and Vite8.3.0 (MIT). Versions are pinned in package.json and package-lock.json. Vite and its dependency tree are build tools.
 
 Official documentation consulted during this event: [Three.js](https://threejs.org/docs/) and [Vite](https://vite.dev/guide/). No example app or pre-event project code was imported.
 
@@ -19,6 +19,8 @@ License identifiers checked against installed package manifests. Full shipped li
 | @maplibre/maplibre-gl-style-spec | 26.4.2 | ISC | Runtime dependency |
 | @maplibre/mlt | 1.2.1 | (MIT OR Apache-2.0) | Runtime dependency |
 | @maplibre/vt-pbf | 4.3.2 | MIT | Runtime dependency |
+| @napi-rs/canvas | 1.0.9 | MIT | Optional PDF.js Node canvas dependency; not imported by the browser viewer |
+| @napi-rs/canvas-darwin-arm64 | 1.0.9 | MIT | Optional local native canvas backend; not browser-bundled |
 | @oxc-project/types | 0.149.0 | MIT | Build tooling |
 | @rolldown/binding-darwin-arm64 | 1.2.8 | MIT | Build tooling |
 | @rolldown/pluginutils | 1.0.1 | MIT | Build tooling |
@@ -38,6 +40,7 @@ License identifiers checked against installed package manifests. Full shipped li
 | murmurhash-js | 1.0.0 | MIT | Runtime dependency |
 | nanoid | 3.3.18 | MIT | Build tooling |
 | pbf | 5.1.2 | BSD-3-Clause | Runtime dependency |
+| pdfjs-dist | 6.3.289 | Apache-2.0 | Original PDF parsing and canvas rendering with a bundled worker |
 | picocolors | 1.1.1 | ISC | Build tooling |
 | picomatch | 4.0.7 | MIT | Build tooling |
 | postcss | 8.5.28 | MIT | Build tooling |
@@ -104,3 +107,17 @@ No new npm dependencies. Inside uses the existing DOM/SVG renderer; Commute uses
 The automatic lookup for resolved routes uses the [FOSSGIS routing service](https://routing.openstreetmap.de/about.html) and its separately deployed OSRM foot, bike and car profiles ([published configuration](https://github.com/fossgis-routing-server/osrm-frontend/blob/master/src/leaflet_options.js), [OSRM API](https://project-osrm.org/docs/v5.24.0/api/)). This is a hosted community service, not a pinned npm package; upstream deployed revision is not supplied by the response. Respect the [FOSSGIS usage conditions](https://fossgis.de/arbeitsgruppen/osm-server/nutzungsbedingungen/). Route data derives from OpenStreetMap under ODbL; attribution and a map-correction link remain visible. Requests are bounded, coalesced and cached for30minutes with a shared cross-process gate. No traffic, transit itinerary or schedule inference is added.
 
 The finite 3WorldTradeCenter destination uses a public approximate point from [OpenStreetMap way166839381](https://www.openstreetmap.org/way/166839381), reviewed during the event. It is not an entrance survey. Source locations and provider acquisition timestamps remain inspectable. No source artwork or user photos are bundled by these modules.
+
+## Official NYC building data — September 10, 2026
+
+The runtime now queries the [NYC OTI BUILDING public layer](https://services6.arcgis.com/yG5s3afENB5iO9fj/arcgis/rest/services/BUILDING_view/FeatureServer/0), following the city's [building-footprint metadata](https://github.com/CityOfNewYork/nyc-geo-metadata/blob/main/Metadata/Metadata_BuildingFootprints.md). This is a hosted dataset without a pinned release; acquisition and per-feature edit dates are retained. It is governed by [NYC Open Data terms](https://opendata.cityofnewyork.us/overview/#termsofuse), not an assumed software or CC0 license. Source attribution remains on the map and in recordings. Queries are bounded to a400m radius with2,000features maximum and no pagination or bulk download. Data is cached in memory for30minutes. No new package, credential or imagery provider is needed.
+
+Roof heights are feet above ground, converted to metres with0.3048. Missing heights remain flat; placeholder outlines are excluded. This improves source grounding without establishing roof shapes, facades, interiors, surveyed dimensions or current construction conditions.
+
+The official [Architectural visualization with Astra](https://developers.openai.com/blog/architectural-visualization-with-astra) example informed the plan-first, structured-model and render/inspect workflow. No example scene code or imagined house was imported. Its conceptual visualization workflow does not establish professional plan compliance or exact-address reconstruction.
+
+## Original publisher plan viewer — September 10, 2026
+
+[Mozilla PDF.js](https://github.com/mozilla/pdf.js) is installed as pinned [pdfjs-dist6.3.289](https://www.npmjs.com/package/pdfjs-dist); its Apache-2.0 license is retained at src/source-plan/PDFJS_LICENSE.txt. Official [examples](https://mozilla.github.io/pdf.js/examples/) and [API documentation](https://mozilla.github.io/pdf.js/api/draft/module-pdfjsLib.html) were consulted; no example app was imported. Library code loads on source viewing and the worker is served locally. Optional Node canvas packages listed above are npm dependencies, not browser imports. Platform-specific packages recorded in the lockfile but not installed here need their notices checked if distributed.
+
+Approved publisher PDFs are transient original-source previews: bounded retrieval, no persistent storage or bundled artwork, retained publisher link and acquisition metadata. This grants no redistribution rights or professional certification. A tighter SVG viewport around the already approved raster mark enlarges its header/favicon presentation; the original artwork bytes remain unchanged.

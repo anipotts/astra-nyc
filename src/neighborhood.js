@@ -4,6 +4,9 @@ import "maplibre-gl/dist/maplibre-gl.css";
 import { validateLocation, LOCATION_BOUNDS } from "./location.js";
 import { createCommuteMapLayer } from "./commute-view/map-layer.js";
 import { createMapFocus } from "./map-focus.js";
+import { createNycBuildingOverlay, outsideOfficialCoverageFilter, NYC_BUILDING_SOURCE } from "./nyc-buildings/index.js";
+import { createRouteEmphasis } from "./practical-motion.js";
+import "./practical-motion.css";
 setWorkerUrl(workerUrl);
 const regionalCamera = {
   center: [-74.009, 40.711],
@@ -40,7 +43,7 @@ export const CITY_SOURCE_DETAILS = Object.freeze({
     "Available OpenStreetMap geometry around New York City; completeness and currentness vary by building.",
 });
 
-export async function createNeighborhood(container, onStatus = () => {}, { routePadding = 72 } = {}) {
+export async function createNeighborhood(container, onStatus = () => {}, { routePadding = 72, onBuildingStatus = () => {} } = {}) {
   const response = await fetch("https://tiles.openfreemap.org/styles/liberty", {
     signal: AbortSignal.timeout(12000),
   });
@@ -76,10 +79,12 @@ export async function createNeighborhood(container, onStatus = () => {}, { route
       ? 0
       : 650;
   let selected = null;
+  let selectedId = null, buildings = null;
   let pin = null;
   let destroyed = false;
   const focus = createMapFocus();
   const routeLayer = createCommuteMapLayer(map, { padding: routePadding });
+  const routeEmphasis = createRouteEmphasis(map);
   const stop = () => {
     if (!destroyed) map.stop();
   };
@@ -210,10 +215,22 @@ export async function createNeighborhood(container, onStatus = () => {}, { route
         before,
       );
     }
+    buildings = createNycBuildingOverlay(map, {
+      // This runs inside load; the base layers above can make isStyleLoaded()
+      // temporarily false even though no further style.load event is coming.
+      initialStyleReady: true,
+      onStatus: onBuildingStatus,
+      beforeLayerId: () => map.getLayer("commute-route-halo") ? "commute-route-halo" : null,
+      onCoverageChange: (coverage) => {
+        if (map.getLayer("elsewhere-city-massing"))
+          map.setFilter("elsewhere-city-massing", outsideOfficialCoverageFilter(supportedMassing, coverage));
+      },
+    });
+    buildings.update({ listingId: selectedId, location: selected });
     status();
   });
   return {
-    setLocation(value) {
+    setLocation(value, listingId = null) {
       if (destroyed) return;
       stop();
       pin?.remove();
@@ -221,6 +238,8 @@ export async function createNeighborhood(container, onStatus = () => {}, { route
       selected = null;
       const location = validateLocation(value);
       selected = location;
+      selectedId = listingId;
+      buildings?.update({ listingId, location });
       if (location) {
         const element = document.createElement("div");
         element.className = "listing-pin";
@@ -240,11 +259,27 @@ export async function createNeighborhood(container, onStatus = () => {}, { route
     resumeLocationFocus() { if (focus.pending) move(focus.pending); },
     routeLayer: {
       ...routeLayer,
+      setRoute(value) { routeEmphasis.stop(); routeLayer.setRoute(value); },
+      highlight(value) { routeLayer.highlight(value); if (value) routeEmphasis.run(); else routeEmphasis.stop(); },
       fit(options) { focus.cancel(); routeLayer.fit(options); },
+      stop() { routeEmphasis.stop(); routeLayer.stop(); },
     },
-    getSourceDetails: () => CITY_SOURCE_DETAILS,
-    getCamera: () => {
+    getSourceDetails() {
+      const evidence = buildings?.getState();
+      if (!evidence?.rendered) return {
+        ...CITY_SOURCE_DETAILS,
+        coverage: CITY_SOURCE_DETAILS.coverage + (evidence?.phase === "error" ? " Official NYC overlay is unavailable; the base map remains visible." : " Official NYC footprint data loads around a selected location."),
+      };
+      return {
+        ...CITY_SOURCE_DETAILS,
+        description: NYC_BUILDING_SOURCE.description,
+        heightMethod: NYC_BUILDING_SOURCE.metadata,
+        coverage: `${evidence.counts.footprints} nearby footprints, ${evidence.counts.extrusions} with recorded heights. ${evidence.counts.unknownHeights} unknown heights remain flat. ${evidence.cached ? "Cached acquisition" : "Retrieved"} ${new Date(evidence.fetchedAt).toLocaleString()}. Feature edit dates ${evidence.oldestFeatureEditAt?.slice(0,10) || "unknown"}–${evidence.newestFeatureEditAt?.slice(0,10) || "unknown"}; these are not measurement dates. ${evidence.selected.kind === "nearby-only" ? "The map point is outside the returned footprints. " : "Point overlap does not verify an apartment or entrance. "}Outside this local area, OpenStreetMap massing remains.`,
+      };
+    },
+    getCamera: ({ intended = false } = {}) => {
       if (destroyed) return null;
+      if (intended && focus.pending) return structuredClone(focus.pending);
       const center = map.getCenter();
       return {
         center: [center.lng, center.lat],
@@ -304,6 +339,8 @@ export async function createNeighborhood(container, onStatus = () => {}, { route
       destroyed = true;
       clearTimeout(timeout);
       observer.disconnect();
+      buildings?.destroy();
+      routeEmphasis.destroy();
       routeLayer.destroy();
       for (const event of ["pointerdown", "wheel", "keydown"])
         container.removeEventListener(event, directInteraction, { capture: true });

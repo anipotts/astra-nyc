@@ -1,0 +1,2 @@
+#plan-drawing.source-plan { min-height: 320px; overflow: hidden; }
+.plan-tools[hidden], .plan-documents button[hidden], #plan-print[hidden] { display: none; }

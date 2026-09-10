@@ -20,14 +20,19 @@ import { acceptInspectedRegion } from "./inspected-plan.js";
 import { inspectedPlans } from "./inspected-plan-records.js";
 import { lookupLocation, confidentLocationMatch } from "./location.js";
 import { getExampleLocation } from "./example-locations.js";
-import { createViewTransition } from "./view-transition.js";
+import { createOverviewReturn } from "./practical-motion.js";
+import { normalizeSourceUrl } from "./source-policy.js";
+import { mountSourcePlan } from "./source-plan/index.js";
+import "./plan-source.css";
 import { setupPlanInspection } from "./plan-inspection.js";
 import { setupEvidenceReview } from "./listing-evidence.js";
 import { mountInsideView } from "./inside-view/index.js";
 import { mountCommuteView } from "./commute-view/index.js";
 const $ = (s) => document.querySelector(s);
 const container = $("#scene");
-const viewTransition = createViewTransition($("#viewport"));
+const overviewReturn = createOverviewReturn();
+let pendingOverviewCamera = null;
+let sourcePlanViewer = null;
 let geoMap,
   mapInit,
   locationRequest = null,
@@ -435,7 +440,10 @@ function resetCamera() {
 function setMode(mode) {
   if (mode === "nearby" && selectedListing) mode = "overview";
   if (mode !== state.mode && mode !== "overview") $("#source-details").open = false;
-  viewTransition.run();
+  if (selectedListing && mode !== state.mode) {
+    if (state.mode === "overview") overviewReturn.leave(selectedListing.id, geoMap?.getCamera({ intended: true }));
+    if (mode === "overview") pendingOverviewCamera = { id: selectedListing.id, camera: overviewReturn.take(selectedListing.id) };
+  }
   geoMap?.stop();
   document.body.dataset.view = mode;
   if (entryKind === "empty") mode = "overview";
@@ -682,6 +690,8 @@ function syncViewServices() {
 const syntheticPotential = { ...homes.potential };
 function showListing(listing) {
   if (!listing) return;
+  overviewReturn.clear();
+  pendingOverviewCamera = null;
   entryKind = "listing";
   selectedListing = listing;
   listingIntake.select(listing);
@@ -778,7 +788,7 @@ async function openNeighborhood(focus = false) {
     mapInit ||= import("./neighborhood.js").then(({ createNeighborhood }) =>
       createNeighborhood($("#map-canvas"), (text) => {
         $("#map-status").textContent = mapLocationMessage || text;
-      }, { routePadding: () => {
+      }, { onBuildingStatus: () => updateCitySource(), routePadding: () => {
         const mapRect = $("#map-canvas").getBoundingClientRect();
         const panel = $("#commute-panel").getBoundingClientRect();
         const overlaps = !$("#commute-panel").hidden && panel.top < mapRect.bottom && panel.bottom > mapRect.top;
@@ -786,10 +796,7 @@ async function openNeighborhood(focus = false) {
       } }),
     );
     geoMap = await mapInit;
-    const citySource = geoMap.getSourceDetails();
-    $("#city-source-description").textContent =
-      citySource.description + " " + citySource.coverage;
-    $("#city-source-link").href = citySource.heightMethod;
+    updateCitySource();
     if (
       selectedListing?.id !== selected.id ||
       state.mode === "walk" ||
@@ -806,17 +813,28 @@ async function openNeighborhood(focus = false) {
     }
     syncViewServices();
     if (shownLocation !== selected.id) {
-      geoMap.setLocation(location);
+      geoMap.setLocation(location, selected.id);
       shownLocation = selected.id;
     }
     geoMap.resize();
-    if (focus && location) geoMap.direct();
+    if (pendingOverviewCamera?.id === selected.id && state.mode === "overview") {
+      const camera = pendingOverviewCamera.camera;
+      pendingOverviewCamera = null;
+      if (camera) geoMap.restoreCamera(camera);
+      else geoMap.resumeLocationFocus();
+    } else if (focus && location) geoMap.direct();
     else geoMap.resumeLocationFocus();
   } catch {
     mapInit = null;
     $("#map-status").textContent =
       "Map could not load. Source details remain available.";
   }
+}
+function updateCitySource() {
+  if (!geoMap) return;
+  const source = geoMap.getSourceDetails();
+  $("#city-source-description").textContent = source.description + " " + source.coverage;
+  $("#city-source-link").href = source.heightMethod;
 }
 $("#listing-map").onclick = () => setMode("overview");
 $("#neighborhood-view").onclick = () => setMode("overview");
@@ -1283,6 +1301,16 @@ function renderPlans() {
   $("#plan-name").textContent =
     selectedListing?.name || currentLayout?.label || "Plans";
   const enabled = Boolean(currentLayout);
+  let sourcePlan = null;
+  try { sourcePlan = normalizeSourceUrl(selectedListing?.planUrl); } catch {}
+  const sourceOnly = !enabled && Boolean(sourcePlan);
+  if (!sourceOnly && sourcePlanViewer) {
+    sourcePlanViewer.destroy();
+    sourcePlanViewer = null;
+  }
+  $("#plan-drawing").classList.toggle("source-plan", sourceOnly);
+  $(".plan-tools").hidden = !enabled;
+  $("#plan-print").hidden = !enabled;
   for (const id of [
     "plan-print",
     "plan-zoom-in",
@@ -1292,6 +1320,9 @@ function renderPlans() {
   ])
     $("#" + id).disabled = !enabled;
   const download = $("#plan-svg");
+  download.textContent = "Download SVG";
+  download.removeAttribute("target");
+  download.removeAttribute("rel");
   download.setAttribute("aria-disabled", String(!enabled));
   download.tabIndex = enabled ? 0 : -1;
   download.removeAttribute("href");
@@ -1308,6 +1339,7 @@ function renderPlans() {
     ? "Bundled inspected source record · original artwork linked only · reuse rights unresolved"
     : "Saved on this browser only";
   for (const button of document.querySelectorAll("[data-document]")) {
+    button.hidden = !enabled && button.dataset.document !== "source";
     button.disabled =
       Boolean(acceptedRegion) &&
       ["arrangement", "offered"].includes(button.dataset.document);
@@ -1321,6 +1353,32 @@ function renderPlans() {
             (acceptedRegion || state.unfurnished ? "empty" : "arrangement"),
       ),
     );
+  }
+  if (sourceOnly) {
+    const study = selectedListing.planStudy;
+    $("[data-document='source']").setAttribute("aria-pressed", "true");
+    $("#plan-notice").textContent = "Original publisher plan · " +
+      (selectedListing.planScope === "type_only" ? "Residence type; exact apartment not selected." : "Confirm the unit and current condition at its source.");
+    if (plansOpen) {
+      if (!sourcePlanViewer) {
+        $("#plan-drawing").replaceChildren();
+        sourcePlanViewer = mountSourcePlan($("#plan-drawing"));
+      }
+      void sourcePlanViewer.update({ sourceUrl: sourcePlan, title: selectedListing.name, active: true });
+    } else sourcePlanViewer?.setActive(false);
+    $("#plan-selection").textContent = study
+      ? study.reportedDimensions.map(room => `${room.label}: ${room.printed}`).join(" · ") + ". Printed sizes; boundary endpoints remain unverified."
+      : "This is the source document. It does not establish verified room geometry or included furnishings.";
+    $("#plan-revision").textContent = study ? `Source reviewed ${study.reviewedAt.slice(0,10)}` : "Publisher-hosted document";
+    $("#plan-persistence").textContent = "Original source preview · open the publisher document to print or save a copy.";
+    download.textContent = "Open publisher plan ↗";
+    download.href = sourcePlan;
+    download.target = "_blank";
+    download.rel = "noopener noreferrer";
+    download.removeAttribute("download");
+    download.setAttribute("aria-disabled", "false");
+    download.tabIndex = 0;
+    return;
   }
   if (!enabled) {
     $("#plan-drawing").replaceChildren();

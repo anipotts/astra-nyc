@@ -1,5 +1,6 @@
 import { listings } from "./listings.js";
 import { getExampleLocation } from "./example-locations.js";
+import { nycPlanStudies } from "./nyc-plan-records.js";
 
 // Current-event NYC scout observations, September 10, 2026. No fresh retrieval.
 // This is a separate catalog: the original NYC/Jersey City research stays intact.
@@ -7,7 +8,16 @@ const byId = new Map(listings.map((listing) => [listing.id, listing]));
 function existing(id, scoutId, evidenceScope, unit, planScope) {
   const listing = byId.get(id);
   if (!listing) throw new Error(`Missing researched listing: ${id}`);
-  return { ...listing, scoutId, evidenceScope, unit, planScope };
+  const study = nycPlanStudies.find(item => item.listingId === id);
+  return { ...listing, scoutId, evidenceScope, unit, planScope,
+    ...(study ? {
+      archived: study.listingObservation.archived,
+      availability: study.listingObservation.availability,
+      checkedAt: study.listingObservation.checkedAt,
+      planStudy: study,
+      questions: `${listing.questions} ${study.discrepancies.join(" ")}`,
+    } : {}),
+  };
 }
 function reserve(record) {
   return {

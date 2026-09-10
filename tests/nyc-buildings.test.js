@@ -174,6 +174,16 @@ test("style readiness and reload preserve data; repeated same selection avoids a
   layer.destroy();
 });
 
+test("mounting during load after base-layer edits does not wait forever for another style event", async () => {
+  const map = mockMap({ loaded: false });
+  const layer = createNycBuildingOverlay(map, { initialStyleReady: true,
+    client: { load: async () => normalize() } });
+  await layer.update(selection);
+  assert.equal(layer.getState().rendered, true);
+  assert.equal(map.sources.get("elsewhere-nyc-buildings").data.features.length, 1);
+  layer.destroy();
+});
+
 test("partial and empty queries never hide the base map; unresolved selection never fetches", async () => {
   const map = mockMap(), changes = []; let calls = 0;
   const layer = createNycBuildingOverlay(map, { onCoverageChange: c => changes.push(c),

@@ -9,8 +9,8 @@ export function createCommuteMapLayer(map, { reducedMotion = () => globalThis.ma
     for (const id of ['commute-route', 'commute-highlight']) if (!map.getSource(id)) map.addSource(id, { type: 'geojson', data: empty() });
     if (!map.getLayer(ids[0])) map.addLayer({ id: ids[0], type: 'line', source: 'commute-route', layout: { 'line-cap': 'round', 'line-join': 'round' }, paint: { 'line-color': '#fffdf3', 'line-width': 10, 'line-opacity': .95 } });
     if (!map.getLayer(ids[1])) map.addLayer({ id: ids[1], type: 'line', source: 'commute-route', layout: { 'line-cap': 'round', 'line-join': 'round' }, paint: { 'line-color': '#1e5841', 'line-width': 5 } });
-    if (!map.getLayer(ids[2])) map.addLayer({ id: ids[2], type: 'line', source: 'commute-highlight', filter: ['==', '$type', 'LineString'], layout: { 'line-cap': 'round', 'line-join': 'round' }, paint: { 'line-color': '#a65d2b', 'line-width': 7 } });
-    if (!map.getLayer(ids[3])) map.addLayer({ id: ids[3], type: 'circle', source: 'commute-highlight', filter: ['==', '$type', 'Point'], paint: { 'circle-radius': 7, 'circle-color': '#a65d2b', 'circle-stroke-width': 3, 'circle-stroke-color': '#fffdf3' } });
+    if (!map.getLayer(ids[2])) map.addLayer({ id: ids[2], type: 'line', source: 'commute-highlight', filter: ['==', '$type', 'LineString'], layout: { 'line-cap': 'round', 'line-join': 'round' }, paint: { 'line-color': '#a65d2b', 'line-width': 7, 'line-width-transition': { duration: 0 } } });
+    if (!map.getLayer(ids[3])) map.addLayer({ id: ids[3], type: 'circle', source: 'commute-highlight', filter: ['==', '$type', 'Point'], paint: { 'circle-radius': 7, 'circle-radius-transition': { duration: 0 }, 'circle-color': '#a65d2b', 'circle-stroke-width': 3, 'circle-stroke-color': '#fffdf3' } });
     map.getSource('commute-route').setData(route ? feature(route.geometry) : empty());
     map.getSource('commute-highlight').setData(step ? { type: 'FeatureCollection', features: [feature(step.geometry), feature({ type: 'Point', coordinates: step.coordinate })] } : empty());
   }

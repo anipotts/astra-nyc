@@ -1,6 +1,7 @@
 import { DEMO_DESTINATION, MODES, externalDirections, formatDuration, formatDistance, stepLabel } from './route.js';
 import { createAutomaticRoute } from './automatic-route.js';
 import { lookupLocation } from '../location.js';
+import { createResultReveal } from '../practical-motion.js';
 import './styles.css';
 
 export function mountCommuteView(container, { routeLayer = {}, acquire, resolveDestination = lookupLocation, onDestinationChange = () => {}, onModeChange = () => {} } = {}) {
@@ -22,6 +23,7 @@ export function mountCommuteView(container, { routeLayer = {}, acquire, resolveD
     <footer class="cv-attribution">Route data © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">OpenStreetMap contributors</a> · <a href="https://www.openstreetmap.org/fixthemap" target="_blank" rel="noopener noreferrer">Fix the map</a></footer>
   </section>`;
   const $ = selector => container.querySelector(selector);
+  const resultReveal = createResultReveal($('.cv-result'));
   let context = { active: true }, mode = 'walking', destination = DEMO_DESTINATION, lookup = null, lookupGeneration = 0, stepIndex = 0, lastIdentity = '', destroyed = false;
   const motion = () => globalThis.matchMedia?.('(prefers-reduced-motion: reduce)').matches ? 0 : 500;
   const controller = createAutomaticRoute({ acquire, onChange: renderState });
@@ -58,7 +60,7 @@ export function mountCommuteView(container, { routeLayer = {}, acquire, resolveD
     $('.cv-submit').textContent = destination ? 'Retry route' : 'Find place';
     $('.cv-submit').disabled = findingPlace || state.status === 'loading' || context.active === false || !(context.selectedListing || context.listing);
     $('.cv-status').textContent = state.status === 'loading' ? 'Finding the route…' : state.status === 'error' ? state.error : state.status === 'external' || mode === 'transit' ? 'Transit schedules and itineraries open in Google Maps. No transit route is drawn here.' : route ? '' : context.resolvedLocation ? (destination ? 'Preparing the route…' : 'Enter a public destination and choose Find place.') : 'The selected home needs a resolved location for an in-app route. External directions remain available.';
-    if (!route) { routeLayer.setRoute?.(null); return; }
+    if (!route) { resultReveal.reset(); routeLayer.setRoute?.(null); return; }
     $('.cv-duration').textContent = formatDuration(route.duration);
     $('.cv-distance').textContent = `${formatDistance(route.distance)} · ${MODES[route.mode]}`;
     $('.cv-freshness').textContent = route.cached ? 'Cached route' : 'Live lookup';
@@ -69,6 +71,7 @@ export function mountCommuteView(container, { routeLayer = {}, acquire, resolveD
       const a = document.createElement('a'); a.textContent = label; a.href = point.source; a.target = '_blank'; a.rel = 'noopener noreferrer'; sources.append(a, document.createTextNode(` · reviewed ${new Date(point.observedAt).toLocaleDateString()} `));
     }
     stepIndex = 0; routeLayer.setRoute?.(route); showStep();
+    resultReveal.show(JSON.stringify([context.selectedListing?.id, route.mode, route.observedAt, route.origin, route.destination]));
     if (context.active !== false) routeLayer.fit?.({ bounds: route.bounds, duration: motion() });
   }
   $('.cv-destination').addEventListener('input', () => { destination = null; invalidate(); onDestinationChange({ text: $('.cv-destination').value, location: null }); });
@@ -122,6 +125,6 @@ export function mountCommuteView(container, { routeLayer = {}, acquire, resolveD
       if (identity !== lastIdentity) { lastIdentity = identity; invalidate(); }
       external();
     },
-    destroy() { destroyed = true; lookupGeneration++; lookup?.abort(); controller.destroy(); routeLayer.stop?.(); routeLayer.setRoute?.(null); container.removeEventListener('keydown',stop); container.removeEventListener('pointerdown',stop); container.replaceChildren(); container.classList.remove('commute-view'); },
+    destroy() { destroyed = true; lookupGeneration++; lookup?.abort(); controller.destroy(); resultReveal.destroy(); routeLayer.stop?.(); routeLayer.setRoute?.(null); container.removeEventListener('keydown',stop); container.removeEventListener('pointerdown',stop); container.replaceChildren(); container.classList.remove('commute-view'); },
   };
 }

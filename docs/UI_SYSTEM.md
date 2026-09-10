@@ -33,7 +33,7 @@ New view modules should consume tokens and primitives, then add only module-scop
 | Easing | --ui-ease | cubic-bezier(.2,.7,.2,1) |
 | Sidebar | --ui-sidebar-width |248px |
 
-The22px title reduces to20px in the compact fact strip. The approved landing heading remains a deliberate large display exception. Provider map controls retain their native29px geometry to preserve supplied icon alignment.
+The22px title reduces to20px in the sidebar listing summary. The approved landing heading remains a deliberate large display exception. Provider map controls retain their native29px geometry to preserve supplied icon alignment.
 
 ## Primitives
 
@@ -62,11 +62,11 @@ Examples:
 
 ## Shared layout and integrations
 
-For a selected listing, #viewport has two grid areas: `surface` fills remaining height, `facts` contains #evidence-stage. The source strip scrolls at42dvh maximum; it never overlays map controls or the Inside surface. It uses two columns above900px window width and one below. Expanding source details reduces the visual area, so renderers must respond to container resize.
+For a selected listing, #evidence-stage belongs in the main sidebar directly below the listing selector. Title, essential facts and price stay visible; freshness, qualifications and source inspection live in Sources & details. The sidebar scrolls independently when expanded. Do not reintroduce a bottom facts bar, floating listing card or duplicate listing summary. Overview and Inside retain the full viewport height.
 
-#inside-surface is a block with16px padding and overflow:auto; the old330px bottom padding and grid centering are removed. Incoming Inside content owns only its inner layout. The current nominal plan fits the available row. #commute-panel remains a bounded overlay within the surface row, leaving the map navigation stack clear. Incoming view modules can replace their own form composition without global shell overrides.
+#inside-surface is a block with16px padding and overflow:auto. Incoming Inside content owns only its inner layout. #commute-panel remains a bounded overlay above900px; at narrower desktop widths, its independently scrolling row occupies at most36dvh below the map. Map controls stay clear. Incoming modules must consume shared tokens and primitives without global shell overrides.
 
-Plans remains a native dialog. Opening it must not reposition the obscured source strip. Preserve Escape, focus return, document state and camera state. Current browser checks confirm Escape and focus return; native browser chrome can receive focus when tabbing past dialog bounds, while background document controls remain inert.
+Plans remains a native dialog. Opening it must not reposition the sidebar or map. Preserve Escape, focus return, document state and camera state. Background document controls remain inert. Original publisher documents and generated planning drawings must remain visibly distinct.
 
 Your places retains Browse listings wording: bundled source cases are not relabelled as user-saved. Add sits alongside the select. Priorities remain real pressed-state buttons in stable single-column rows. Status/persistence elements retain runtime IDs and failure messages; concise runtime wording is separately handed to the coordinator.
 
@@ -80,4 +80,4 @@ Shared pass:123existing tests and production build pass; existing bundle-size ad
 
 Calculated contrast: body/surface15.45:1, muted/surface5.76:1, white/accent9.59:1, selected-text/background8.11:1, focus/surface4.98:1. These are token-pair checks, not a claim of exhaustive accessibility certification.
 
-Known integration check: rapid listing selection followed by a view change can stop the current map flight before reaching the new listing; this belongs to runtime/map owner. Verify combined Inside/Commute and restored evidence records on the exact integration head. Private screenshots and detailed QA receipts remain outside public sources.
+Direction owns combined checks of rapid listing selection, intended camera restoration, route cancellation and source-view state on the final integration head. Practical motion uses a160ms result reveal and300ms route-segment emphasis; both cancel on state changes and respect reduced motion. Camera movement uses actual geographic framing; no input morph or simulated map zoom decorates view changes. Private screenshots and detailed QA receipts remain outside public sources.

@@ -5,6 +5,7 @@ import { createPlanInspectionMiddleware } from "./server/plan-inspection.js";
 import { createListingEvidenceMiddleware } from "./server/listing-evidence.js";
 import { createLocationMiddleware } from "./server/location.js";
 import { createCommuteMiddleware } from "./server/commute-view/provider.js";
+import { createSourcePlanMiddleware } from "./server/source-plan.js";
 export default defineConfig(({ mode }) => {
   const env = loadEnv(
     mode,
@@ -26,11 +27,16 @@ export default defineConfig(({ mode }) => {
   });
   const location = createLocationMiddleware();
   const commute = createCommuteMiddleware();
+  const sourcePlan = createSourcePlanMiddleware();
   return {
+    // Prepare the lazy parser at startup so the first Plans open does not
+    // trigger a development-server reload and discard the current selection.
+    optimizeDeps: { include: ["pdfjs-dist/build/pdf.mjs"] },
     plugins: [
       {
         name: "elsewhere-local-astra",
         configureServer(server) {
+          server.middlewares.use(sourcePlan);
           server.middlewares.use(commute);
           server.middlewares.use(location);
           server.middlewares.use(planInspection);
@@ -39,6 +45,7 @@ export default defineConfig(({ mode }) => {
           server.middlewares.use(middleware);
         },
         configurePreviewServer(server) {
+          server.middlewares.use(sourcePlan);
           server.middlewares.use(commute);
           server.middlewares.use(location);
           server.middlewares.use(planInspection);
