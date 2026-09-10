@@ -1,4 +1,5 @@
 import * as THREE from "three";
+import { buildPersonalAsset } from "./personal-asset-mesh.js";
 import { elementBounds, isSolidElement } from "./layout.js";
 
 const materials = new Map();
@@ -29,6 +30,7 @@ export function buildLayoutScene(group, solids, layout, options = {}) {
     node.name = e.id;
     node.position.set(e.x, e.y - e.height / 2, e.z);
     node.userData.elementId = e.id;
+    node.rotation.y = -THREE.MathUtils.degToRad(e.rotation);
     group.add(node);
     const w = e.width,
       d = e.depth,
@@ -40,7 +42,9 @@ export function buildLayoutScene(group, solids, layout, options = {}) {
       solids.push(bounds);
       if (e.id === "bed") group.userData.bedFootprint = bounds;
     }
-    if (e.kind === "floor") {
+    if (e.assetId) {
+      buildPersonalAsset(node, e);
+    } else if (e.kind === "floor") {
       draw(w, h, d, 0, h / 2, 0, "#b6a78a");
       const count = Math.ceil((w - 0.35) / 0.28),
         step = (w - 0.35) / count;

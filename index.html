@@ -5,15 +5,27 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="theme-color" content="#FAFAF6" />
     <title>Elsewhere</title>
-    <link rel="icon" type="image/svg+xml" href="/elsewhere-mark.svg" />
-    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png" />
-    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="stylesheet" href="/src/style.css" />
+    <link rel="stylesheet" href="/src/shell.css" />
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="16x16"
+      href="/favicon-approved-v2-16.png"
+    />
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="32x32"
+      href="/favicon-approved-v2-32.png"
+    />
+    <link rel="apple-touch-icon" href="/apple-touch-approved-v2.png" />
   </head>
-  <body>
+  <body class="empty-state">
     <header>
       <a class="wordmark" href="/" aria-label="Elsewhere home"
         ><img
-          src="/elsewhere-mark.svg"
+          src="/elsewhere-approved-v2.png"
           width="36"
           height="36"
           alt=""
@@ -37,10 +49,11 @@
           </button>
         </div>
         <div id="places-content">
+          <button id="add-listing" type="button">+ Add listing</button>
           <fieldset class="homes">
             <legend class="sr-only">Choose a home</legend>
             <label class="home"
-              ><input type="radio" name="home" value="current" checked /><span
+              ><input type="radio" name="home" value="current" /><span
                 ><strong>Current home</strong
                 ><small>Synthetic example</small></span
               ><span class="selection-mark" aria-hidden="true">✓</span></label
@@ -52,6 +65,23 @@
               ><span class="selection-mark" aria-hidden="true">✓</span></label
             >
           </fieldset>
+          <section id="personal-library" hidden>
+            <details>
+              <summary>Furniture previews</summary>
+              <p>Appearance approximations · product identity unconfirmed</p>
+              <div class="asset-actions">
+                <button type="button" data-add-asset="green-seat">
+                  + Green seat</button
+                ><button type="button" data-add-asset="black-shelf">
+                  + Black shelf
+                </button>
+              </div>
+            </details>
+            <label for="object-select">Select an item</label
+            ><select id="object-select">
+              <option value="">Choose an item</option>
+            </select>
+          </section>
           <div class="examples-heading">Examples</div>
           <div class="listing-examples">
             <button type="button" data-listing="wall2308">
@@ -66,23 +96,6 @@
               Urby #1504 <small>Evidence only</small>
             </button>
           </div>
-          <form id="listing-form" hidden>
-            <label for="listing-url">Listing URL</label
-            ><input
-              id="listing-url"
-              type="url"
-              required
-              maxlength="2048"
-              placeholder="Paste a listing URL"
-              autocomplete="off"
-              spellcheck="false"
-            /><button type="submit">Explore →</button>
-          </form>
-          <output
-            id="listing-status"
-            class="sr-only"
-            aria-live="polite"
-          ></output>
           <details class="evidence">
             <summary>
               <span id="model-status">Illustrative model</span>
@@ -142,13 +155,58 @@
         <small id="collapsed-model-status">Illustrative model</small>
       </aside>
       <section id="viewport" aria-label="Interactive 3D home preview">
+        <section id="entry-stage" aria-labelledby="entry-title">
+          <h1 id="entry-title">
+            See what life could be like in your next home
+          </h1>
+          <p>Start with a listing and see what is known about the home</p>
+          <form id="listing-form">
+            <label for="listing-url">Listing URL</label
+            ><input
+              id="listing-url"
+              type="url"
+              required
+              maxlength="2048"
+              placeholder="Paste a listing URL"
+              autocomplete="off"
+              spellcheck="false"
+            /><button type="submit">Review listing →</button>
+          </form>
+          <output
+            id="listing-status"
+            class="intake-status"
+            aria-live="polite"
+          ></output>
+
+          <p class="intake-note">
+            Known examples are supported today · live URL import is not
+            connected
+          </p>
+          <div class="entry-examples" aria-label="Supported listing examples">
+            <button type="button" data-listing="wall2308">
+              95 Wall studio
+            </button>
+            <button type="button" data-listing="urby409">Urby #409</button>
+            <button type="button" data-listing="urby1504">Urby #1504</button>
+          </div>
+          <button id="entry-demo" type="button" class="text-action">
+            Explore a synthetic example →
+          </button>
+        </section>
         <div class="modebar" role="group" aria-label="View mode">
           <button data-mode="overview" aria-pressed="true">Overview</button
           ><button data-mode="walk" aria-pressed="false">Walk</button
           ><button data-mode="commute" aria-pressed="false">Commute</button
           ><button data-mode="nearby" aria-pressed="false">Nearby</button>
-          <button id="plans-toggle" aria-pressed="false">Plans</button>
         </div>
+        <button
+          id="plans-toggle"
+          class="plans-utility"
+          aria-haspopup="dialog"
+          aria-pressed="false"
+        >
+          Plans
+        </button>
         <div
           id="scene"
           tabindex="0"
@@ -172,9 +230,12 @@
           </p>
         </div>
         <section id="evidence-stage" hidden aria-label="Listing evidence only">
-          <span class="eyebrow">SOURCE EVIDENCE</span>
+          <span class="eyebrow">LISTING OVERVIEW</span>
           <h1 id="evidence-title"></h1>
           <p id="evidence-facts"></p>
+          <p id="overview-price"></p>
+          <small id="overview-freshness"></small>
+          <p id="view-unavailable" role="status" hidden></p>
           <p id="evidence-reason">
             A matching, authorized plan with usable scale is needed before
             creating a dimensional interior. Reported square footage is not
@@ -199,46 +260,85 @@
             Explore a synthetic demo →
           </button>
         </section>
-        <section id="plans-panel" hidden aria-label="Synchronized floor plan">
-          <div class="plan-heading">
-            <div>
-              <span class="eyebrow">PLANS</span>
-              <h2 id="plan-name">Current home</h2>
+        <dialog id="plans-dialog" aria-labelledby="plan-name">
+          <section id="plans-panel" hidden aria-label="Planning documents">
+            <div class="plan-heading">
+              <div>
+                <span class="eyebrow">PLANS</span>
+                <h2 id="plan-name">Current home</h2>
+              </div>
+              <button id="plans-close" aria-label="Close plans">×</button>
             </div>
-            <button id="plans-close" aria-label="Close plans">×</button>
+            <div class="plan-documents" role="group" aria-label="Plan document">
+              <button data-document="source">Source plan</button
+              ><button data-document="empty">Empty layout</button
+              ><button data-document="offered">As offered</button
+              ><button data-document="arrangement" aria-pressed="true">
+                My arrangement
+              </button>
+            </div>
+            <p id="plan-notice" role="status"></p>
+            <div class="plan-tools">
+              <button id="plan-zoom-out" aria-label="Zoom plan out">−</button
+              ><button id="plan-fit">Fit</button
+              ><button id="plan-zoom-in" aria-label="Zoom plan in">+</button
+              ><label
+                ><input id="plan-dimensions" type="checkbox" checked />
+                Dimensions</label
+              ><button id="plan-undo" disabled>Undo</button>
+            </div>
+            <div
+              id="plan-drawing"
+              tabindex="0"
+              aria-label="Floor plan; select an object to inspect its model dimensions"
+            ></div>
+            <div id="plan-selection" role="status">
+              Select an object to inspect its dimensions
+            </div>
+            <div class="plan-footer">
+              <span id="plan-revision"></span
+              ><button id="plan-svg">Download SVG</button
+              ><button id="plan-print">Print / PDF</button>
+            </div>
+            <small id="plan-persistence">Saved on this browser only</small>
+          </section>
+        </dialog>
+        <section
+          id="object-controls"
+          hidden
+          aria-label="Selected item controls"
+        >
+          <div class="reply-heading">
+            <strong id="object-name"></strong
+            ><button id="object-close" aria-label="Deselect item">×</button>
           </div>
-          <div class="plan-documents" role="group" aria-label="Plan document">
-            <button data-document="source">Source plan</button
-            ><button data-document="empty">Empty layout</button
-            ><button data-document="offered">As offered</button
-            ><button data-document="arrangement" aria-pressed="true">
-              My arrangement
-            </button>
+          <p id="object-evidence"></p>
+          <div id="object-move" hidden>
+            <div
+              class="nudge-controls"
+              aria-label="Move in quarter-metre steps"
+            >
+              <button data-nudge="left" aria-label="Move left 25 centimetres">
+                ←</button
+              ><button data-nudge="back" aria-label="Move back 25 centimetres">
+                ↑</button
+              ><button
+                data-nudge="front"
+                aria-label="Move forward 25 centimetres"
+              >
+                ↓</button
+              ><button
+                data-nudge="right"
+                aria-label="Move right 25 centimetres"
+              >
+                →
+              </button>
+            </div>
+            <button id="object-rotate">Rotate 90°</button
+            ><button id="object-remove">Remove</button>
           </div>
-          <p id="plan-notice" role="status"></p>
-          <div class="plan-tools">
-            <button id="plan-zoom-out" aria-label="Zoom plan out">−</button
-            ><button id="plan-fit">Fit</button
-            ><button id="plan-zoom-in" aria-label="Zoom plan in">+</button
-            ><label
-              ><input id="plan-dimensions" type="checkbox" checked />
-              Dimensions</label
-            ><button id="plan-undo" disabled>Undo</button>
-          </div>
-          <div
-            id="plan-drawing"
-            tabindex="0"
-            aria-label="Floor plan; select an object to inspect its model dimensions"
-          ></div>
-          <div id="plan-selection" role="status">
-            Select an object to inspect its dimensions
-          </div>
-          <div class="plan-footer">
-            <span id="plan-revision"></span
-            ><button id="plan-svg">Download SVG</button
-            ><button id="plan-print">Print / PDF</button>
-          </div>
-          <small id="plan-persistence">Saved on this browser only</small>
+          <button id="object-undo">Undo</button
+          ><output id="object-feedback" role="status"></output>
         </section>
         <form id="astra-form" class="astra-panel">
           <div id="astra-reply" class="agent-reply" hidden>

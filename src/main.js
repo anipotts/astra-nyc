@@ -1,9 +1,9 @@
 import * as THREE from "three";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import { homes, pointOnRoute, blocked } from "./model.js";
-import "./style.css";
 import { clearanceAround } from "./clearance.js";
 import { validateSceneEdit } from "./scene-edit.js";
+import { applySceneCommand } from "./scene-commands.js";
 import { updateCutaway } from "./interior.js";
 import { createLayout } from "./layout.js";
 import { buildLayoutScene } from "./layout-scene.js";
@@ -22,11 +22,13 @@ const state = {
   largeBed: false,
   unfurnished: false,
   hiddenItems: [],
+  personalObjects: [],
   evening: false,
   progress: 0,
   playing: false,
 };
 let currentLayout = null;
+let entryKind = "empty";
 let plansOpen = false;
 let planZoom = 1;
 let selectedPlanObject = null;
@@ -233,8 +235,8 @@ function buildHome() {
   clear(house);
   solids.length = 0;
   house.userData.bedFootprint = null;
-  house.visible = !selectedListing;
-  if (selectedListing) {
+  house.visible = entryKind === "demo";
+  if (entryKind !== "demo") {
     currentLayout = null;
     return;
   }
@@ -251,6 +253,7 @@ function buildHome() {
 }
 function buildNeighborhood() {
   clear(neighborhood);
+  if (entryKind !== "demo") return;
   box(neighborhood, 170, 0.2, 170, 0, -0.3, 0, "#a8b39e");
   for (const z of [12, -24]) {
     box(neighborhood, 115, 0.04, 5, 0, -0.16, z, "#81877c");
@@ -408,14 +411,8 @@ function resetCamera() {
   controls.update();
 }
 function setMode(mode) {
-  if (selectedListing && !["overview", "nearby"].includes(mode))
-    mode = "overview";
-  if (plansOpen && mode !== "overview") {
-    plansOpen = false;
-    document.body.classList.remove("plans-open");
-    $("#plans-panel").hidden = true;
-    $("#plans-toggle").setAttribute("aria-pressed", "false");
-  }
+  if (entryKind === "empty") mode = "overview";
+  if (plansOpen) setPlansOpen(false);
   document.body.classList.toggle("evidence-only", Boolean(selectedListing));
   $("#evidence-stage").hidden = !selectedListing || mode === "nearby";
   $("#map-view").hidden = true;
@@ -424,6 +421,35 @@ function setMode(mode) {
   $("#neighborhood-view").hidden = true;
   $("#listing-map").hidden = selectedListing?.id !== "wall2308";
   state.mode = mode;
+  if (entryKind === "empty") {
+    state.playing = false;
+    keys.clear();
+    return;
+  }
+  if (selectedListing) {
+    state.playing = false;
+    keys.clear();
+    document
+      .querySelectorAll(".modebar [data-mode]")
+      .forEach((b) =>
+        b.setAttribute("aria-pressed", String(b.dataset.mode === mode)),
+      );
+    const unavailable =
+      mode === "walk"
+        ? "Walk needs a matching interior plan with usable scale. Astra has not established one for this listing."
+        : mode === "commute"
+          ? "Commute needs confirmed endpoints and a connected routing source. No route or travel time has been generated."
+          : mode === "nearby" && selectedListing.id !== "wall2308"
+            ? "Nearby data is not connected for this listing. The original listing provides its location context."
+            : "";
+    $("#view-unavailable").hidden = !unavailable;
+    $("#view-unavailable").textContent = unavailable;
+    $("#evidence-stage").hidden =
+      mode === "nearby" && selectedListing.id === "wall2308";
+    if (mode === "nearby" && selectedListing.id === "wall2308")
+      openNeighborhood();
+    return;
+  }
   updateCutaway(house, mode === "overview");
   keys.clear();
   controls.enabled = mode === "overview" || mode === "nearby";
@@ -441,7 +467,7 @@ function setMode(mode) {
     state.playing = false;
     resetCamera();
     $("#hint").textContent = "Drag to orbit · scroll to zoom";
-    $("#view-description").textContent = "A place to start imagining.";
+    $("#view-description").textContent = "Synthetic example";
   }
   if (mode === "nearby") {
     state.playing = false;
@@ -519,6 +545,10 @@ function light() {
 }
 function refresh() {
   sceneRevision++;
+  document.body.classList.toggle("empty-state", entryKind === "empty");
+  document.body.classList.toggle("evidence-only", entryKind === "listing");
+  $("#entry-stage").hidden = entryKind !== "empty";
+  $("#plans-toggle").disabled = entryKind === "empty";
   $("#astra-reply").hidden = true;
   buildHome();
   buildNeighborhood();
@@ -542,7 +572,7 @@ function refresh() {
       String(button.dataset.listing === selectedListing?.id),
     );
   for (const input of document.querySelectorAll("[name=home]"))
-    input.checked = !selectedListing && input.value === state.home;
+    input.checked = entryKind === "demo" && input.value === state.home;
   for (const id of ["model-status", "collapsed-model-status"]) {
     const modelStatus = $("#" + id);
     if (modelStatus)
@@ -560,11 +590,16 @@ function refresh() {
     ? "Furnished"
     : "Unfurnished";
   renderPlans();
+  renderObjectControls();
 }
 let selectedListing = null;
 const syntheticPotential = { ...homes.potential };
 function showListing(listing) {
+  entryKind = "listing";
   selectedListing = listing;
+  try {
+    localStorage.setItem("elsewhere-last-real-home", listing.id);
+  } catch {}
   if (matchMedia("(max-width: 650px)").matches) {
     $("#places-content").hidden = true;
     $("#places-toggle").setAttribute("aria-expanded", "false");
@@ -586,6 +621,8 @@ function showListing(listing) {
     }) +
     " ET · not a live refresh";
   $("#listing-unknowns").textContent = listing.questions;
+  $("#overview-price").textContent = listing.price;
+  $("#overview-freshness").textContent = $("#listing-checked").textContent;
   $("#listing-preview").hidden = true;
   $("#listing-map").hidden = listing.id !== "wall2308";
   $("#listing-status").textContent =
@@ -605,16 +642,6 @@ function showListing(listing) {
 }
 $("#listing-form").addEventListener("submit", (event) => {
   event.preventDefault();
-  selectedListing = null;
-  $("#listing-evidence").hidden = true;
-  // Do not leave a previously selected listing scene attached to a new URL.
-  Object.assign(homes.potential, syntheticPotential, { studio: false });
-  // Listing evidence does not change either synthetic home or its arrangement.
-  $("input[value=" + state.home + "]").checked = true;
-  $("#potential-name").textContent = "Potential home";
-  $("#potential-note").textContent = "Synthetic example · more space";
-  refresh();
-  setMode("overview");
   try {
     const listing = identifyListing($("#listing-url").value);
     if (listing) showListing(listing);
@@ -681,6 +708,7 @@ for (const b of document.querySelectorAll("[data-mode]"))
 for (const input of document.querySelectorAll("[name=home]"))
   input.addEventListener("change", () => {
     selectedListing = null;
+    entryKind = "demo";
     $("#listing-evidence").hidden = true;
     state.home = input.value;
     Object.assign(
@@ -690,6 +718,7 @@ for (const input of document.querySelectorAll("[name=home]"))
         unfurnished: false,
         evening: false,
         hiddenItems: [],
+        personalObjects: [],
       },
     );
     state.hiddenItems = [...state.hiddenItems];
@@ -699,45 +728,46 @@ for (const input of document.querySelectorAll("[name=home]"))
       `${homes[state.home].label} loaded. All dimensions and surroundings are synthetic.`,
     );
   });
-$("#bed").onclick = () => {
-  $("#astra-status").hidden = false;
-  $("#astra-status").textContent = "Local edit · no model request";
-  state.largeBed = !state.largeBed;
-  state.hiddenItems = state.hiddenItems.filter((item) => item !== "bed");
-  state.unfurnished = false;
-  refresh();
-  if (state.mode === "walk") setMode("walk");
-  message(
-    state.largeBed
-      ? "King bed footprint: 1.93 × 2.03 m. Compare clearance in this synthetic room; verify real dimensions before buying."
-      : "Queen bed restored: 1.52 × 2.03 m. Synthetic room dimensions.",
+function commitSceneCommand(command) {
+  if (entryKind !== "demo" || !currentLayout)
+    throw new Error("Select an available interior first.");
+  Object.assign(
+    state,
+    applySceneCommand(state, command, currentLayout, currentLayout.revision.id),
   );
-};
-$("#unfurnished").onclick = () => {
-  $("#astra-status").hidden = false;
-  $("#astra-status").textContent = "Local edit · no model request";
-  state.unfurnished = !state.unfurnished;
-  if (!state.unfurnished) state.hiddenItems = [];
   refresh();
-  message(
-    state.unfurnished
-      ? "Furnishings removed. Explore the empty floor area."
-      : "Furnishings restored.",
-  );
-};
-$("#evening").onclick = () => {
-  $("#astra-status").hidden = false;
-  $("#astra-status").textContent = "Local edit · no model request";
-  state.evening = !state.evening;
-  refresh();
-  message(
-    state.evening
-      ? "Evening lighting applied. Illustrative light, not a solar study."
-      : "Daylight restored.",
-  );
-};
+}
+function localCommand(command) {
+  try {
+    commitSceneCommand(command);
+    $("#astra-status").hidden = false;
+    $("#astra-status").textContent = "Local edit · no model request";
+    $("#object-feedback").textContent = "Updated · Undo is available";
+  } catch (error) {
+    $("#object-feedback").textContent = error.message;
+  }
+}
+$("#bed").onclick = () =>
+  localCommand({
+    action: "resize_bed",
+    target: "bed",
+    value: state.largeBed ? "queen" : "king",
+  });
+$("#unfurnished").onclick = () =>
+  localCommand({
+    action: "set_visibility",
+    target: "furniture",
+    value: state.unfurnished ? "show" : "hide",
+  });
+$("#evening").onclick = () =>
+  localCommand({
+    action: "set_lighting",
+    target: "scene",
+    value: state.evening ? "day" : "evening",
+  });
 $("#reset").onclick = () => {
   state.hiddenItems = [];
+  state.personalObjects = [];
   $("#astra-status").hidden = false;
   $("#astra-status").textContent = "Local edit · no model request";
   state.largeBed = false;
@@ -815,12 +845,19 @@ function resize() {
 }
 new ResizeObserver(resize).observe(container);
 refresh();
+try {
+  const recent = listings.find(
+    (l) => l.id === localStorage.getItem("elsewhere-last-real-home"),
+  );
+  if (recent) showListing(recent);
+} catch {}
 setMode("overview");
 resize();
 let last = performance.now();
 renderer.setAnimationLoop((now) => {
   const dt = Math.min((now - last) / 1000, 0.05);
   last = now;
+  if (entryKind !== "demo" || plansOpen) return;
   if (state.mode === "overview" || state.mode === "nearby") controls.update();
   if (state.mode === "walk") {
     if (keys.has("ArrowLeft")) yaw += dt * 1.6;
@@ -867,6 +904,7 @@ renderer.setAnimationLoop((now) => {
 window.__elsewhere = {
   snapshot: () => ({
     ...state,
+    entryKind,
     camera: camera.position.toArray(),
     objects: scene.children.length,
     solids: solids.length,
@@ -885,7 +923,7 @@ function syncComposer() {
   const form = $("#astra-form");
   $("#astra-submit").disabled =
     form.dataset.ready !== "true" ||
-    Boolean(selectedListing) ||
+    entryKind !== "demo" ||
     form.getAttribute("aria-busy") === "true" ||
     !$("#astra-prompt").value.trim();
 }
@@ -933,7 +971,7 @@ $("#astra-form").addEventListener("submit", async (event) => {
   const prompt = $("#astra-prompt").value.trim();
   if (
     !astraReady ||
-    Boolean(selectedListing) ||
+    entryKind !== "demo" ||
     !prompt ||
     $("#astra-form").getAttribute("aria-busy") === "true"
   )
@@ -977,34 +1015,13 @@ $("#astra-form").addEventListener("submit", async (event) => {
       throw new Error(
         "Scene changed while Astra was working. Edit was not applied. Send your request again.",
       );
-    let reply;
-    if (edit.action === "resize_bed") {
-      state.largeBed = edit.value === "king";
-      state.unfurnished = false;
-      state.hiddenItems = state.hiddenItems.filter((item) => item !== "bed");
-      reply = `${edit.value === "king" ? "King" : "Queen"} bed placed.`;
-    } else if (edit.action === "set_lighting") {
-      state.evening = edit.value === "evening";
-      reply = `${state.evening ? "Evening light" : "Daylight"} applied. Lighting is illustrative, not a solar study.`;
-    } else if (edit.target === "furniture") {
-      state.unfurnished = edit.value === "hide";
-      if (!state.unfurnished) state.hiddenItems = [];
-      reply = state.unfurnished
-        ? "Loose furnishings hidden."
-        : "Furnishings restored.";
-    } else {
-      if (edit.value === "show") {
-        // Showing a single item from the unfurnished state keeps the other editable items hidden.
-        if (state.unfurnished) state.hiddenItems = ["bed", "sofa", "table"];
-        state.unfurnished = false;
-        state.hiddenItems = state.hiddenItems.filter(
-          (item) => item !== edit.target,
-        );
-      } else if (!state.hiddenItems.includes(edit.target))
-        state.hiddenItems.push(edit.target);
-      reply = `${edit.target === "table" ? "Tables and their attached chairs" : edit.target[0].toUpperCase() + edit.target.slice(1)} ${edit.value === "show" ? "restored" : "hidden"}.`;
-    }
-    refresh();
+    const reply =
+      edit.action === "resize_bed"
+        ? `${edit.value === "king" ? "King" : "Queen"} bed placed.`
+        : edit.action === "set_lighting"
+          ? `${edit.value === "evening" ? "Evening light" : "Daylight"} applied. Lighting is illustrative.`
+          : `${edit.target === "furniture" ? "Movable furnishings" : edit.target === "table" ? "Table group" : edit.target} ${edit.value === "hide" ? "hidden" : "restored"}.`;
+    commitSceneCommand(edit);
     if (state.mode === "walk") setMode("walk");
     $("#astra-reply").hidden = false;
     $("#astra-answer").textContent =
@@ -1016,7 +1033,6 @@ $("#astra-form").addEventListener("submit", async (event) => {
       `${result.cached ? "Cached Astra edit" : "Live Astra edit"} · ${result.model}`;
     $("#astra-status").title =
       `Request ${result.requestId} · ${new Date(result.generatedAt).toLocaleTimeString()}`;
-    $(".local").textContent = "Local demo · live Astra edit received";
     if ($("#astra-prompt").value.trim() === prompt)
       $("#astra-prompt").value = "";
     sizeComposer();
@@ -1114,21 +1130,49 @@ function renderPlans() {
   $("#plan-revision").textContent =
     "Revision " + currentLayout.revision.id.slice(0, 8);
   const element = currentLayout.elements.find(
-    (e) => e.id === selectedPlanObject,
+    (e) => e.id === selectedPlanObject && e.visible,
   );
-  $("#plan-selection").textContent = element
-    ? `${element.label} · outer ${element.width.toFixed(2)} × ${element.depth.toFixed(2)} m · ${element.evidence.basis} · ${element.category === "fixtures" ? "Fixed fixture" : element.category}`
-    : "Select an object to inspect its model dimensions.";
+  $("#plan-selection").textContent = element?.assetId
+    ? `${element.label} · hypothetical preview ${element.width.toFixed(2)} × ${element.depth.toFixed(2)} m · actual dimensions unknown`
+    : element
+      ? `${element.label} · outer ${element.width.toFixed(2)} × ${element.depth.toFixed(2)} m · ${element.evidence.basis} · ${element.category === "fixtures" ? "Fixed fixture" : element.category}`
+      : "Select an object to inspect its model dimensions.";
 }
 function setPlansOpen(open) {
   plansOpen = open;
+  keys.clear();
   document.body.classList.toggle("plans-open", open);
   $("#plans-toggle").setAttribute("aria-pressed", String(open));
-  if (open) setMode("overview");
   renderPlans();
+  if (open && !$("#plans-dialog").open) $("#plans-dialog").showModal();
+  else if (!open && $("#plans-dialog").open) $("#plans-dialog").close();
 }
 $("#plans-toggle").onclick = () => setPlansOpen(!plansOpen);
 $("#plans-close").onclick = () => setPlansOpen(false);
+$("#plans-dialog").addEventListener("cancel", (event) => {
+  event.preventDefault();
+  setPlansOpen(false);
+});
+$("#plans-dialog").addEventListener("click", (event) => {
+  const r = $("#plans-dialog").getBoundingClientRect();
+  if (
+    event.target === $("#plans-dialog") &&
+    (event.clientX < r.left ||
+      event.clientX > r.right ||
+      event.clientY < r.top ||
+      event.clientY > r.bottom)
+  )
+    setPlansOpen(false);
+});
+$("#add-listing").onclick = () => {
+  entryKind = "empty";
+  selectedListing = null;
+  setPlansOpen(false);
+  refresh();
+  setMode("overview");
+  $("#listing-url").focus();
+};
+$("#entry-demo").onclick = () => $("#evidence-demo").click();
 $("#plan-dimensions").onchange = renderPlans;
 $("#plan-fit").onclick = () => {
   planZoom = 1;
@@ -1150,7 +1194,7 @@ $("#plan-drawing").onclick = (event) => {
   const object = house.children.find(
     (n) => n.userData.elementId === selectedPlanObject,
   );
-  if (object) {
+  if (object && !plansOpen) {
     controls.target.set(object.position.x, 0.7, object.position.z);
     controls.update();
   }
@@ -1174,8 +1218,11 @@ for (const button of document.querySelectorAll("[data-document]"))
         "Needs measurement: supply an authorized plan with usable scale before planning this listing.";
       return;
     }
-    state.unfurnished = kind === "empty";
-    refresh();
+    localCommand({
+      action: "set_visibility",
+      target: "furniture",
+      value: kind === "empty" ? "hide" : "show",
+    });
   };
 $("#plan-undo").onclick = () => {
   const entries = histories[state.home];
@@ -1256,4 +1303,141 @@ $("#plan-drawing").addEventListener("keydown", (event) => {
   $("#plan-drawing [data-object-id='" + CSS.escape(id) + "']")?.focus({
     preventScroll: true,
   });
+});
+
+function renderObjectControls() {
+  $("#personal-library").hidden = entryKind !== "demo";
+  for (const button of document.querySelectorAll("[data-add-asset]")) {
+    button.disabled = state.unfurnished || state.personalObjects.length >= 12;
+    button.title =
+      state.personalObjects.length >= 12
+        ? "This preview supports up to 12 personal objects"
+        : state.unfurnished
+          ? "Restore My arrangement before adding a furniture preview"
+          : "Add a hypothetical preview; actual dimensions are unknown";
+  }
+  const select = $("#object-select");
+  select.replaceChildren(new Option("Choose an item", ""));
+  for (const element of currentLayout?.elements || [])
+    if (element.visible && element.kind !== "floor")
+      select.add(new Option(element.label, element.id));
+  select.value = selectedPlanObject || "";
+  const element = currentLayout?.elements.find(
+    (e) => e.id === selectedPlanObject && e.visible,
+  );
+  $("#object-controls").hidden = !element || entryKind !== "demo";
+  if (!element) return;
+  $("#object-name").textContent = element.label;
+  $("#object-evidence").textContent = element.assetId
+    ? "Approximate appearance · size and product identity unconfirmed. Preview placement only; no real fit claim."
+    : `${element.width.toFixed(2)} × ${element.depth.toFixed(2)} m · synthetic model${element.category === "fixtures" || element.category === "structure" ? " · fixed, inspect only" : ""}`;
+  $("#object-move").hidden = !element.assetId;
+  $("#object-undo").disabled = histories[state.home].length < 2;
+}
+function selectObject(id) {
+  if (id && matchMedia("(max-width: 650px), (max-height: 600px)").matches) {
+    $("#places-content").hidden = true;
+    $("#places-toggle").setAttribute("aria-expanded", "false");
+    $("#places-toggle").setAttribute("aria-label", "Expand places");
+    $("#places-toggle").textContent = "+";
+    $("#astra-reply").hidden = true;
+  }
+  selectedPlanObject = id || null;
+  renderPlans();
+  renderObjectControls();
+  $("#object-feedback").textContent = "";
+}
+$("#object-select").onchange = (event) => selectObject(event.target.value);
+$("#object-close").onclick = () => selectObject(null);
+$("#object-undo").onclick = () => {
+  $("#plan-undo").click();
+  renderObjectControls();
+};
+$("#object-remove").onclick = () =>
+  localCommand({ action: "remove_instance", instanceId: selectedPlanObject });
+$("#object-rotate").onclick = () => {
+  const instance = state.personalObjects.find(
+    (o) => o.id === selectedPlanObject,
+  );
+  if (instance)
+    localCommand({
+      action: "rotate_instance",
+      instanceId: instance.id,
+      rotation: (instance.rotation + 90) % 360,
+    });
+};
+for (const b of document.querySelectorAll("[data-nudge]"))
+  b.onclick = () => {
+    const instance = state.personalObjects.find(
+      (o) => o.id === selectedPlanObject,
+    );
+    if (!instance) return;
+    const delta = {
+      left: [-0.25, 0],
+      right: [0.25, 0],
+      back: [0, -0.25],
+      front: [0, 0.25],
+    }[b.dataset.nudge];
+    localCommand({
+      action: "move_instance",
+      instanceId: instance.id,
+      x: instance.x + delta[0],
+      z: instance.z + delta[1],
+    });
+  };
+for (const b of document.querySelectorAll("[data-add-asset]"))
+  b.onclick = () => {
+    if (!currentLayout) return;
+    const instanceId = "personal-" + crypto.randomUUID();
+    for (const z of [1, 2, 0, -2, 3])
+      for (const x of [-3, -1, 1, 3, -4, 4]) {
+        const command = {
+          action: "place_asset",
+          assetId: b.dataset.addAsset,
+          instanceId,
+          x,
+          z,
+          rotation: 0,
+        };
+        try {
+          applySceneCommand(
+            state,
+            command,
+            currentLayout,
+            currentLayout.revision.id,
+          );
+          localCommand(command);
+          selectObject(instanceId);
+          return;
+        } catch {}
+      }
+    $("#astra-status").hidden = false;
+    $("#astra-status").textContent =
+      "No clear preview position is available in this arrangement";
+  };
+let pickStart;
+container.addEventListener("pointerdown", (event) => {
+  pickStart = [event.clientX, event.clientY];
+});
+container.addEventListener("pointerup", (event) => {
+  if (
+    !pickStart ||
+    Math.hypot(event.clientX - pickStart[0], event.clientY - pickStart[1]) >
+      6 ||
+    entryKind !== "demo"
+  )
+    return;
+  const r = container.getBoundingClientRect();
+  const ray = new THREE.Raycaster();
+  ray.setFromCamera(
+    new THREE.Vector2(
+      ((event.clientX - r.left) / r.width) * 2 - 1,
+      (-(event.clientY - r.top) / r.height) * 2 + 1,
+    ),
+    camera,
+  );
+  const hit = ray.intersectObject(house, true)[0];
+  let node = hit?.object;
+  while (node && !node.userData.elementId) node = node.parent;
+  if (node) selectObject(node.userData.elementId);
 });

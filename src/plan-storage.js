@@ -1,3 +1,12 @@
+import { cleanPersonalObjects } from "./scene-commands.js";
+const validPersonal = (value) => {
+  try {
+    cleanPersonalObjects(value);
+    return true;
+  } catch {
+    return false;
+  }
+};
 const VALID_HOMES = ["current", "potential"];
 export function validPlanState(value) {
   return (
@@ -9,7 +18,8 @@ export function validPlanState(value) {
     Array.isArray(value.hiddenItems) &&
     value.hiddenItems.length <= 3 &&
     value.hiddenItems.every((k) => ["bed", "sofa", "table"].includes(k)) &&
-    new Set(value.hiddenItems).size === value.hiddenItems.length
+    new Set(value.hiddenItems).size === value.hiddenItems.length &&
+    validPersonal(value.personalObjects)
   );
 }
 export function cleanPlanState(value) {
@@ -19,6 +29,7 @@ export function cleanPlanState(value) {
     unfurnished: value.unfurnished,
     evening: value.evening,
     hiddenItems: [...value.hiddenItems].sort(),
+    personalObjects: cleanPersonalObjects(value.personalObjects),
   };
 }
 let database;

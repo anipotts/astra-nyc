@@ -220,6 +220,11 @@ export function renderPlanSvg(layout, options = {}) {
   const footerLines = [
     clearanceSummary,
     "Geometric distances only. Verify real dimensions; this does not establish real-world fit.",
+    ...(elements.some((e) => e.assetId)
+      ? [
+          "Personal furniture uses hypothetical preview sizes. Actual dimensions and product identity are unknown.",
+        ]
+      : []),
     `Revision ${revision.id || "unversioned"} · ${revision.createdAt || "Timestamp not supplied"}`,
     revision.summary || "Generated from the current canonical layout",
     `Exported ${new Date().toISOString()}`,

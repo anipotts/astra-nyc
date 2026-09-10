@@ -1,3 +1,4 @@
+import { PERSONAL_ASSETS } from "./personal-assets.js";
 const evidence = () => ({
   basis: "synthetic",
   source: "Event-authored demonstration",
@@ -274,6 +275,31 @@ export function createLayout(home, state = {}) {
     0.05,
     !state.unfurnished,
   );
+  for (const instance of state.personalObjects || []) {
+    const asset = PERSONAL_ASSETS[instance.assetId];
+    if (!asset) continue;
+    const { width, depth, height } = asset.previewDimensions;
+    elements.push({
+      id: instance.id,
+      assetId: asset.id,
+      label: asset.label,
+      category: "furniture",
+      kind: asset.kind,
+      x: instance.x,
+      z: instance.z,
+      y: height / 2,
+      width,
+      depth,
+      height,
+      rotation: instance.rotation,
+      visible: !state.unfurnished,
+      dimensions: asset.dimensions,
+      evidence: {
+        basis: "estimated",
+        source: "Hypothetical preview size; real dimensions unknown",
+      },
+    });
+  }
   return {
     id: `synthetic-${key}-v1`,
     label: key === "current" ? "Current home" : "Potential home",
@@ -305,19 +331,31 @@ export function createLayout(home, state = {}) {
 }
 
 export function elementBounds(element) {
-  if (element.rotation !== 0)
-    throw new Error("Only axis-aligned layout elements are supported.");
+  if (![0, 90, 180, 270].includes(element.rotation))
+    throw new Error("Only quarter-turn rotations are supported.");
+  const swapped = element.rotation % 180 !== 0;
+  const width = swapped ? element.depth : element.width;
+  const depth = swapped ? element.width : element.depth;
   return {
-    minX: element.x - element.width / 2,
-    maxX: element.x + element.width / 2,
-    minZ: element.z - element.depth / 2,
-    maxZ: element.z + element.depth / 2,
+    minX: element.x - width / 2,
+    maxX: element.x + width / 2,
+    minZ: element.z - depth / 2,
+    maxZ: element.z + depth / 2,
   };
 }
 
 export function isSolidElement(element) {
   return (
     element.visible &&
-    ["wall", "bed", "sofa", "table", "kitchen", "plant"].includes(element.kind)
+    [
+      "wall",
+      "bed",
+      "sofa",
+      "table",
+      "kitchen",
+      "plant",
+      "green-seat",
+      "black-shelf",
+    ].includes(element.kind)
   );
 }

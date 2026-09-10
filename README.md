@@ -21,10 +21,11 @@ npm run build
 
 ## What works
 
-- Pick a researched example: 95 Wall Street #2308, archived Zephyr Lofts #501, or Journal Square Urby #409/#1504. The disconnected URL importer is hidden until arbitrary listing imports work.
+- Start with a listing intake screen, with no synthetic apartment loaded. Known example URLs resolve to bundled source snapshots: 95 Wall Street #2308, archived Zephyr Lofts #501, or Journal Square Urby #409/#1504. Unsupported URLs explain that live import is not connected. The last selected real example resumes on reload. Address resolution and floor-plan upload are not implemented.
 - Use a compact, full-viewport canvas with one mode selector and one change field. The document does not scroll; places and accuracy details can be collapsed.
 - Review dated source facts and unknowns. Real listings are evidence only: no dimensional interior or fit result is generated from reported square footage. Linked Urby plan references have not established usable scale or authorization for reproduction.
-- Switch between a synthetic current home and a potential home with illustrative routes. Plans, 3D geometry, collision boundaries, clearance and SVG/PDF exports share one canonical layout. Select objects, toggle dimensions, inspect empty/furnished states, undo changes and retain arrangements in this browser using IndexedDB. Empty removes movable furniture while keeping fixed kitchen fixtures.
+- Enter the explicitly labeled synthetic demo to switch between current and potential homes with illustrative routes. Plans, 3D geometry, collision boundaries, clearance and SVG/PDF exports share one canonical layout. Select objects, toggle dimensions, inspect empty/furnished states, undo changes and retain arrangements in this browser using IndexedDB. Empty removes movable furniture while keeping fixed kitchen fixtures.
+- Add approximate green-seat and black-shelf previews, select an item, nudge it, rotate it by quarter turns, remove it, or Undo. Personal objects persist with the arrangement. Actual product identities and dimensions are unknown; hypothetical preview sizes do not establish fit. Fixed fixtures remain inspect-only. These direct commands use the same validator as supported Astra scene edits, without model calls.
 - Orbit the home or walk at eye level. Focus the scene, use WASD to move, arrow keys to turn, or drag to look. On-screen buttons also support movement. Walls and furniture have collision boundaries; the front doorway leads outside.
 - Ask Astra to resize the bed, hide or restore the bed, sofa, table group, or all furnishings, and change daylight/evening lighting in any existing home preview. Table edits affect the full table group and attached chairs. Local preview buttons still work without API access.
 - Follow an animated car along an invented road route. Pause, replay, or scrub the commute; reduced-motion users start paused.
@@ -38,11 +39,13 @@ Astra assists development of the scene and app. The running product has an optio
 
 ## Interface and geographic context
 
-The interface uses an original SVG mark recreated from a participant-approved event design reference, live system-font text, compact listing controls, one view selector and one chat composer. The places drawer starts collapsed on small or short screens. Source status stays visible and full uncertainty details remain accessible. Plans is retained alongside the four geographic/home modes. No font or icon library was added.
+The interface uses PNG exports of the participant-approved event-generated home-to-home artwork, live system-font text, compact listing controls, one view selector and one chat composer. The places drawer starts collapsed on small or short screens. Source status stays visible and full uncertainty details remain accessible. Plans opens in a separate modal with native keyboard focus and Escape dismissal; opening it does not resize or move the scene. The four view tabs stay associated with the selected home, and unavailable real-home views explain the missing evidence. No font or icon library was added.
 
 95 Wall opens a separate MapLibre/OpenFreeMap neighborhood map with source attribution, camera pullback and “Go directly.” A fade returns to listing evidence. The pin is approximate; no verified driving route is available. Original recordings are preserved; they show earlier scope and are not proof of the current source gate.
 
 ## Next integration, not implemented
+
+Furniture evidence lookup should accept a photo, link, or description, use visual reasoning and bounded web search to find likely product variants and original specifications, and ask for confirmation when identity is ambiguous. No measurement form is required for previews. Automatic product search, matching, dimension recovery, and Astra manipulation of personal objects are not implemented. Single-image appearance alone does not establish real scale. Cache confirmed evidence per object; movement stays local.
 
 Replace the bundled snapshots with a live, bounded listing importer. Use the participant's listing inputs to collect attributable photo evidence with source URLs and observation dates. Separate visible details from inferred geometry and unknown conditions. Generate a validated scene description and bounded edits, then render locally with Three.js. Verified driving routes, travel times, and filtered nearby-business details remain unimplemented. A photo cannot establish every issue or guarantee a listing's present condition.
 
