@@ -101,6 +101,176 @@ export const listings = [
     readinessReason:
       "Inspected main bedroom region available in Plans. Historical nominal dimensions; remaining apartment, openings and ceiling height stay unknown.",
   },
+  {
+    id: "mima48h",
+    mapAddress: "450 West 42nd Street, New York, NY 10036",
+    url: "https://www.relatedrentals.com/apartment-rentals/new-york-city/midtown-manhattan/mima/studio-1-bath-31510",
+    name: "MiMA #48H",
+    location: "450 West 42nd Street, New York, NY 10036",
+    facts: "Unit 48H · published source reference",
+    price: "Check source for current rent",
+    availability:
+      "Current availability not verified; confirm with the original source.",
+    checkedAt: "2026-09-10",
+    archived: false,
+    scene: null,
+    dimensionalReadiness: "needs-evidence",
+    furnishingStatus: "unknown",
+    questions:
+      "Confirm current availability, the exact unit, plan dimensions and current condition. The building map is geographic context; a walkable interior is not established.",
+    readinessReason:
+      "Published listing or plan reference available. Room geometry and current conditions remain unverified; review the original source.",
+    planUrl:
+      "https://www.relatedrentals.com/sites/default/files/2021-04/MiMA_H_39-50.pdf",
+  },
+  {
+    id: "theone2h",
+    mapAddress: "110 First Street, Jersey City, NJ 07302",
+    url: "https://theonenj.com/pdf/1bdrm-h2-9.pdf",
+    name: "The One #2H",
+    location: "110 First Street, Jersey City, NJ 07302",
+    facts: "Unit 2H · published source reference",
+    price: "Check source for current rent",
+    availability:
+      "Current availability not verified; confirm with the original source.",
+    checkedAt: "2026-09-10",
+    archived: false,
+    scene: null,
+    dimensionalReadiness: "needs-evidence",
+    furnishingStatus: "unknown",
+    questions:
+      "Confirm current availability, the exact unit, plan dimensions and current condition. The building map is geographic context; a walkable interior is not established.",
+    readinessReason:
+      "Published listing or plan reference available. Room geometry and current conditions remain unverified; review the original source.",
+    planUrl: "https://theonenj.com/pdf/1bdrm-h2-9.pdf",
+  },
+  {
+    id: "eos24f",
+    mapAddress: "100 West 31st Street, Manhattan, NY 10001",
+    url: "https://www.eosnomad.com/residences/studio/878484/",
+    name: "EOS #24F",
+    location: "100 West 31st Street, Manhattan, NY 10001",
+    facts: "Unit 24F · published source reference",
+    price: "Check source for current rent",
+    availability:
+      "Current availability not verified; confirm with the original source.",
+    checkedAt: "2026-09-10",
+    archived: false,
+    scene: null,
+    dimensionalReadiness: "needs-evidence",
+    furnishingStatus: "unknown",
+    questions:
+      "Confirm current availability, the exact unit, plan dimensions and current condition. The building map is geographic context; a walkable interior is not established.",
+    readinessReason:
+      "Published listing or plan reference available. Room geometry and current conditions remain unverified; review the original source.",
+  },
+  {
+    id: "jasperw410",
+    mapAddress: "2-33 50th Avenue, Long Island City, NY",
+    url: "https://jasperhp.com/availability/",
+    name: "Jasper #W410",
+    location: "2-33 50th Avenue, Long Island City, NY",
+    facts: "Unit W410 · published source reference",
+    price: "Check source for current rent",
+    availability:
+      "Current availability not verified; confirm with the original source.",
+    checkedAt: "2026-09-10",
+    archived: false,
+    scene: null,
+    dimensionalReadiness: "needs-evidence",
+    furnishingStatus: "unknown",
+    questions:
+      "Confirm current availability, the exact unit, plan dimensions and current condition. The building map is geographic context; a walkable interior is not established.",
+    readinessReason:
+      "Published listing or plan reference available. Room geometry and current conditions remain unverified; review the original source.",
+    planUrl:
+      "https://jasperhp.com/wp-content/uploads/2025/03/Classic_Studio_W410-W710-W809-W1009-W1108-W1207-1024x666.png",
+  },
+  {
+    id: "newkirk65",
+    mapAddress: "65 Newkirk Street, Jersey City, NJ 07306",
+    url: "https://www.live65newkirk.com/virtualtours",
+    name: "65 Newkirk tour type",
+    location: "65 Newkirk Street, Jersey City, NJ 07306",
+    facts: "Building / plan-type source · no exact unit selected",
+    price: "Check source for current rent",
+    availability:
+      "Current availability not verified; confirm with the original source.",
+    checkedAt: "2026-09-10",
+    archived: false,
+    scene: null,
+    dimensionalReadiness: "needs-evidence",
+    furnishingStatus: "unknown",
+    questions:
+      "Confirm current availability, the exact unit, plan dimensions and current condition. The building map is geographic context; a walkable interior is not established.",
+    readinessReason:
+      "Published listing or plan reference available. Room geometry and current conditions remain unverified; review the original source.",
+    planUrl:
+      "https://www.live65newkirk.com/s/0_65-newkirk-1bd-w-balcony_0_1-copy.png",
+  },
+  {
+    id: "plazastudio",
+    mapAddress: "91 Sip Avenue, Jersey City, NJ 07306",
+    url: "https://rnhousing.org/properties/plaza-apartments/",
+    name: "Plaza Apartments studio type",
+    location: "91 Sip Avenue, Jersey City, NJ 07306",
+    facts: "Building / plan-type source · no exact unit selected",
+    price: "Check source for current rent",
+    availability:
+      "Current availability not verified; confirm with the original source.",
+    checkedAt: "2026-09-10",
+    archived: false,
+    scene: null,
+    dimensionalReadiness: "needs-evidence",
+    furnishingStatus: "unknown",
+    questions:
+      "Confirm current availability, the exact unit, plan dimensions and current condition. The building map is geographic context; a walkable interior is not established.",
+    readinessReason:
+      "Published listing or plan reference available. Room geometry and current conditions remain unverified; review the original source.",
+    planUrl:
+      "https://rnhousing.org/wp-content/uploads/2024/07/floor-plan-plaza.pdf",
+  },
+  {
+    id: "gotham2409",
+    mapAddress: "56-27 2nd Street, Long Island City, NY 11101",
+    url: "https://gothampoint.com/availability/",
+    name: "Gotham Point South #2409",
+    location: "56-27 2nd Street, Long Island City, NY 11101",
+    facts: "Unit South2409 · published source reference",
+    price: "Check source for current rent",
+    availability:
+      "Current availability not verified; confirm with the original source.",
+    checkedAt: "2026-09-10",
+    archived: false,
+    scene: null,
+    dimensionalReadiness: "needs-evidence",
+    furnishingStatus: "unknown",
+    questions:
+      "Confirm current availability, the exact unit, plan dimensions and current condition. The building map is geographic context; a walkable interior is not established.",
+    readinessReason:
+      "Published listing or plan reference available. Room geometry and current conditions remain unverified; review the original source.",
+  },
+  {
+    id: "castiron5j",
+    mapAddress: "300 Coles Street, Jersey City, NJ 07310",
+    url: "https://castironlofts.com/floorplans/cil1_5-6j/",
+    name: "Cast Iron Lofts #5J",
+    location: "300 Coles Street, Jersey City, NJ 07310",
+    facts: "Unit 5J (CIL1 plan group) · published source reference",
+    price: "Check source for current rent",
+    availability:
+      "Current availability not verified; confirm with the original source.",
+    checkedAt: "2026-09-10",
+    archived: false,
+    scene: null,
+    dimensionalReadiness: "needs-evidence",
+    furnishingStatus: "unknown",
+    questions:
+      "Confirm current availability, the exact unit, plan dimensions and current condition. The building map is geographic context; a walkable interior is not established.",
+    readinessReason:
+      "Published listing or plan reference available. Room geometry and current conditions remain unverified; review the original source.",
+    planUrl: "https://castironlofts.com/assets/files/Binder1-31.pdf",
+  },
 ];
 export function identifyListing(input) {
   let url;
@@ -124,3 +294,22 @@ export function identifyListing(input) {
     }) ?? null
   );
 }
+
+export const auditedExampleIds = [
+  "charles345",
+  "mima48h",
+  "theone2h",
+  "eos24f",
+  "jasperw410",
+  "newkirk65",
+  "plazastudio",
+  "zephyr501",
+  "gotham2409",
+  "castiron5j",
+];
+export const auditedExamples = auditedExampleIds.map((id) =>
+  listings.find((listing) => listing.id === id),
+);
+export const additionalExamples = listings.filter(
+  (listing) => !auditedExampleIds.includes(listing.id),
+);

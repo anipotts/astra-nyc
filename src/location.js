@@ -1,3 +1,4 @@
+import { normalizeSourceUrl } from "./source-policy.js";
 // Regional bounds for NYC and Jersey City; this is not a jurisdiction polygon.
 export const LOCATION_BOUNDS = Object.freeze({
   west: -74.27,
@@ -9,6 +10,39 @@ export const LOCATION_ATTRIBUTION = Object.freeze({
   label: "© OpenStreetMap contributors · Nominatim",
   url: "https://www.openstreetmap.org/copyright",
 });
+// A street segment or broad neighborhood match cannot identify a building.
+// Automatic selection requires one unique source object matching the numbered street.
+export function confidentLocationMatch(address, candidates) {
+  const normalize = (value) =>
+    String(value)
+      .toLowerCase()
+      .replace(/(\d)(st|nd|rd|th)\b/g, "$1")
+      .replace(
+        /\b(st|ave|blvd|rd|w|e|n|s)\b/g,
+        (word) =>
+          ({
+            st: "street",
+            ave: "avenue",
+            blvd: "boulevard",
+            rd: "road",
+            w: "west",
+            e: "east",
+            n: "north",
+            s: "south",
+          })[word],
+      )
+      .replace(/[^a-z0-9]+/g, " ")
+      .trim();
+  const street = normalize(String(address).split(",")[0]);
+  if (!/^\d+\s/.test(street) || street.split(" ").length < 3) return null;
+  const matching = new Map();
+  for (const value of candidates) {
+    const candidate = validateLocation(value);
+    if (candidate && ` ${normalize(candidate.label)} `.includes(` ${street} `))
+      matching.set(candidate.id, candidate);
+  }
+  return matching.size === 1 ? [...matching.values()][0] : null;
+}
 const text = (value, max) =>
   typeof value === "string" &&
   value.trim().length > 0 &&
@@ -46,10 +80,18 @@ export function validateLocation(value) {
   )
     throw new Error("Invalid approximate location.");
   const identity = /^osm:(node|way|relation):([1-9]\d{0,15})$/.exec(value.id);
+  const publisher = /^publisher:([a-z0-9.-]+):([a-z0-9_-]+)$/.exec(value.id);
+  const sourcedPublisher =
+    publisher &&
+    normalizeSourceUrl(value.source) === value.source &&
+    new URL(value.source).hostname.replace(/^www\./, "") === publisher[1];
   if (
-    !identity ||
-    value.source !==
-      `https://www.openstreetmap.org/${identity[1]}/${identity[2]}`
+    !(
+      identity &&
+      value.source ===
+        `https://www.openstreetmap.org/${identity[1]}/${identity[2]}`
+    ) &&
+    !sourcedPublisher
   )
     throw new Error("Location source does not match its identity.");
   return {

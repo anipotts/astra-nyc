@@ -92,3 +92,7 @@ The existing OpenAI Responses API now uses its web_search tool for explicit addr
 ## Interior evidence assessment and header treatment
 
 The existing OpenAI service now provides bounded source-text evidence assessments on the same listing domains, additionally allowing Apartment Finder and Redfin. No original images are inspected, copied or bundled by this adapter. The subject hierarchy and capability checks are original event code; search classifications are proposed model observations. No plan, scan, exterior-tile or reconstruction dependency was adopted. The header icon is recolored with a local CSS/SVG filter; approved source PNGs and favicons are unchanged.
+
+## Landing asset tooling and original artwork
+
+Existing local cwebp1.6.0 (libwebp, BSD-3-Clause; [upstream source](https://github.com/webmproject/libwebp)) compressed the supplied current-event hero toWebP at quality86. License verified from installed COPYING. This is an offline asset utility, not an added runtime or npm dependency. The original generated illustration is separately described in `public/hudson-daylight-illustration.provenance.json`; it is decorative artwork, not a sourced geographic dataset.
