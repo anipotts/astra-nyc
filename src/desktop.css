@@ -217,7 +217,7 @@ body.desktop-shell {
 .desktop-shell #location-review {
   justify-self: end;
   align-self: start;
-  margin-top: 92px;
+  margin-top: 164px;
   max-height: calc(100% - 200px);
 }
 .desktop-shell :is(#location-review, #commute-panel) h2 {
@@ -268,7 +268,7 @@ body.desktop-shell {
 .desktop-shell #commute-panel {
   justify-self: end;
   align-self: start;
-  margin-top: 92px;
+  margin-top: 164px;
   max-height: calc(100% - 190px);
 }
 .desktop-shell[data-view="commute"] #location-review {
@@ -390,12 +390,13 @@ body.desktop-shell {
   .desktop-shell .map-heading {
     bottom: auto;
     top: 74px;
-    right: 20px;
-    width: calc(100% - 40px);
+    /* Keep status text clear of the full map navigation control stack. */
+    right: 60px;
+    width: calc(100% - 80px);
   }
   .desktop-shell #location-review,
   .desktop-shell #commute-panel {
-    margin-top: 138px;
+    margin-top: 164px;
     max-height: calc(68% - 190px);
   }
   .desktop-shell[data-view="commute"] #evidence-stage {
@@ -411,6 +412,8 @@ body.desktop-shell {
   }
   .desktop-shell #lifestyle-panel {
     margin-top: 136px;
+    /* End above the bottom summary, keeping every priority scrollable. */
+    max-height: calc(68% - 182px);
   }
   .desktop-shell:has(#location-review:not([hidden])) #lifestyle-panel {
     display: none;
