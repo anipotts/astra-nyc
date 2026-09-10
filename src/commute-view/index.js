@@ -1,4 +1,5 @@
 import { DEMO_DESTINATION, MODES, externalDirections, formatDuration, formatDistance, stepLabel } from './route.js';
+import { mountWalkingControls } from './walking-view.js';
 import { createAutomaticRoute } from './automatic-route.js';
 import { lookupLocation } from '../location.js';
 import { createResultReveal } from '../practical-motion.js';
@@ -14,6 +15,7 @@ export function mountCommuteView(container, { routeLayer = {}, acquire, resolveD
     <button class="cv-submit ui-button" type="submit" hidden>Find place</button></form>
     <div class="cv-candidates"></div><p class="cv-status" role="status" aria-live="polite"></p>
     <div class="cv-result" hidden><div class="cv-metrics"><strong class="cv-duration"></strong><span class="cv-distance"></span><span class="cv-freshness"></span></div><p class="cv-estimate">Provider estimate · no live traffic or departure schedule</p>
+    <div class="cv-walking" hidden></div>
     <div class="cv-preview-heading"><h3>Along the way</h3><button type="button" class="cv-fit">Show full route</button></div>
     <label class="cv-scrub-label">Explore route segments<input class="cv-scrub" type="range" min="0" value="0" step="1"></label>
     <p class="cv-step" aria-live="polite"></p><div class="cv-step-controls"><button type="button" class="cv-prev">← Previous</button><span class="cv-step-count"></span><button type="button" class="cv-next">Next →</button></div>
@@ -24,6 +26,7 @@ export function mountCommuteView(container, { routeLayer = {}, acquire, resolveD
   </section>`;
   const $ = selector => container.querySelector(selector);
   const resultReveal = createResultReveal($('.cv-result'));
+  const walking = mountWalkingControls($('.cv-walking'), routeLayer);
   let context = { active: true }, mode = 'walking', destination = DEMO_DESTINATION, lookup = null, lookupGeneration = 0, stepIndex = 0, lastIdentity = '', destroyed = false;
   const motion = () => globalThis.matchMedia?.('(prefers-reduced-motion: reduce)').matches ? 0 : 500;
   const controller = createAutomaticRoute({ acquire, onChange: renderState });
@@ -55,6 +58,7 @@ export function mountCommuteView(container, { routeLayer = {}, acquire, resolveD
   function renderState(state) {
     const route = state.route;
     $('.cv-result').hidden = !route;
+    walking.update(route);
     const findingPlace = Boolean(lookup);
     $('.cv-submit').hidden = mode === 'transit' || Boolean(destination && state.status !== 'error');
     $('.cv-submit').textContent = destination ? 'Retry route' : 'Find place';
@@ -125,6 +129,6 @@ export function mountCommuteView(container, { routeLayer = {}, acquire, resolveD
       if (identity !== lastIdentity) { lastIdentity = identity; invalidate(); }
       external();
     },
-    destroy() { destroyed = true; lookupGeneration++; lookup?.abort(); controller.destroy(); resultReveal.destroy(); routeLayer.stop?.(); routeLayer.setRoute?.(null); container.removeEventListener('keydown',stop); container.removeEventListener('pointerdown',stop); container.replaceChildren(); container.classList.remove('commute-view'); },
+    destroy() { destroyed = true; lookupGeneration++; lookup?.abort(); controller.destroy(); walking.destroy(); resultReveal.destroy(); routeLayer.stop?.(); routeLayer.setRoute?.(null); container.removeEventListener('keydown',stop); container.removeEventListener('pointerdown',stop); container.replaceChildren(); container.classList.remove('commute-view'); },
   };
 }

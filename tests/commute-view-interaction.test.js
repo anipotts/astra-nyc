@@ -8,6 +8,8 @@ const hooks=registerHooks({load(url,context,next){return url.endsWith('/commute-
 const {mountCommuteView}=await import('../src/commute-view/index.js');hooks.deregister();
 class Element {
   constructor(){this.children=[];this.events={};this.attributes={};this.value='';this.hidden=false;this.disabled=false;this.classList={add(){},remove(){}};}
+  querySelector(selector){this.nodes ??= new Map();if(!this.nodes.has(selector))this.nodes.set(selector,new Element());return this.nodes.get(selector);}
+  querySelectorAll(){return [];}
   addEventListener(name,fn){this.events[name]=fn;} removeEventListener(name){delete this.events[name];}
   append(...children){this.children.push(...children);} replaceChildren(...children){this.children=children;}
   setAttribute(key,value){this.attributes[key]=value;} removeAttribute(key){delete this.attributes[key];} focus(){}
