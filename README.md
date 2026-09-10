@@ -6,7 +6,7 @@ A local prototype for comparing the space, commute, and daily essentials around 
 
 ## Quick demo
 
-Choose **MiMA #48H** from the search suggestions to explore its approximate neighborhood context. Open **Inside** to see the original publisher PDF immediately; use Fit page and zoom to inspect it, or open **Plans** for the document dialog. Switch to **95 Wall Street #2308**, open **Commute**, and use the default public destination, **3 World Trade Center**. Once the walking route loads, **Walk this route** follows its returned geometry through the map. Escape exits walking and closes Plans.
+Choose **MiMA #48H** from the search suggestions to explore its approximate neighborhood context. Open **Plans** to inspect the original publisher PDF, using Fit page and zoom for its details. Switch to **95 Wall Street #2308**, open **Commute**, and use the default public destination, **3 World Trade Center**. Once the walking route loads, **Walk this route** follows its returned geometry through the map. Escape exits walking and closes Plans.
 
 MiMA is an archived listing. Source dates, missing interior evidence and approximate geographic context remain visible. No current NYC example establishes a complete reconstructed apartment or measured furniture fit.
 
