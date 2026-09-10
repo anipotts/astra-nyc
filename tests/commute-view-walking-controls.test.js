@@ -27,6 +27,23 @@ function setup() {
 }
 const state = (distance, extra = {}) => ({ distance, fraction: distance / 2000, speed: 1, stepIndex: 0, arrived: false, step: { name: 'Test street' }, ...extra });
 
+test('street imagery follows the current route coordinate and viewing direction', () => {
+  const h = setup(); h.start();
+  assert.equal(h.$('.cv-street-imagery').hidden, true);
+  h.change(state(3, { coordinate: [-74.007, 40.707], viewBearing: 95 }));
+  const url = new URL(h.$('.cv-street-imagery').href);
+  assert.equal(url.origin, 'https://www.google.com');
+  assert.equal(url.searchParams.get('map_action'), 'pano');
+  assert.equal(url.searchParams.get('viewpoint'), '40.707000,-74.007000');
+  assert.equal(url.searchParams.get('heading'), '95');
+  assert.equal(h.$('.cv-street-imagery').hidden, false);
+  h.change(state(6, { coordinate: [-74.008, 40.708], viewBearing: 180 }));
+  assert.equal(new URL(h.$('.cv-street-imagery').href).searchParams.get('viewpoint'), '40.708000,-74.008000');
+  h.change(state(9, { coordinate: [Infinity, 40.708] }));
+  assert.equal(h.$('.cv-street-imagery').hidden, true);
+  h.view.destroy();
+});
+
 test('movement dismisses the initial help, looking does not, and re-entry restores compact onboarding', () => {
   const h = setup(); h.start();
   assert.equal(h.$('.cv-walk-onboarding').hidden, false);

@@ -11,6 +11,7 @@
     <link rel="stylesheet" href="/src/ui/components.css" />
     <link rel="stylesheet" href="/src/desktop.css" />
     <link rel="stylesheet" href="/src/ui/inspector.css" />
+    <link rel="stylesheet" href="/src/street-view.css" />
     <link
       rel="icon"
       type="image/png"
@@ -130,7 +131,6 @@
             <p id="overview-price"></p>
             <p id="evidence-availability"></p>
             <p id="view-unavailable" role="status" hidden></p>
-            <section id="commute-panel" hidden aria-label="Plan a regular journey"></section>
             <details id="source-details" class="ui-disclosure">
               <summary><span class="ui-icon ui-icon-files" aria-hidden="true"></span>Sources &amp; details</summary>
               <div class="inspector-source-actions">
@@ -386,7 +386,6 @@
           </button>
         </section>
         <p class="entry-region">New York City</p>
-        <p class="entry-art-source">Illustrative city art · AI generated</p>
         <div
           id="scene"
           tabindex="0"
@@ -396,6 +395,8 @@
           <div id="map-canvas"></div>
         </div>
         <section id="inside-surface" hidden aria-label="Inside source view"></section>
+        <section id="commute-panel" hidden aria-label="Plan a regular journey"></section>
+        <section id="street-surface" hidden aria-label="Street View"></section>
         <dialog id="plans-dialog" aria-labelledby="plan-name">
           <section id="plans-panel" hidden aria-label="Planning documents">
             <div class="plan-heading">

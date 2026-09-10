@@ -30,6 +30,7 @@ import { setupPlanInspection } from "./plan-inspection.js";
 import { setupEvidenceReview } from "./listing-evidence.js";
 import { mountInsideView } from "./inside-view/index.js";
 import { mountCommuteView } from "./commute-view/index.js";
+import { mountStreetView } from "./street-view.js";
 const $ = (s) => document.querySelector(s);
 const container = $("#scene");
 const overviewReturn = createOverviewReturn();
@@ -440,6 +441,7 @@ function resetCamera() {
   controls.update();
 }
 function setMode(mode) {
+  streetView?.close({ focus: false });
   if (mode === "nearby" && selectedListing) mode = "overview";
   if (mode !== state.mode && mode !== "overview") $("#source-details").open = false;
   if (selectedListing && mode !== state.mode) {
@@ -660,7 +662,9 @@ let selectedListing = null;
 const buildingNotesHost = document.createElement("div");
 $("#evidence-stage").append(buildingNotesHost);
 const buildingNotes = mountBuildingNotes(buildingNotesHost);
+const streetView = mountStreetView($("#street-surface"));
 const insideView = mountInsideView($("#inside-surface"), {
+  sourceDetailsHost: $("#source-details"),
   onOpenPlans: () => setPlansOpen(true),
   onInspectPlan: ({ sourceUrl }) => {
     $("#source-details").open = true;
@@ -668,6 +672,7 @@ const insideView = mountInsideView($("#inside-surface"), {
   },
 });
 const commuteView = mountCommuteView($("#commute-panel"), {
+  onStreetView: (location) => streetView.open(location),
   routeLayer: {
     setRoute: (route) => geoMap?.routeLayer.setRoute(route),
     highlight: (step) => geoMap?.routeLayer.highlight(step),
@@ -699,6 +704,7 @@ function syncViewServices() {
 const syntheticPotential = { ...homes.potential };
 function showListing(listing) {
   if (!listing) return;
+  streetView.close({ focus: false });
   overviewReturn.clear();
   pendingOverviewCamera = null;
   entryKind = "listing";

@@ -2,7 +2,8 @@ import { approvedPlanUrl, fetchSourcePlan } from '../source-plan.js';
 import { insideEstimateSource } from '../../src/inside-view/source.js';
 import { normalizeSourceUrl } from '../../src/source-policy.js';
 import { createHash } from 'node:crypto';
-import { existsSync, readFileSync, writeFileSync, renameSync } from 'node:fs';
+import { existsSync, readFileSync, writeFileSync, renameSync, mkdirSync } from 'node:fs';
+import { dirname } from 'node:path';
 import { nycListings } from '../../src/nyc-listings.js';
 import { estimateSchema, validateEstimate } from '../../src/inside-view/estimate-model.js';
 const fail = (message,status=502) => Object.assign(new Error(message),{status});
@@ -14,6 +15,7 @@ export function createInteriorEstimateService({ apiKey, fetchFn = fetch, maxAtte
   const exportState = () => ({ version: 1, attempts, entries: [...cache.values()].flatMap(entry => entry.result ? [entry.result] : []) });
   const persist = () => {
     if (!statePath) return;
+    mkdirSync(dirname(statePath), { recursive:true, mode:0o700 });
     const temporary = `${statePath}.tmp`;
     writeFileSync(temporary, JSON.stringify(exportState()), { mode: 0o600 });
     renameSync(temporary, statePath);
@@ -76,7 +78,10 @@ export function createInteriorEstimateService({ apiKey, fetchFn = fetch, maxAtte
         if (content.some(c=>c.type==='refusal')) throw fail('Astra could not estimate this source.');
         let scene;
         try { scene=validateEstimate(JSON.parse(content.filter(c=>c.type==='output_text').map(c=>c.text).join('')),listing.id); }
-        catch { throw fail('The generated interior did not pass geometry checks. Open Plans to inspect the source.'); }
+        catch (error) {
+          if (statePath) writeFileSync(`${statePath}.rejected.json`, JSON.stringify({ listingId:listing.id, error:error.message, output:content.filter(c=>c.type==='output_text').map(c=>c.text).join('') }), { mode:0o600 });
+          throw fail('The generated interior did not pass geometry checks. Open Plans to inspect the source.');
+        }
         const consulted = data.output?.filter(item => item.type === 'web_search_call' && item.status === 'completed').flatMap(item => item.action?.sources || []) || [];
         const sourceUrls = [...new Set(consulted.flatMap(item => { try { return [normalizeSourceUrl(item.url)]; } catch { return []; } }))].slice(0,6);
         return {scene,representation:'estimated_interior',sourceUrl:plan.sourceUrl,sourceHash:source.sha256,fetchedAt:source.fetchedAt,generatedAt:new Date(now()).toISOString(),model:data.model,responseId:data.id,cached:false,

@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { buildingRequest, buildingQueryUrl, normalizeBuildings, feetToMeters,
   selectionCoverage, outsideOfficialCoverageFilter, boundsPolygon } from "../src/nyc-buildings/data.js";
 import { createNycBuildingClient } from "../src/nyc-buildings/client.js";
-import { createNycBuildingOverlay } from "../src/nyc-buildings/index.js";
+import { createNycBuildingOverlay, getBuildingLayerAnchor } from "../src/nyc-buildings/index.js";
 import { validateStyleMin } from "@maplibre/maplibre-gl-style-spec";
 
 // Synthetic provider responses are regression inputs, never a runtime fallback.
@@ -28,7 +28,13 @@ function mockMap({ loaded = true } = {}) {
     getSource: id => sources.get(id),
     getLayer: id => layers.get(id),
     addSource(id, value) { sources.set(id, { ...value, setData(data) { this.data = data; } }); },
-    addLayer(layer) { layers.set(layer.id, layer); },
+    addLayer(layer, before) {
+      const ordered = [...layers.values()].filter(value => value.id !== layer.id);
+      const index = ordered.findIndex(value => value.id === before);
+      ordered.splice(index < 0 ? ordered.length : index, 0, layer);
+      layers.clear(); for (const value of ordered) layers.set(value.id, value);
+    },
+    moveLayer(id, before) { const layer = layers.get(id); layers.delete(id); this.addLayer(layer, before); },
     removeLayer: id => layers.delete(id), removeSource: id => sources.delete(id),
     on(name, listener) { events.set(name, listener); },
     off(name, listener) { if (events.get(name) === listener) events.delete(name); },
@@ -210,4 +216,28 @@ test("official layers and bounded base exclusion validate against the installed 
   const style = { version: 8, sources: { ...sources, osm: { type: "vector", tiles: ["https://tiles.example/{z}/{x}/{y}.pbf"] } }, layers };
   assert.deepEqual(validateStyleMin(style), []);
   layer.destroy();
+});
+
+test("building massing follows ground road labels while place labels and commute overlays stay above it", async () => {
+  const map = mockMap();
+  for (const layer of [
+    { id: "road", type: "line", "source-layer": "transportation" },
+    { id: "road-arrows", type: "symbol", "source-layer": "transportation" },
+    { id: "street-names", type: "symbol", "source-layer": "transportation_name" },
+    { id: "place-names", type: "symbol", "source-layer": "place" },
+    { id: "poi", type: "symbol", "source-layer": "poi" },
+    { id: "commute-route-halo", type: "line" },
+  ]) map.addLayer(layer);
+  assert.equal(getBuildingLayerAnchor(map, "commute-route-halo"), "place-names");
+  assert.equal(getBuildingLayerAnchor(map, "road-arrows"), "place-names");
+  const overlay = createNycBuildingOverlay(map, {
+    beforeLayerId: "commute-route-halo", client: { load: async () => normalize() },
+  });
+  await overlay.update(selection);
+  assert.deepEqual([...map.layers.keys()], ["road", "road-arrows", "street-names",
+    "elsewhere-nyc-footprints", "elsewhere-nyc-massing", "place-names", "poi", "commute-route-halo"]);
+  map.moveLayer("elsewhere-nyc-massing", "road-arrows");
+  map.fire("style.load");
+  assert.ok([...map.layers.keys()].indexOf("elsewhere-nyc-massing") > [...map.layers.keys()].indexOf("street-names"));
+  overlay.destroy();
 });

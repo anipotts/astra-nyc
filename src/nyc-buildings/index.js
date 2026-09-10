@@ -8,6 +8,16 @@ const SOURCE_ID = "elsewhere-nyc-buildings";
 const LAYER_IDS = ["elsewhere-nyc-footprints", "elsewhere-nyc-massing"];
 const height = ["number", ["get", "heightMeters"], 0];
 
+export function getBuildingLayerAnchor(map, requestedBefore = null) {
+  const layers = map.getStyle().layers ?? [];
+  // Ground labels and road arrows must be painted before solid building volumes.
+  // Keep place/POI labels and explicit overlays after the building volumes.
+  const groundSources = new Set(["transportation", "transportation_name", "housenumber"]);
+  const lastGround = layers.findLastIndex(layer => groundSources.has(layer["source-layer"]));
+  return layers.find((layer, index) => index > lastGround && !LAYER_IDS.includes(layer.id)
+    && (layer.id === requestedBefore || (layer.type === "symbol" && !groundSources.has(layer["source-layer"]))))?.id;
+}
+
 export function createNycBuildingOverlay(map, { client = createNycBuildingClient(),
   onStatus = () => {}, onCoverageChange = () => {}, beforeLayerId = null,
   radiusMeters = 400, initialStyleReady = map.isStyleLoaded() } = {}) {
@@ -35,8 +45,7 @@ export function createNycBuildingOverlay(map, { client = createNycBuildingClient
       type: "geojson", data: empty(),
     });
     const requestedBefore = typeof beforeLayerId === "function" ? beforeLayerId() : beforeLayerId;
-    const before = requestedBefore && map.getLayer(requestedBefore) ? requestedBefore
-      : map.getStyle().layers?.find(layer => layer.type === "symbol")?.id;
+    const before = getBuildingLayerAnchor(map, requestedBefore);
     if (!map.getLayer(LAYER_IDS[0])) map.addLayer({
       id: LAYER_IDS[0], type: "fill", source: SOURCE_ID, minzoom: 14,
       paint: { "fill-color": "#cac9bc", "fill-opacity": 0.9, "fill-outline-color": "#aaa99e" },
@@ -49,6 +58,8 @@ export function createNycBuildingOverlay(map, { client = createNycBuildingClient
           0, "#d7dcd5", 35, "#bbc7bc", 150, "#92a89d", 400, "#7f9991"],
         "fill-extrusion-opacity": 1, "fill-extrusion-vertical-gradient": true },
     }, before);
+    // Also repair an existing layer pair after a style reload or changed anchor.
+    for (const id of LAYER_IDS) map.moveLayer?.(id, before);
     map.getSource(SOURCE_ID).setData(data?.collection ?? empty());
     return true;
   }

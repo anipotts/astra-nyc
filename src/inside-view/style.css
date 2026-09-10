@@ -71,3 +71,10 @@
 .iv-estimate-status { position: absolute; top: 42%; left: 24px; right: 24px; text-align: center; color: var(--ui-muted, #59665e); }
 .iv-estimate-status[hidden] { display: none; }
 .iv-estimate-help { position: absolute; bottom: 8px; left: 12px; right: 12px; margin: 0; padding: 8px 12px; background: #fafaf6ee; border-radius: 8px; color: var(--ui-text, #18231f); font-size: 12px; pointer-events: none; }
+
+.iv-estimate-help[hidden] { display: none; }
+.inside-view.iv-source-first { display: grid; grid-template-rows: auto minmax(0,1fr); gap: var(--ui-space-2); overflow: hidden; }
+.inside-view.iv-source-first .iv-source-scope { margin: 0; }
+.inside-view.iv-source-first .iv-published-plan { height: 100%; min-height: 0; }
+.inside-view .iv-status:empty { display: none; }
+.iv-estimate-tools { justify-content: flex-end; }

@@ -5,14 +5,16 @@ import { lookupLocation } from '../location.js';
 import { createResultReveal } from '../practical-motion.js';
 import './styles.css';
 
-export function mountCommuteView(container, { routeLayer = {}, acquire, resolveDestination = lookupLocation, onDestinationChange = () => {}, onModeChange = () => {} } = {}) {
+export function mountCommuteView(container, { routeLayer = {}, acquire, resolveDestination = lookupLocation, onDestinationChange = () => {}, onModeChange = () => {}, onStreetView } = {}) {
   container.classList.add('commute-view');
+  if(onStreetView)container.classList.add('cv-real-street');
   container.innerHTML = `<section aria-label="Commute preview" class="cv-card ui-panel">
     <h2>Your commute</h2>
     <form class="cv-form"><label class="cv-label ui-label">Destination<input class="cv-destination ui-field" maxlength="180" placeholder="A public destination or work address" value="3 World Trade Center" autocomplete="off" required></label>
     <div class="cv-modes" role="group" aria-label="Travel mode">${Object.entries(MODES).map(([value,label]) => `<button type="button" class="ui-chip" data-travel-mode="${value}" aria-pressed="${value === 'walking'}">${label}</button>`).join('')}</div>
     <button class="cv-submit ui-button" type="submit" hidden>Find place</button></form>
     <div class="cv-candidates"></div><p class="cv-status" role="status" aria-live="polite"></p>
+    <button type="button" class="cv-street-start ui-button" hidden>Explore street view</button>
     <div class="cv-result" hidden><div class="cv-metrics"><strong class="cv-duration"></strong><span class="cv-distance"></span></div><p class="cv-estimate">Estimate · current conditions may differ</p>
     <div class="cv-walking" hidden></div>
     <details class="cv-route-segments ui-disclosure"><summary>Route segments</summary><div class="cv-preview-heading"><h3>Along the way</h3><button type="button" class="cv-fit">Show full route</button></div>
@@ -28,10 +30,12 @@ export function mountCommuteView(container, { routeLayer = {}, acquire, resolveD
   let context = { active: true }, mode = 'walking', destination = DEMO_DESTINATION, lookup = null, lookupGeneration = 0, stepIndex = 0, lastIdentity = '', destroyed = false;
   const motion = () => globalThis.matchMedia?.('(prefers-reduced-motion: reduce)').matches ? 0 : 500;
   const controller = createAutomaticRoute({ acquire, onChange: renderState });
+  $('.cv-street-start').onclick=()=>{if(onStreetView&&context.resolvedLocation)onStreetView(context.resolvedLocation);};
   function syncRoute() {
     controller.update({ active: context.active !== false, listingId: (context.selectedListing || context.listing)?.id, origin: context.resolvedLocation, destination, mode });
   }
   function external() {
+    $('.cv-street-start').hidden=!onStreetView||!context.resolvedLocation;
     const listing = context.selectedListing || context.listing;
     const origin = context.resolvedLocation?.label || listing?.mapAddress || (listing ? `${listing.name}, ${listing.location}` : null);
     const href = externalDirections(origin, $('.cv-destination').value, mode);

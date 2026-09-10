@@ -3,11 +3,11 @@ import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.j
 import { walkable } from './estimate-model.js';
 import { openingYaw } from './estimate-camera.js';
 
-export function createEstimateScene(host, data) {
+export function createEstimateScene(host, data, { onMove = () => {} } = {}) {
   const scene = new THREE.Scene(); scene.background = new THREE.Color('#dddcd2');
   const renderer = new THREE.WebGLRenderer({antialias:true,alpha:false});
   renderer.setPixelRatio(Math.min(window.devicePixelRatio,1.7));
-  renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;
+  renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFShadowMap;
   renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.2;
   renderer.domElement.tabIndex=0;renderer.domElement.setAttribute('aria-label','First-person estimated apartment in 3D. W A S D or arrow keys to move. Drag to look. Home resets the view.');
   host.append(renderer.domElement);
@@ -88,6 +88,7 @@ export function createEstimateScene(host, data) {
   const initialYaw=openingYaw(data);
   let x=data.spawn.x,z=data.spawn.z,yaw=initialYaw,pitch=-.04,active=true,frame=0,last=0,drag=null;
   const keys=new Set(),abort=new AbortController(),canvas=renderer.domElement;
+  function focusOnEntry(){if(document.activeElement===document.body||document.activeElement?.matches('[data-mode="walk"]'))canvas.focus({preventScroll:true});}
   const reduced=window.matchMedia('(prefers-reduced-motion: reduce)');
   document.addEventListener('visibilitychange',()=>{if(document.hidden)keys.clear();},{signal:abort.signal});
   const listen=(type,fn)=>canvas.addEventListener(type,fn,{signal:abort.signal});
@@ -100,17 +101,19 @@ export function createEstimateScene(host, data) {
   }
   function wake(){if(active&&!frame){last=performance.now();frame=requestAnimationFrame(tick);}}
   function tick(time){frame=0;if(!active||!keys.size)return;const dt=Math.min((time-last)/1000,.04);last=time;
+    const previousX=x,previousZ=z;
     let forward=Number(keys.has('w')||keys.has('arrowup'))-Number(keys.has('s')||keys.has('arrowdown')),side=Number(keys.has('d')||keys.has('arrowright'))-Number(keys.has('a')||keys.has('arrowleft'));
     const norm=Math.hypot(forward,side)||1,dx=(-Math.sin(yaw)*forward+Math.cos(yaw)*side)/norm*dt*1.5,dz=(-Math.cos(yaw)*forward-Math.sin(yaw)*side)/norm*dt*1.5;
     if(walkable(data,x+dx,z))x+=dx;if(walkable(data,x,z+dz))z+=dz;
+    if(x!==previousX||z!==previousZ)onMove();
     if(forward||side)draw();frame=requestAnimationFrame(tick);
   }
-  listen('keydown',e=>{const key=e.key.toLowerCase();if(['w','a','s','d','arrowup','arrowdown','arrowleft','arrowright','home'].includes(key)){e.preventDefault();if(key==='home')reset();else if(reduced.matches){if(e.repeat)return;const f=key==='w'||key==='arrowup'?1:key==='s'||key==='arrowdown'?-1:0,side=key==='d'||key==='arrowright'?1:key==='a'||key==='arrowleft'?-1:0;const dx=(-Math.sin(yaw)*f+Math.cos(yaw)*side)*.2,dz=(-Math.cos(yaw)*f-Math.sin(yaw)*side)*.2;if(walkable(data,x+dx,z))x+=dx;if(walkable(data,x,z+dz))z+=dz;draw();}else{keys.add(key);wake();}}});
+  listen('keydown',e=>{const key=e.key.toLowerCase();if(['w','a','s','d','arrowup','arrowdown','arrowleft','arrowright','home'].includes(key)){e.preventDefault();if(key==='home')reset();else if(reduced.matches){if(e.repeat)return;const previousX=x,previousZ=z;const f=key==='w'||key==='arrowup'?1:key==='s'||key==='arrowdown'?-1:0,side=key==='d'||key==='arrowright'?1:key==='a'||key==='arrowleft'?-1:0;const dx=(-Math.sin(yaw)*f+Math.cos(yaw)*side)*.2,dz=(-Math.cos(yaw)*f-Math.sin(yaw)*side)*.2;if(walkable(data,x+dx,z))x+=dx;if(walkable(data,x,z+dz))z+=dz;if(x!==previousX||z!==previousZ)onMove();draw();}else{if(!e.repeat){const previousX=x,previousZ=z;const f=key==='w'||key==='arrowup'?1:key==='s'||key==='arrowdown'?-1:0,side=key==='d'||key==='arrowright'?1:key==='a'||key==='arrowleft'?-1:0;const dx=(-Math.sin(yaw)*f+Math.cos(yaw)*side)*.08,dz=(-Math.cos(yaw)*f-Math.sin(yaw)*side)*.08;if(walkable(data,x+dx,z))x+=dx;if(walkable(data,x,z+dz))z+=dz;if(x!==previousX||z!==previousZ)onMove();draw();}keys.add(key);wake();}}});
   listen('keyup',e=>keys.delete(e.key.toLowerCase()));listen('blur',()=>{keys.clear();drag=null;});
   listen('pointerdown',e=>{if(e.button!==0)return;canvas.focus();canvas.setPointerCapture(e.pointerId);drag={x:e.clientX,y:e.clientY};});
   listen('pointermove',e=>{if(!drag)return;yaw-=(e.clientX-drag.x)*.005;pitch=Math.max(-.35,Math.min(.35,pitch-(e.clientY-drag.y)*.003));drag={x:e.clientX,y:e.clientY};draw();});
   for(const type of ['pointerup','pointercancel','lostpointercapture'])listen(type,()=>{drag=null;});
   const observer=new ResizeObserver(()=>{const w=host.clientWidth,h=host.clientHeight;if(!w||!h)return;renderer.setSize(w,h);camera.aspect=w/h;camera.updateProjectionMatrix();draw();});observer.observe(host);
-  draw();
-  return { reset, setActive(value){active=value;keys.clear();cancelAnimationFrame(frame);frame=0;if(active)draw();}, destroy(){active=false;cancelAnimationFrame(frame);abort.abort();observer.disconnect();geos.forEach(g=>g.dispose());mats.forEach(m=>m.dispose());textures.forEach(t=>t.dispose());renderer.dispose();canvas.remove();} };
+  draw();focusOnEntry();
+  return { reset, setActive(value){active=value;keys.clear();cancelAnimationFrame(frame);frame=0;if(active){draw();focusOnEntry();}}, destroy(){active=false;cancelAnimationFrame(frame);abort.abort();observer.disconnect();geos.forEach(g=>g.dispose());mats.forEach(m=>m.dispose());textures.forEach(t=>t.dispose());renderer.dispose();canvas.remove();} };
 }

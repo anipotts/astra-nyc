@@ -102,7 +102,7 @@ test('leaving cancels source work and resuming reopens the selected original sou
   } finally { h.close(); }
 });
 
-test('switching listings destroys prior renderer and missing evidence has a compact honest fallback', () => {
+test('switching listings destroys prior renderer and no-PDF listings use their own evidence', () => {
   const h = setup();
   try {
     h.view.update({ selectedListing: mima, active: true });
@@ -116,9 +116,11 @@ test('switching listings destroys prior renderer and missing evidence has a comp
     assert.equal(h.root.querySelector('.iv-source-receipt').textContent, undefined);
     h.view.update({ selectedListing: wall, active: true });
     assert.equal(h.renders[1].destroyed, true);
-    assert.match(h.root.innerHTML, /No supported PDF plan/);
-    assert.doesNotMatch(h.root.innerHTML, /iv-published-plan|MiMA|11′10/);
-    assert.equal(h.renders.length, 2);
+    assert.match(h.root.innerHTML, /Estimated from listing evidence/);
+    assert.doesNotMatch(h.root.innerHTML, /No supported PDF plan|MiMA|11′10/);
+    assert.equal(h.renders.length, 3);
+    assert.equal(h.renders[2].updates[0].listingId, wall.id);
+    assert.equal(h.renders[2].updates[0].sourceUrl, wall.url);
   } finally { h.close(); }
 });
 

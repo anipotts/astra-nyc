@@ -7,11 +7,12 @@ import { createLocationMiddleware } from "./server/location.js";
 import { createCommuteMiddleware } from "./server/commute-view/provider.js";
 import { createSourcePlanMiddleware } from "./server/source-plan.js";
 import { createBuildingNotesMiddleware } from "./server/building-notes.js";
+import { createInteriorEstimateMiddleware } from "./server/inside-view/index.js";
 export default defineConfig(({ mode }) => {
   const env = loadEnv(
     mode,
     process.env.ELSEWHERE_ENV_DIR || process.cwd(),
-    "OPENAI_",
+    ["OPENAI_", "ELSEWHERE_"],
   );
   const middleware = createAstraMiddleware({
     apiKey: process.env.OPENAI_API_KEY || env.OPENAI_API_KEY,
@@ -30,14 +31,20 @@ export default defineConfig(({ mode }) => {
   const commute = createCommuteMiddleware();
   const sourcePlan = createSourcePlanMiddleware();
   const buildingNotes = createBuildingNotesMiddleware();
+  const interiorEstimate = createInteriorEstimateMiddleware({
+    apiKey: process.env.OPENAI_API_KEY || env.OPENAI_API_KEY,
+    maxAttempts: 10,
+    statePath: process.env.ELSEWHERE_INTERIOR_STATE_PATH || env.ELSEWHERE_INTERIOR_STATE_PATH || '.cache/interior-generations.json',
+  });
   return {
     // Prepare the lazy parser at startup so the first Plans open does not
     // trigger a development-server reload and discard the current selection.
-    optimizeDeps: { include: ["pdfjs-dist/build/pdf.mjs"] },
+    optimizeDeps: { include: ["pdfjs-dist/build/pdf.mjs", "three/addons/geometries/RoundedBoxGeometry.js"] },
     plugins: [
       {
         name: "elsewhere-local-astra",
         configureServer(server) {
+          server.middlewares.use(interiorEstimate);
           server.middlewares.use(buildingNotes);
           server.middlewares.use(sourcePlan);
           server.middlewares.use(commute);
@@ -48,6 +55,7 @@ export default defineConfig(({ mode }) => {
           server.middlewares.use(middleware);
         },
         configurePreviewServer(server) {
+          server.middlewares.use(interiorEstimate);
           server.middlewares.use(buildingNotes);
           server.middlewares.use(sourcePlan);
           server.middlewares.use(commute);

@@ -7,22 +7,20 @@ export function mountEstimatedInterior(host,{onSource}={}) {
   const status=document.createElement('p');status.className='iv-estimate-status';status.setAttribute('role','status');
   const stage=document.createElement('div');stage.className='iv-estimate-stage';
   const tools=document.createElement('div');tools.className='iv-estimate-tools';
-  const badge=document.createElement('span');badge.className='iv-badge ui-chip';badge.textContent='Estimated interior · first person';
   const reset=document.createElement('button');reset.className='ui-button';reset.type='button';reset.textContent='Reset view';reset.addEventListener('click',()=>scene?.reset());
   const help=document.createElement('p');help.className='iv-estimate-help';help.textContent='W A S D / arrows to move · Drag to look · Home to reset';
-  tools.append(badge,reset);host.append(stage,tools,status,help);
+  tools.append(reset);host.append(stage,tools,status,help);
   async function update({sourceUrl,listingId,active:visible=true}) {
     active=visible;scene?.setActive(active);if(!active)return;
     const key=`${listingId}:${sourceUrl}`;
     if(identity===key&&scene)return;
     identity=key;request?.abort();const turn=++generation;request=new AbortController();
-    scene?.destroy();scene=null;status.hidden=false;status.textContent='Astra is estimating this apartment from its published plan…';reset.disabled=true;
+    scene?.destroy();scene=null;status.hidden=false;status.textContent='Astra is generating this apartment from its source evidence…';reset.disabled=true;
     try {
       // Download/parse rendering code while Astra works, rather than afterward.
       const readyRenderer=loadRenderer();
       void readyRenderer.catch(()=>{});
       let receipt=cache.get(key);
-      if(receipt&&Date.now()-receipt.savedAt>30*60*1000){cache.delete(key);receipt=null;}
       if(receipt)receipt={...receipt,cached:true};
       if(!receipt){
         const response=await fetch('/api/interiors/estimate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({listingId,sourceUrl}),signal:AbortSignal.any([request.signal,AbortSignal.timeout(80000)])});
@@ -32,7 +30,7 @@ export function mountEstimatedInterior(host,{onSource}={}) {
       }
       const {createEstimateScene}=await readyRenderer;
       if(destroyed||turn!==generation||!active)return;
-      scene=createEstimateScene(stage,receipt.scene);status.hidden=true;reset.disabled=false;
+      help.hidden=false;scene=createEstimateScene(stage,receipt.scene,{onMove:()=>{help.hidden=true;}});status.hidden=true;reset.disabled=false;
       help.textContent='W A S D / arrows to move · Drag to look · Home to reset';
       onSource?.(receipt);
     }catch(error){if(!destroyed&&turn===generation&&active){status.hidden=false;status.textContent=error.name==='AbortError'||error.name==='TimeoutError'?'Interior generation timed out. Open Plans to view the original drawing.':error.message;help.textContent='Open Plans for the published drawing. No substitute apartment is shown.';}}

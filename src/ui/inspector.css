@@ -34,17 +34,20 @@
 .desktop-shell #plan-inspection-report > small { display: block; margin: 6px 0; color: var(--ui-color-muted); }
 .desktop-shell #reconstruction-evidence > button { margin: 4px 0; }
 .desktop-shell #source-details .intake-note { color: var(--ui-color-muted); }
+.desktop-shell #source-details [data-inside-evidence] dl { display: grid; gap: 4px; font-size: 12px; line-height: 1.4; }
+.desktop-shell #source-details [data-inside-evidence] dt { margin-top: 6px; color: var(--ui-color-muted); }
+.desktop-shell #source-details [data-inside-evidence] dd { margin: 0; overflow-wrap: anywhere; }
 
-/* One sidebar inspector and one uninterrupted map in Commute. */
+/* One route component floats over the uninterrupted map at both desktop sizes. */
 .desktop-shell.evidence-only[data-view="commute"] #viewport { grid-template: "surface" minmax(0,1fr) / minmax(0,1fr); }
-.desktop-shell #evidence-stage #commute-panel.commute-view { position: static; display: block; width: 100%; max-width: none; max-height: none; margin: 14px 0; padding: 0; border: 0; border-radius: 0; overflow: visible; box-shadow: none; }
-.desktop-shell #evidence-stage #commute-panel[hidden] { display: none !important; }
-.desktop-shell #evidence-stage #commute-panel .cv-card { padding: 0; border: 0; border-radius: 0; background: transparent; box-shadow: none; }
-.desktop-shell #evidence-stage #commute-panel h2 { font-size: 16px; line-height: 1.3; margin: 0 0 8px; }
-.desktop-shell #evidence-stage #commute-panel .cv-modes { gap: 2px; margin: 8px 0; padding: 2px; }
-.desktop-shell #evidence-stage #commute-panel .cv-modes button { padding: 5px 2px; font-size: 12px; }
-.desktop-shell #evidence-stage #commute-panel :is(.cv-details,.cv-freshness,.cv-estimate,.cv-sharing,.cv-attribution) { font-size: 12px; letter-spacing: normal; text-transform: none; line-height: 1.4; }
-.desktop-shell #evidence-stage #commute-panel .cv-attribution a { display: inline; min-height: 0; margin: 0; font-size: 12px; }
-.desktop-shell #evidence-stage #commute-panel .cv-attribution { padding-top: 8px; }
-.desktop-shell #evidence-stage #commute-panel .cv-external { min-height: 30px; margin: 8px 0; font-size: 12px; line-height: 1.4; }
-.desktop-shell #evidence-stage #commute-panel .cv-candidates:empty { display: none; }
+.desktop-shell[data-view="commute"] #commute-panel.commute-view { grid-area: surface; position: relative; width: min(292px, calc(100% - 76px)); margin: var(--ui-space-4); max-height: calc(100% - 32px); border: 0; border-radius: var(--ui-radius-panel); align-self: start; justify-self: start; }
+.desktop-shell[data-view="commute"] #commute-panel .cv-card { padding: var(--ui-space-3); border: 1px solid var(--ui-color-border); border-radius: var(--ui-radius-panel); box-shadow: 0 8px 24px #173a2b12; }
+.desktop-shell #commute-panel :is(.cv-details,.cv-freshness,.cv-estimate,.cv-sharing,.cv-attribution) { font-size: 12px; letter-spacing: normal; text-transform: none; line-height: 1.4; }
+.desktop-shell #commute-panel .cv-attribution a { display: inline; min-height: 0; margin: 0; font-size: 12px; }
+.desktop-shell #commute-panel .cv-attribution { padding-top: 8px; }
+.desktop-shell #commute-panel .cv-external { min-height: 30px; margin: 8px 0; font-size: 12px; line-height: 1.4; }
+.desktop-shell #commute-panel .cv-candidates:empty { display: none; }
+.desktop-shell #commute-panel:has(.is-walking) { width: min(272px, calc(100% - 76px)); }
+.desktop-shell #commute-panel:has(.is-walking) .cv-details { border: 0; padding-top: 0; }
+.desktop-shell #commute-panel:has(.is-walking) .cv-attribution { display: none; }
+.desktop-shell #commute-panel .cv-street-imagery { display: inline-flex; align-items: center; min-height: 30px; margin: 4px 0; font-size: 12px; font-weight: 550; }

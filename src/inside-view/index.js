@@ -1,6 +1,6 @@
 import { initialInsideState, resolveInsideContext, reduceInsideAction, dimensionLabel, safeSourceUrl } from './model.js';
 import { mountEstimatedInterior } from './estimate-view.js';
-import { insideSourcePlan } from './source.js';
+import { insideEstimateSource } from './source.js';
 import './style.css';
 
 const escape = (value) => String(value ?? '').replace(/[&<>"']/g, (char) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
@@ -8,10 +8,11 @@ const link = (url, label) => safeSourceUrl(url) ? `<a href="${escape(safeSourceU
 let viewSequence = 0;
 const date = (value) => value && Number.isFinite(Date.parse(value)) ? new Date(value).toISOString().slice(0, 10) : 'Unknown';
 
-export function mountInsideView(container, { onInspectPlan, onOpenPlans, onAction, records, createSourcePlan = mountEstimatedInterior } = {}) {
+export function mountInsideView(container, { onInspectPlan, onOpenPlans, onAction, records, sourceDetailsHost, createSourcePlan = mountEstimatedInterior } = {}) {
   const helpId = `inside-help-${++viewSequence}`;
   let context = resolveInsideContext(), state = initialInsideState(), destroyed = false, active = true, signature = '', drag = null;
   let sourceViewer = null, sourceVisible = false;
+  let sidebarEvidence = null;
   const root = document.createElement('section');
   root.className = 'inside-view';
   root.setAttribute('aria-label', 'Inside evidence explorer');
@@ -44,7 +45,7 @@ export function mountInsideView(container, { onInspectPlan, onOpenPlans, onActio
   }
 
   function syncSourcePlan() {
-    const plan = !context.region && insideSourcePlan(context.listing);
+    const plan = !context.region && insideEstimateSource(context.listing);
     const host = root.querySelector('.iv-published-plan');
     if (!plan || !host) return;
     if (!active) {
@@ -55,9 +56,20 @@ export function mountInsideView(container, { onInspectPlan, onOpenPlans, onActio
     sourceViewer ||= createSourcePlan(host, {
       compact: true,
       onSource(receipt) {
-        if (destroyed || !sourceVisible || context.listing?.id !== plan.listingId || insideSourcePlan(context.listing)?.sourceUrl !== plan.sourceUrl) return;
-        const output = root.querySelector('.iv-source-receipt');
-        if (output) output.textContent = `${receipt.model || 'Astra'} · ${receipt.cached ? 'cached estimate' : 'generated estimate'} · source retrieved ${receipt.fetchedAt || 'time not supplied'}. ${receipt.scene?.sourceAssessment || ''} ${(receipt.scene?.assumptions || []).join(' ')}`;
+        if (destroyed || !sourceVisible || context.listing?.id !== plan.listingId || insideEstimateSource(context.listing)?.sourceUrl !== plan.sourceUrl) return;
+        const output = (sidebarEvidence || root).querySelector('.iv-source-receipt');
+        if (output) {
+          const evidence = receipt.sourceEvidence;
+          const basis = evidence?.kind === 'listing_evidence'
+            ? `Listing evidence checked ${evidence.catalogCheckedAt || 'date unavailable'}; web sources checked ${evidence.searchedAt || 'not retrieved'}`
+            : `Source retrieved ${receipt.fetchedAt || 'time not supplied'}`;
+          output.textContent = `${receipt.model || 'Astra'} · ${receipt.cached ? 'cached estimate' : 'generated estimate'} · ${basis}. ${receipt.scene?.sourceAssessment || ''} ${(receipt.scene?.assumptions || []).join(' ')}`;
+          for (const url of evidence?.sourceUrls || []) {
+            if (!safeSourceUrl(url)) continue;
+            const a = document.createElement('a'); a.href = url; a.target = '_blank'; a.rel = 'noopener noreferrer'; a.textContent = new URL(url).hostname + ' ↗';
+            output.append(document.createElement('br'), a);
+          }
+        }
       },
     });
     if (!sourceVisible) {
@@ -67,9 +79,10 @@ export function mountInsideView(container, { onInspectPlan, onOpenPlans, onActio
   }
 
   function render() {
+    sidebarEvidence?.remove(); sidebarEvidence = null;
     sourceViewer?.destroy(); sourceViewer = null; sourceVisible = false;
     const { listing, region } = context;
-    const sourcePlan = !region && insideSourcePlan(listing);
+    const sourcePlan = !region && insideEstimateSource(listing);
     root.classList.toggle('iv-source-first', Boolean(sourcePlan));
     if (!listing) {
       root.innerHTML = '<div class="iv-empty ui-panel"><span class="iv-eyebrow">Inside</span><h2>Choose a home to look inside</h2><p>Select a listing to review its source and any accepted room evidence.</p></div>';
@@ -81,6 +94,16 @@ export function mountInsideView(container, { onInspectPlan, onOpenPlans, onActio
       <details class="iv-details ui-disclosure"><summary>${sourcePlan ? 'Estimate details & source evidence' : 'Sources & dimensions'}</summary><dl><dt>Selected source</dt><dd>${escape(listing.name)}</dd>${sourcePlan ? '<dt>Estimated reconstruction</dt><dd class="iv-source-receipt">Not loaded yet</dd>' : ''}<dt>Listing checked</dt><dd>${date(listing.checkedAt)}</dd><dt>Availability</dt><dd>${escape(listing.availability || 'Not verified')}</dd>${region ? `<dt>Region dimensions</dt><dd>${dimensionLabel(region.width, 'ft')} × ${dimensionLabel(region.depth, 'ft')} (${dimensionLabel(region.width, 'm')} × ${dimensionLabel(region.depth, 'm')})</dd><dt>Basis</dt><dd>${escape(region.elements[0].evidence.source)}</dd><dt>Reviewed</dt><dd>${date(region.revision.createdAt)}</dd><dt>Published date</dt><dd>${date(region.sourceDate)}</dd><dt>Artwork metadata</dt><dd>${date(region.artworkDate)}; not a publication date</dd>` : ''}</dl>${region ? `<p>${escape(region.qualification)}</p><p><strong>Excluded:</strong> ${escape(region.exclusions.join('; '))}.</p>${region.sources.map((source) => `<p>${link(source.url, escape(source.title))}</p>`).join('')}<p>Source artwork remains at the publisher. Reuse rights are unresolved.</p>` : `<p>${escape(listing.questions || 'Confirm exact unit, source date, dimensions and current condition.')}</p>`}</details>
       ${region ? `<details class="iv-details ui-disclosure"><summary>Compare an object’s footprint</summary><p>Enter dimensions you know. This creates a separate scale reference; placing furniture needs verified room boundaries and obstacles.</p><form class="iv-object-form"><label>Width (m)<input class="ui-field" name="width" type="number" min="0.1" max="10" step="any" required placeholder="e.g. 1.5"></label><label>Depth (m)<input class="ui-field" name="depth" type="number" min="0.1" max="10" step="any" required placeholder="e.g. 2.0"></label><button class="ui-button" type="submit">Compare size</button></form><div class="iv-comparison" hidden></div></details>` : ''}
       ${sourcePlan ? '' : '<details class="iv-details ui-disclosure"><summary>What would unlock more?</summary><p><strong>Furniture placement:</strong> reviewed clear-floor boundaries, doors, fixed obstacles and confirmed object dimensions.</p><p><strong>Walkthrough & lighting:</strong> reviewed wall, opening, ceiling and orientation evidence. These sources do not establish a complete 3D interior.</p></details>'}<p class="iv-status" role="status" aria-live="polite"></p>`;
+    if (sourcePlan) {
+      root.querySelector('.iv-source-actions')?.remove();
+      root.querySelector('.iv-source-scope').textContent = sourcePlan.kind === 'pdf' ? 'Estimated interior from the published plan' : 'Estimated interior from listing evidence';
+      if (sourceDetailsHost) {
+        sidebarEvidence = root.querySelector('.iv-details');
+        sidebarEvidence.setAttribute('data-inside-evidence', '');
+        sidebarEvidence.querySelector('summary').textContent = 'Interior estimate';
+        sourceDetailsHost.append(sidebarEvidence);
+      }
+    }
     draw();
     syncSourcePlan();
   }
@@ -168,6 +191,6 @@ export function mountInsideView(container, { onInspectPlan, onOpenPlans, onActio
     setActive,
     deactivate: () => setActive(false),
     getState: () => structuredClone(state),
-    destroy() { destroyed = true; drag = null; sourceViewer?.destroy(); sourceViewer = null; sourceVisible = false; abort.abort(); root.remove(); },
+    destroy() { destroyed = true; drag = null; sidebarEvidence?.remove(); sourceViewer?.destroy(); sourceViewer = null; sourceVisible = false; abort.abort(); root.remove(); },
   };
 }

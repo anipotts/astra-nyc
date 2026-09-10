@@ -4,7 +4,7 @@ import "maplibre-gl/dist/maplibre-gl.css";
 import { validateLocation, LOCATION_BOUNDS } from "./location.js";
 import { createCommuteMapLayer } from "./commute-view/map-layer.js";
 import { createMapFocus } from "./map-focus.js";
-import { createNycBuildingOverlay, outsideOfficialCoverageFilter, NYC_BUILDING_SOURCE } from "./nyc-buildings/index.js";
+import { createNycBuildingOverlay, outsideOfficialCoverageFilter, NYC_BUILDING_SOURCE, getBuildingLayerAnchor } from "./nyc-buildings/index.js";
 import { createRouteEmphasis } from "./practical-motion.js";
 import "./practical-motion.css";
 setWorkerUrl(workerUrl);
@@ -166,9 +166,7 @@ export async function createNeighborhood(container, onStatus = () => {}, { route
       ([, value]) => value.type === "vector",
     )?.[0];
     if (source && !map.getLayer("elsewhere-buildings")) {
-      const before = map
-        .getStyle()
-        .layers.find((layer) => layer.type === "symbol")?.id;
+      const before = getBuildingLayerAnchor(map, "commute-route-halo");
       map.addLayer(
         {
           id: "elsewhere-buildings",

@@ -21,6 +21,7 @@ export function mountWalkingControls(container, routeLayer) {
     <div class="cv-walk-controls" hidden>
       <div class="cv-walk-heading"><strong>Walk the route</strong><button type="button" class="ui-button ui-button--compact cv-walk-exit">Exit walk</button></div>
       <p class="cv-walk-progress"></p>
+      <a class="cv-street-imagery" target="_blank" rel="noopener noreferrer" hidden title="Open nearby Google Street View imagery; capture date and exact location may differ">Street imagery ↗</a>
       <span class="cv-walk-announcement" role="status" aria-live="polite" aria-atomic="true"></span>
       <div class="cv-walk-onboarding"><strong>W/S move · A/D or drag to look</strong><span>Click the map to use keys. Escape exits.</span></div>
       <details class="cv-walk-more ui-disclosure"><summary>Controls</summary>
@@ -39,6 +40,15 @@ export function mountWalkingControls(container, routeLayer) {
   let route = null, active = false, lastAnnouncement = '', initialDistance = null;
   function exited() { active = false; $('.cv-walk-controls').hidden = true; $('.cv-walk-start').hidden = Boolean(walkingAvailability(route)); container.classList.remove('is-walking'); }
   function position(state) {
+    const imagery = $('.cv-street-imagery');
+    const coordinate = state.coordinate;
+    const valid = Array.isArray(coordinate) && coordinate.length === 2 && coordinate.every(Number.isFinite) && Math.abs(coordinate[0]) <= 180 && Math.abs(coordinate[1]) <= 90;
+    imagery.hidden = !valid;
+    if (valid) {
+      const url = new URL('https://www.google.com/maps/@');
+      url.search = new URLSearchParams({ api: '1', map_action: 'pano', viewpoint: `${coordinate[1].toFixed(6)},${coordinate[0].toFixed(6)}`, heading: String(Number.isFinite(state.viewBearing) ? state.viewBearing : 0), pitch: '0' });
+      imagery.href = url.href;
+    } else imagery.removeAttribute?.('href');
     if (initialDistance === null) initialDistance = state.distance;
     else if (Math.abs(state.distance - initialDistance) > .01) $('.cv-walk-onboarding').hidden = true;
     $('.cv-walk-seek').value = String(Math.round(state.fraction * 1000));

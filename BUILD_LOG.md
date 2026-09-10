@@ -288,3 +288,13 @@ GitHub main was verified at 2b12ddd with successful CI after the participant's p
 - Added procedural fabric/wood surface detail and door trim; reused static shadow maps and stopped animation frames while idle. Renderer module loading now overlaps generation.
 - Direction reported the first live source-bound MiMA generation succeeded and supplied a screenshot; inspected its overly close third-person entry view before this refinement. No extra model request or server/cache restart was performed here.
 - Focused 12 tests and production build passed. Combined first-person visual QA remains with Direction.
+
+## 2026-09-10 21:04 UTC — recording integration
+
+- Integrated all completed Inside, Commute, design and listing-evidence work into main; retained one canonical preview at 127.0.0.1:5174. Other feature tasks archived with Direction owning final QA.
+- Added official Google-issued interactive Street View embeds near MiMA and 95 Wall; other valid locations use an official external Street View URL. Public panoramas are nearby street imagery, not surveyed entrances or a continuous route simulation.
+- Corrected map layer ordering so ground road labels no longer paint across building massing. Geometry and sources are unchanged.
+- Removed requested landing art badge and Inside badge/bottom disclosures; detailed interior provenance remains in the sidebar. Updated the generation loading copy.
+- No-PDF 95 Wall source-evidence generation succeeded live in 31.6 seconds with 14 wall segments. MiMA and 95 Wall receipts persist privately across server restarts; all successful catalog generations retain source identity and original timestamps without expiry. Failed attempts remain charged. No claim that all ten examples are pre-generated.
+- Fixed environment-prefix loading for the private persistent generation cache. Added immediate keyboard tap movement and dismissed the movement hint after actual movement.
+- Verified 235 tests and production build. Browser checks covered MiMA and no-PDF 95 Wall interiors, native keyboard hint dismissal, original Plans modal, and real Street View imagery. Desktop layout measured at 1144x853 and 723x856; compact view has no horizontal overflow and reduced-motion movement works. Final recording capture follows this milestone.
