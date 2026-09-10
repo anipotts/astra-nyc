@@ -1,0 +1,9 @@
+{
+  "asset": "hudson-daylight-illustration.webp",
+  "origin": "OpenAI ImageGen artwork supplied during the September 10, 2026 event",
+  "purpose": "Decorative landing illustration of the Hudson region",
+  "sourceDimensions": [1536, 1024],
+  "optimization": "cwebp 1.6.0, quality 86",
+  "sha256": "904108671608eec661bb0027821eef2f9020a72c7fa074e891d30303ecc90994",
+  "limitations": "Illustrative AI generated composition. Not geospatial evidence, listing photography, accurate building identification or reconstructed geometry."
+}

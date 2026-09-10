@@ -186,28 +186,32 @@
       </aside>
       <section id="viewport" aria-label="Interactive 3D home preview">
         <section id="entry-stage" aria-labelledby="entry-title">
+          <p class="entry-eyebrow">A new way to find home</p>
           <h1 id="entry-title">
-            See what life could be like in your next home
+            <span>See what life could be like</span>
+            <span>in your next home</span>
           </h1>
-          <p>Where are you thinking of moving?</p>
           <form id="address-form">
             <label class="sr-only" for="listing-address"
-              >Address or building in NYC or Jersey City</label
+              >Address, building or listing URL in NYC or Jersey City</label
             >
+            <div class="entry-search-field">
             <input
               id="listing-address"
               type="search"
               required
               minlength="3"
-              maxlength="180"
+              maxlength="2048"
               placeholder="Address, building or apartment"
               autocomplete="off"
               spellcheck="false"
-              aria-describedby="search-disclosure"
+              aria-describedby="search-disclosure listing-input-hint"
             />
-            <button type="submit">Search →</button>
+            <label id="listing-input-hint" class="listing-input-badge" for="listing-address">or paste a listing</label>
+            </div>
+            <button type="submit">Explore →</button>
           </form>
-          <details id="listing-link-entry">
+          <details id="listing-link-entry" hidden>
             <summary>Paste a listing link</summary>
             <form id="listing-form">
               <label class="sr-only" for="listing-url">Listing URL</label>
@@ -240,7 +244,8 @@
           <button id="search-online" class="text-action" type="button" hidden>
             Search online for more listings →
           </button>
-          <p class="intake-note">Examples</p>
+          <details class="landing-examples">
+          <summary>Explore example listings</summary>
           <div class="entry-examples" aria-label="Supported listing examples">
             <button type="button" data-listing="wall2308">
               95 Wall studio
@@ -248,7 +253,10 @@
             <button type="button" data-listing="urby409">Urby #409</button>
             <button type="button" data-listing="urby1504">Urby #1504</button>
           </div>
+          </details>
         </section>
+        <p class="entry-region">NYC &amp; Jersey City</p>
+        <p class="entry-art-source">Illustrative city art · AI generated</p>
         <div
           id="scene"
           tabindex="0"
