@@ -1,0 +1,657 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#FAFAF6" />
+    <title>Elsewhere</title>
+    <link rel="stylesheet" href="/src/style.css" />
+    <link rel="stylesheet" href="/src/shell.css" />
+    <link rel="stylesheet" href="/src/desktop.css" />
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="16x16"
+      href="/favicon-approved-v2-16.png"
+    />
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="32x32"
+      href="/favicon-approved-v2-32.png"
+    />
+    <link rel="apple-touch-icon" href="/apple-touch-approved-v2.png" />
+  </head>
+  <body class="empty-state desktop-shell">
+    <svg
+      width="0"
+      height="0"
+      aria-hidden="true"
+      focusable="false"
+      style="position: absolute"
+    >
+      <defs>
+        <filter id="wordmark-ink" color-interpolation-filters="sRGB">
+          <feColorMatrix
+            type="matrix"
+            values="0 0 0 0 0.12549  0 0 0 0 0.30196  0 0 0 0 0.23922  0 1.536145 0 0 -0.487952"
+          />
+        </filter>
+      </defs>
+    </svg>
+    <header>
+      <a class="wordmark" href="/" aria-label="Elsewhere home"
+        ><img
+          src="/elsewhere-approved-v2.png"
+          width="36"
+          height="36"
+          alt=""
+        />Elsewhere</a
+      >
+      <div class="modebar" role="group" aria-label="View mode">
+        <button data-mode="overview" aria-pressed="true">Overview</button
+        ><button data-mode="walk" aria-pressed="false">Inside</button
+        ><button data-mode="commute" aria-pressed="false">Commute</button>
+      </div>
+      <button
+        id="plans-toggle"
+        class="plans-utility"
+        aria-haspopup="dialog"
+        aria-pressed="false"
+      >
+        Plans
+      </button>
+    </header>
+    <main>
+      <aside aria-label="Your homes">
+        <div class="intro" hidden>
+          <h1>See what life could be like in your next home</h1>
+        </div>
+        <div class="panel-heading">
+          <span>Your places</span
+          ><button
+            id="places-toggle"
+            aria-expanded="true"
+            aria-controls="places-content"
+            aria-label="Collapse places"
+          >
+            −
+          </button>
+        </div>
+        <div id="places-content">
+          <button id="add-listing" type="button">+ Add listing</button>
+          <fieldset class="homes">
+            <legend class="sr-only">Choose a home</legend>
+            <label class="home"
+              ><input type="radio" name="home" value="current" /><span
+                ><strong>Current home</strong
+                ><small>Synthetic example</small></span
+              ><span class="selection-mark" aria-hidden="true">✓</span></label
+            >
+            <label class="home"
+              ><input type="radio" name="home" value="potential" /><span
+                ><strong id="potential-name">Potential home</strong
+                ><small id="potential-note">Synthetic example</small></span
+              ><span class="selection-mark" aria-hidden="true">✓</span></label
+            >
+          </fieldset>
+          <section id="personal-library" hidden>
+            <details>
+              <summary>Furniture previews</summary>
+              <p>Appearance approximations · product identity unconfirmed</p>
+              <div class="asset-actions">
+                <button type="button" data-add-asset="green-seat">
+                  + Green seat</button
+                ><button type="button" data-add-asset="black-shelf">
+                  + Black shelf
+                </button>
+              </div>
+            </details>
+            <label for="object-select">Select an item</label
+            ><select id="object-select">
+              <option value="">Choose an item</option>
+            </select>
+          </section>
+          <div class="examples-heading">Examples</div>
+          <div class="listing-examples">
+            <button type="button" data-listing="wall2308">
+              95 Wall studio <span aria-hidden="true">↗</span></button
+            ><button type="button" data-listing="zephyr501">
+              Zephyr #501 <small>Archived</small>
+            </button>
+            <button type="button" data-listing="urby409">
+              Urby #409 <small>Evidence only</small>
+            </button>
+            <button type="button" data-listing="urby1504">
+              Urby #1504 <small>Evidence only</small>
+            </button>
+          </div>
+          <details class="evidence">
+            <summary>
+              <span id="model-status">Illustrative model</span>
+              <span aria-hidden="true">ⓘ</span>
+            </summary>
+            <p>
+              Demo room dimensions and furnishings are synthetic. Real listings
+              remain evidence only until usable measurements are available.
+              Reported area alone does not establish room dimensions or fit.
+            </p>
+            <section
+              id="listing-evidence"
+              class="listing-card"
+              aria-label="Listing evidence"
+              hidden
+            >
+              <h2 id="listing-name"></h2>
+              <p id="listing-location"></p>
+              <strong id="listing-facts"></strong>
+              <p id="listing-price"></p>
+              <p id="listing-availability"></p>
+              <a id="listing-source" target="_blank" rel="noopener noreferrer"
+                >Original listing &amp; photos ↗</a
+              ><small id="listing-checked"></small>
+              <details>
+                <summary>Unknown conditions</summary>
+                <p id="listing-unknowns"></p>
+              </details>
+              <button id="listing-preview" type="button">
+                Needs a dimensioned plan
+              </button>
+              <p>
+                No dimensional interior is available. Source facts are a dated
+                snapshot, not a live refresh.
+              </p>
+            </section>
+            <p>
+              Other homes, streets and places are synthetic examples. Live map
+              data is identified in Nearby.
+            </p>
+            <output id="status" aria-live="polite">Current home loaded</output>
+          </details>
+          <section
+            id="clearance-panel"
+            class="clearance-panel"
+            hidden
+            aria-label="Bed clearance"
+          >
+            <h2>Synthetic room · model clearance</h2>
+            <output id="clearance-values" aria-live="polite"></output>
+            <p>
+              Clearance from bed frame to scene obstacles. Verify actual
+              dimensions before deciding fit.
+            </p>
+          </section>
+        </div>
+        <small id="collapsed-model-status">Illustrative model</small>
+      </aside>
+      <section id="viewport" aria-label="Interactive 3D home preview">
+        <section id="entry-stage" aria-labelledby="entry-title">
+          <h1 id="entry-title">
+            See what life could be like in your next home
+          </h1>
+          <p>Where are you thinking of moving?</p>
+          <form id="address-form">
+            <label class="sr-only" for="listing-address"
+              >Address or building in NYC or Jersey City</label
+            >
+            <input
+              id="listing-address"
+              type="search"
+              required
+              minlength="3"
+              maxlength="180"
+              placeholder="Address, building or apartment"
+              autocomplete="off"
+              spellcheck="false"
+              aria-describedby="search-disclosure"
+            />
+            <button type="submit">Search →</button>
+          </form>
+          <details id="listing-link-entry">
+            <summary>Paste a listing link</summary>
+            <form id="listing-form">
+              <label class="sr-only" for="listing-url">Listing URL</label>
+              <input
+                id="listing-url"
+                type="url"
+                required
+                maxlength="2048"
+                placeholder="https://…"
+                autocomplete="off"
+                spellcheck="false"
+              />
+              <button type="submit">Find listing →</button>
+            </form>
+          </details>
+          <p id="search-disclosure" class="intake-note">
+            NYC &amp; Jersey City · Online searches go to OpenAI only when you
+            submit.
+          </p>
+          <output
+            id="listing-status"
+            class="intake-status"
+            aria-live="polite"
+          ></output>
+          <section
+            id="listing-results"
+            aria-label="Listing matches"
+            hidden
+          ></section>
+          <button id="search-online" class="text-action" type="button" hidden>
+            Search online for more listings →
+          </button>
+          <p class="intake-note">Examples</p>
+          <div class="entry-examples" aria-label="Supported listing examples">
+            <button type="button" data-listing="wall2308">
+              95 Wall studio
+            </button>
+            <button type="button" data-listing="urby409">Urby #409</button>
+            <button type="button" data-listing="urby1504">Urby #1504</button>
+          </div>
+        </section>
+        <div
+          id="scene"
+          tabindex="0"
+          aria-label="3D scene. In walk mode use W A S D to move, arrow keys to turn, or drag to look."
+        ></div>
+        <div id="map-view" hidden aria-label="Geographic neighborhood">
+          <div id="map-canvas"></div>
+          <div class="map-heading">
+            <span class="eyebrow">GEOGRAPHIC CONTEXT</span>
+            <h2 id="map-title">Your neighborhood</h2>
+            <p id="map-status" role="status">Loading map…</p>
+          </div>
+          <div class="map-actions">
+            <button id="map-pullback">Neighborhood</button
+            ><button id="map-direct">Focus listing</button
+            ><button id="map-enter" class="primary">Inside →</button>
+          </div>
+        </div>
+        <section
+          id="location-review"
+          hidden
+          aria-label="Confirm listing location"
+        >
+          <h2>Locate this listing</h2>
+          <p id="location-progress" role="status">
+            Confirm the address to place its map pin.
+          </p>
+          <button id="resolve-location" type="button">Find on map</button>
+          <div id="location-candidates"></div>
+          <small
+            >Address lookup uses OpenStreetMap. A map pin does not establish an
+            entrance or interior.</small
+          >
+        </section>
+        <section id="inside-surface" hidden aria-label="Inside source view">
+          <div id="inside-plan"></div>
+          <div id="inside-empty">
+            <h2>Start with the real source</h2>
+            <p id="inside-explanation">
+              A matching plan or photo source can show what is known inside.
+              Unseen rooms remain absent.
+            </p>
+            <a id="inside-source" target="_blank" rel="noopener noreferrer"
+              >Open source photos &amp; details ↗</a
+            >
+          </div>
+        </section>
+        <section id="commute-panel" hidden aria-label="Plan a regular journey">
+          <h2>Your regular journey</h2>
+          <p>Start from this listing. No current home address is required.</p>
+          <form id="commute-form">
+            <label for="journey-destination">Where do you go regularly?</label>
+            <input
+              id="journey-destination"
+              required
+              maxlength="180"
+              placeholder="Work, campus, a gym, or another address"
+            />
+            <label for="journey-mode">Your usual mode</label>
+            <select id="journey-mode">
+              <option value="walking">Walk</option>
+              <option value="bicycling">Bike</option>
+              <option value="transit">Transit</option>
+              <option value="driving">Drive</option>
+            </select>
+            <button type="submit">Prepare directions</button>
+          </form>
+          <p id="journey-summary" role="status">
+            Travel times and routes are not connected to this map yet.
+          </p>
+          <a
+            id="journey-external"
+            target="_blank"
+            rel="noopener noreferrer"
+            hidden
+            >Open route in Google Maps ↗</a
+          >
+        </section>
+        <details id="lifestyle-panel" hidden>
+          <summary>What matters nearby?</summary>
+          <p>
+            Choose up to three priorities. Places and detour times appear only
+            when sourced.
+          </p>
+          <div id="lifestyle-choices"></div>
+          <p id="lifestyle-status" role="status">
+            Your priorities are optional.
+          </p>
+        </details>
+        <section id="evidence-stage" hidden aria-label="Listing evidence only">
+          <div class="summary-heading">
+            <span id="summary-view-label">Your next place</span
+            ><button id="change-listing" type="button">Change</button>
+          </div>
+          <h1 id="evidence-title"></h1>
+          <p id="evidence-facts"></p>
+          <p id="overview-price"></p>
+          <small id="overview-freshness"></small>
+          <p id="view-unavailable" role="status" hidden></p>
+          <p id="summary-next"></p>
+          <details id="source-details">
+            <summary>Sources &amp; details</summary>
+            <details id="city-source-details">
+              <summary>3D city sources</summary>
+              <p id="city-source-description"></p>
+              <a id="city-source-link" target="_blank" rel="noopener noreferrer"
+                >Building height method ↗</a
+              >
+            </details>
+            <section id="location-source" hidden>
+              <a
+                id="location-source-link"
+                target="_blank"
+                rel="noopener noreferrer"
+              ></a>
+              <small id="location-source-date"></small>
+              <button id="change-location" type="button">
+                Review map location
+              </button>
+            </section>
+            <p id="evidence-reason">
+              A matching, authorized plan with usable scale is needed before
+              creating a dimensional interior. Reported square footage is not
+              enough.
+            </p>
+            <a id="evidence-source" target="_blank" rel="noopener noreferrer"
+              >View original listing ↗</a
+            >
+            <a
+              id="evidence-plan-source"
+              target="_blank"
+              rel="noopener noreferrer"
+              hidden
+              >View original plan reference ↗</a
+            >
+            <p class="evidence-note">
+              No room dimensions or furniture fit have been established. Listing
+              furnishing status is unknown; photo staging does not establish
+              what is included.
+            </p>
+            <section id="inspected-region" hidden aria-label="Inspected region">
+              <h3>Inspected 2D region available</h3>
+              <p id="inspected-region-note"></p>
+              <button id="open-inspected-region" type="button">
+                Open bedroom region in Plans
+              </button>
+            </section>
+            <details id="plan-inspection">
+              <summary>Inspect a published plan</summary>
+              <p>
+                Use a direct PDF or image link from a supported publisher. The
+                source is sent to OpenAI when you submit.
+              </p>
+              <form id="plan-inspection-form">
+                <label for="plan-source-url">Plan PDF or image URL</label>
+                <input
+                  id="plan-source-url"
+                  type="url"
+                  required
+                  placeholder="https://…/floor-plan.pdf"
+                />
+                <button id="inspect-plan" type="submit">Inspect plan →</button>
+              </form>
+              <p
+                id="plan-inspection-progress"
+                role="status"
+                aria-live="polite"
+              ></p>
+              <section id="plan-inspection-report" hidden></section>
+            </details>
+            <section
+              id="reconstruction-evidence"
+              aria-label="Interior evidence review"
+            >
+              <button id="collect-evidence" type="button">
+                Assess interior evidence →
+              </button>
+              <p class="intake-note">
+                Searches public sources with Astra. No images or plans are
+                imported.
+              </p>
+              <output id="evidence-progress" role="status"></output>
+              <div id="evidence-report" hidden></div>
+            </section>
+          </details>
+        </section>
+        <dialog id="plans-dialog" aria-labelledby="plan-name">
+          <section id="plans-panel" hidden aria-label="Planning documents">
+            <div class="plan-heading">
+              <div>
+                <span class="eyebrow">PLANS</span>
+                <h2 id="plan-name">Current home</h2>
+              </div>
+              <button id="plans-close" aria-label="Close plans">×</button>
+            </div>
+            <div class="plan-documents" role="group" aria-label="Plan document">
+              <button data-document="source">Source plan</button
+              ><button data-document="empty">Empty layout</button
+              ><button data-document="offered">As offered</button
+              ><button data-document="arrangement" aria-pressed="true">
+                My arrangement
+              </button>
+            </div>
+            <p id="plan-notice" role="status"></p>
+            <div class="plan-tools">
+              <button id="plan-zoom-out" aria-label="Zoom plan out">−</button
+              ><button id="plan-fit">Fit</button
+              ><button id="plan-zoom-in" aria-label="Zoom plan in">+</button
+              ><label
+                ><input id="plan-dimensions" type="checkbox" checked />
+                Dimensions</label
+              ><button id="plan-undo" disabled>Undo</button>
+            </div>
+            <div
+              id="plan-drawing"
+              tabindex="0"
+              aria-label="Floor plan; select an object to inspect its model dimensions"
+            ></div>
+            <div id="plan-selection" role="status">
+              Select an object to inspect its dimensions
+            </div>
+            <div class="plan-footer">
+              <span id="plan-revision"></span
+              ><button id="plan-svg">Download SVG</button
+              ><button id="plan-print">Print / PDF</button>
+            </div>
+            <small id="plan-persistence">Saved on this browser only</small>
+          </section>
+        </dialog>
+        <section
+          id="object-controls"
+          hidden
+          aria-label="Selected item controls"
+        >
+          <div class="reply-heading">
+            <strong id="object-name"></strong
+            ><button id="object-close" aria-label="Deselect item">×</button>
+          </div>
+          <p id="object-evidence"></p>
+          <div id="object-move" hidden>
+            <div
+              class="nudge-controls"
+              aria-label="Move in quarter-metre steps"
+            >
+              <button data-nudge="left" aria-label="Move left 25 centimetres">
+                ←</button
+              ><button data-nudge="back" aria-label="Move back 25 centimetres">
+                ↑</button
+              ><button
+                data-nudge="front"
+                aria-label="Move forward 25 centimetres"
+              >
+                ↓</button
+              ><button
+                data-nudge="right"
+                aria-label="Move right 25 centimetres"
+              >
+                →
+              </button>
+            </div>
+            <button id="object-rotate">Rotate 90°</button
+            ><button id="object-remove">Remove</button>
+          </div>
+          <button id="object-undo">Undo</button
+          ><output id="object-feedback" role="status"></output>
+        </section>
+        <form id="astra-form" class="astra-panel">
+          <div id="astra-reply" class="agent-reply" hidden>
+            <div class="reply-heading">
+              <strong>Astra</strong
+              ><button
+                id="dismiss-reply"
+                type="button"
+                aria-label="Dismiss reply"
+              >
+                ×
+              </button>
+            </div>
+            <p id="astra-request"></p>
+            <p id="astra-answer" aria-live="polite"></p>
+          </div>
+          <div class="composer-input">
+            <label for="astra-prompt" class="sr-only">Message Astra</label>
+            <textarea
+              id="astra-prompt"
+              rows="2"
+              maxlength="500"
+              placeholder="What would you change?"
+              aria-describedby="astra-status"
+              spellcheck="true"
+            ></textarea>
+            <div class="composer-toolbar">
+              <button
+                id="astra-submit"
+                class="primary"
+                type="submit"
+                aria-label="Send message to Astra"
+                title="Send message (Enter)"
+                disabled
+              >
+                <svg
+                  viewBox="0 0 24 24"
+                  width="19"
+                  height="19"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  aria-hidden="true"
+                >
+                  <path d="M12 19V5m-6 6 6-6 6 6" />
+                </svg>
+              </button>
+            </div>
+          </div>
+          <div
+            class="changes"
+            aria-label="Local scene changes"
+            title="Local edits · no model request"
+          >
+            <button id="bed" type="button" aria-pressed="false">
+              <span>King bed</span></button
+            ><button id="unfurnished" type="button" aria-pressed="false">
+              <span>Unfurnished</span></button
+            ><button id="evening" type="button" aria-pressed="false">
+              <span>Evening light</span></button
+            ><button
+              id="reset"
+              type="button"
+              aria-label="Reset scene"
+              title="Reset scene"
+            >
+              ↺
+            </button>
+          </div>
+          <output id="astra-status" aria-live="polite" hidden></output>
+          <p id="scene-clearance" class="sr-only"></p>
+        </form>
+        <div id="transition" aria-hidden="true">
+          <span>Stepping inside…</span>
+        </div>
+        <div id="scene-title" hidden>
+          <strong id="place">Current home</strong
+          ><span id="view-description"></span>
+        </div>
+        <div class="walk-controls" hidden>
+          <button data-key="a" aria-label="Step left">←</button
+          ><button data-key="w" aria-label="Walk forward">↑</button
+          ><button data-key="s" aria-label="Walk backward">↓</button
+          ><button data-key="d" aria-label="Step right">→</button
+          ><button data-key="ArrowLeft" aria-label="Turn left">↶</button
+          ><button data-key="ArrowRight" aria-label="Turn right">↷</button>
+        </div>
+        <div class="nearby-panel" hidden>
+          <h2>Daily essentials</h2>
+          <button id="listing-map" type="button" hidden>
+            Open real neighborhood map ↗</button
+          ><button id="neighborhood-view" hidden>Neighborhood ↗</button>
+          <div id="categories"></div>
+          <strong id="poi-name"></strong>
+          <p id="poi-note">Illustrative places · real distances unknown</p>
+        </div>
+        <div class="journey" hidden>
+          <div>
+            <strong id="journey-label">Home → Work</strong
+            ><button id="ride">Pause ride</button>
+          </div>
+          <label for="progress" class="sr-only">Commute preview progress</label
+          ><input
+            id="progress"
+            type="range"
+            min="0"
+            max="100"
+            value="0"
+            step="0.1"
+          /><small>Illustrative route · no real travel-time estimate</small>
+        </div>
+        <div class="caption">
+          <span id="hint">Drag to orbit · scroll to zoom</span>
+        </div>
+        <button
+          id="help-toggle"
+          aria-expanded="false"
+          aria-controls="help-panel"
+          aria-label="Scene controls"
+        >
+          ?
+        </button>
+        <div id="help-panel" hidden>
+          <strong>Explore the scene</strong>
+          <p>Overview: drag to orbit, scroll to zoom.</p>
+          <p>
+            Walk: WASD to move; drag or arrow keys to look. Use the doorway to
+            go outside.
+          </p>
+          <p>
+            Changes: suggestion buttons render locally. Ask Astra makes a
+            runtime request when available.
+          </p>
+        </div>
+      </section>
+    </main>
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>

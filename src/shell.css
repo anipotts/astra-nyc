@@ -1,0 +1,526 @@
+/* Reality-first entry and document modal; keep the existing scene geometry. */
+#entry-stage {
+  position: absolute;
+  z-index: 20;
+  top: clamp(96px, 18dvh, 180px);
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(620px, calc(100% - 40px));
+  max-height: calc(100dvh - clamp(96px, 18dvh, 180px) - 24px);
+  overflow: auto;
+  scrollbar-width: none;
+}
+#entry-stage h1 {
+  color: var(--green);
+  font-size: clamp(32px, 4vw, 48px);
+  letter-spacing: -1.7px;
+  line-height: 1.1;
+  margin: 0 0 20px;
+  max-width: 600px;
+}
+#entry-stage p {
+  color: var(--muted);
+  font-size: 16px;
+  line-height: 1.5;
+}
+#listing-form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 28px 0 8px;
+}
+#listing-form label {
+  flex-basis: 100%;
+  font-size: 13px;
+  font-weight: 600;
+}
+#listing-url {
+  flex: 1;
+  min-width: 180px;
+  min-height: 48px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  font: inherit;
+  padding: 12px;
+  background: white;
+}
+#listing-form button {
+  background: var(--green);
+  color: white;
+}
+#entry-stage .intake-note {
+  font-size: 12px;
+  margin: 12px 0 16px;
+}
+.intake-status {
+  font-size: 13px;
+  color: #79442b;
+}
+.entry-examples {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.text-action {
+  margin-top: 20px;
+  padding-left: 0;
+  background: transparent;
+  border-color: transparent;
+  color: var(--green);
+}
+#add-listing {
+  width: 100%;
+  text-align: left;
+  background: transparent;
+  margin-bottom: 8px;
+}
+body.empty-state #viewport {
+  background: #fafaf6;
+}
+body.empty-state
+  :is(
+    aside,
+    .modebar,
+    .plans-utility,
+    #scene,
+    #map-view,
+    #evidence-stage,
+    #astra-form,
+    .caption,
+    .walk-controls,
+    .nearby-panel,
+    .journey,
+    #help-toggle,
+    #help-panel
+  ) {
+  display: none !important;
+}
+body.evidence-only #viewport {
+  background: #e9ede5;
+}
+#overview-price {
+  font-weight: 600;
+}
+#overview-freshness {
+  display: block;
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--muted);
+}
+#view-unavailable {
+  padding: 12px;
+  border-left: 3px solid var(--green);
+  background: #e6eee6;
+}
+.plans-utility {
+  position: absolute;
+  z-index: 25;
+  top: 20px;
+  right: 24px;
+  background: var(--glass);
+}
+#plans-toggle {
+  border: 1px solid var(--border);
+  margin: 0;
+}
+.modebar {
+  left: calc(50% + 70px);
+}
+#plans-dialog {
+  width: min(1120px, calc(100% - 48px));
+  height: min(900px, calc(100dvh - 48px));
+  max-width: none;
+  max-height: none;
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background: var(--glass);
+  color: inherit;
+  overflow: hidden;
+}
+#plans-dialog::backdrop {
+  background: #18231f80;
+}
+#plans-dialog #plans-panel {
+  position: static;
+  inset: auto;
+  width: 100%;
+  height: 100%;
+  max-height: none;
+  padding: 24px;
+  border: 0;
+  display: flex;
+  flex-direction: column;
+  box-shadow: none;
+  border-radius: 0;
+}
+#plans-dialog .plan-heading h2 {
+  font-size: 22px;
+}
+#plans-dialog .plan-documents {
+  flex-shrink: 0;
+}
+#plans-dialog #plan-drawing {
+  min-height: 60px;
+}
+#plans-dialog #plan-drawing svg {
+  min-height: 60px;
+}
+body.plans-open aside {
+  display: block;
+}
+body.plans-open #scene {
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+body.plans-open .astra-panel {
+  display: block;
+  left: calc(50% + 105px);
+  width: min(500px, calc(100% - 340px));
+  bottom: 24px;
+}
+body.plans-open .caption {
+  left: calc(50% + 100px);
+}
+body.plans-open .walk-controls {
+  left: calc(50% + 100px);
+}
+body.evidence-only.plans-open #evidence-stage {
+  left: calc(50% - 170px);
+  width: min(560px, calc(100% - 355px));
+  padding: 28px;
+  display: block;
+}
+@media (max-width: 650px) {
+  #entry-stage {
+    top: 130px;
+    width: calc(100% - 32px);
+    max-height: calc(100dvh - 150px);
+  }
+  #entry-stage h1 {
+    font-size: 36px;
+  }
+  #listing-form button {
+    width: 100%;
+  }
+  .modebar {
+    left: 50%;
+  }
+  .plans-utility {
+    top: 8px;
+    right: 68px;
+    font-size: 12px;
+  }
+  #plans-dialog {
+    width: 100%;
+    height: 100dvh;
+    margin: 0;
+    border: 0;
+    border-radius: 0;
+  }
+  #plans-dialog #plans-panel {
+    padding: 16px 12px max(16px, env(safe-area-inset-bottom));
+  }
+  #plans-dialog #plan-revision,
+  #plans-dialog #plan-persistence {
+    display: block;
+  }
+  #plans-dialog .plan-heading h2 {
+    font-size: 20px;
+  }
+  #plans-dialog .plan-tools {
+    margin: 8px 0;
+  }
+  #plans-dialog .plan-documents button {
+    font-size: 12px;
+  }
+  body.plans-open .astra-panel {
+    left: 12px;
+    right: 12px;
+    width: auto;
+    bottom: max(12px, env(safe-area-inset-bottom));
+  }
+  body.evidence-only.plans-open #evidence-stage {
+    left: 12px;
+    right: 12px;
+    top: 180px;
+    width: auto;
+    padding: 20px;
+  }
+}
+@media (max-height: 650px) and (min-width: 651px) {
+  #entry-stage {
+    top: 110px;
+    max-height: calc(100dvh - 125px);
+  }
+  #entry-stage h1 {
+    font-size: 36px;
+  }
+  #listing-form {
+    margin-top: 16px;
+  }
+}
+
+#personal-library {
+  padding: 12px 0;
+  border-top: 1px solid var(--border);
+  margin: 8px 0;
+}
+#personal-library summary {
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  font-size: 13px;
+}
+#personal-library p {
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--muted);
+}
+#personal-library label {
+  display: block;
+  font-size: 12px;
+  margin-top: 12px;
+}
+#object-select {
+  width: 100%;
+  min-height: 44px;
+  padding: 8px;
+  margin-top: 4px;
+  font: inherit;
+  font-size: 13px;
+  background: var(--glass);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+}
+.asset-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+.asset-actions button {
+  flex: 1;
+  font-size: 12px;
+}
+#object-controls {
+  position: absolute;
+  z-index: 26;
+  right: 24px;
+  top: 90px;
+  width: 260px;
+  background: var(--glass);
+  padding: 16px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  box-shadow: 0 6px 20px #18231f14;
+}
+#object-controls p {
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--muted);
+}
+#object-controls button {
+  min-width: 44px;
+}
+#object-close {
+  border: 0;
+  background: transparent;
+  font-size: 20px;
+}
+.nudge-controls {
+  display: flex;
+  gap: 4px;
+  margin: 8px 0;
+}
+#object-controls output {
+  margin-top: 8px;
+  font-size: 12px;
+}
+body.empty-state #object-controls,
+body.evidence-only #object-controls {
+  display: none !important;
+}
+@media (max-width: 650px) {
+  #object-controls {
+    top: 204px;
+    right: 12px;
+    width: calc(100% - 24px);
+    max-height: calc(100dvh - 430px);
+    overflow: auto;
+    scrollbar-width: none;
+  }
+}
+
+body.evidence-only .homes {
+  display: none;
+}
+
+/* Address-first intake; all online requests are explicit submissions. */
+#address-form {
+  display: flex;
+  gap: 8px;
+  margin: 28px 0 16px;
+}
+#listing-address {
+  flex: 1;
+  min-width: 0;
+  min-height: 56px;
+  padding: 14px 16px;
+  font: inherit;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: white;
+}
+#address-form button {
+  background: var(--green);
+  color: white;
+  padding: 12px 20px;
+}
+#listing-link-entry {
+  font-size: 14px;
+  color: var(--green);
+}
+#listing-link-entry summary {
+  cursor: pointer;
+  width: fit-content;
+  padding: 4px 0;
+}
+#listing-link-entry #listing-form {
+  margin: 12px 0;
+}
+#listing-results {
+  margin-top: 16px;
+  display: grid;
+  gap: 8px;
+}
+#listing-results[hidden] {
+  display: none;
+}
+.listing-match {
+  padding: 14px;
+  background: white;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+}
+.listing-match strong {
+  display: block;
+  color: var(--ink);
+  font-size: 15px;
+}
+#entry-stage .listing-match p {
+  margin: 5px 0;
+  font-size: 12px;
+}
+.listing-match footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-top: 8px;
+}
+.listing-match a {
+  font-size: 12px;
+  color: var(--green);
+}
+.listing-match button {
+  min-height: 40px;
+  padding: 8px 12px;
+}
+#search-online {
+  margin-top: 8px;
+  font-size: 13px;
+}
+@media (max-width: 650px) {
+  #entry-stage {
+    top: 112px;
+    max-height: calc(100dvh - 132px);
+  }
+  #address-form button {
+    padding: 12px;
+  }
+}
+
+#reconstruction-evidence {
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 1px solid var(--border);
+}
+#collect-evidence {
+  background: var(--green);
+  color: white;
+}
+#reconstruction-evidence .intake-note,
+#evidence-progress {
+  display: block;
+  font-size: 12px;
+  line-height: 1.5;
+}
+#evidence-report {
+  margin-top: 16px;
+}
+#evidence-report h3 {
+  font-size: 18px;
+  margin: 12px 0;
+}
+#evidence-report p,
+#evidence-report li {
+  font-size: 13px;
+  line-height: 1.5;
+}
+#evidence-report .evidence-qualification {
+  font-size: 12px;
+  color: var(--muted);
+}
+#evidence-report details {
+  padding: 12px 0;
+  border-top: 1px solid var(--border);
+}
+#evidence-report summary {
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+}
+#evidence-report ul {
+  padding-left: 20px;
+}
+.evidence-reference {
+  padding: 12px 0;
+}
+.evidence-reference small,
+#evidence-report > small {
+  display: block;
+  font-size: 11px;
+  color: var(--muted);
+  margin-top: 6px;
+}
+.evidence-reference a {
+  font-size: 13px;
+}
+
+#plan-inspection {
+  margin-top: 1rem;
+  border-top: 1px solid #dce2dc;
+  padding-top: 0.8rem;
+}
+#plan-inspection summary {
+  cursor: pointer;
+  font-weight: 600;
+}
+#plan-inspection-form {
+  display: grid;
+  gap: 0.5rem;
+}
+#plan-source-url {
+  min-width: 0;
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid #cbd3ca;
+  border-radius: 8px;
+  background: #fff;
+  color: #233d32;
+}
+#plan-inspection-report small {
+  display: block;
+  margin-top: 0.75rem;
+}
