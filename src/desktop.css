@@ -1,0 +1,418 @@
+/* The public product targets desktop windows throughout this project. */
+body.desktop-shell {
+  display: grid;
+  grid-template-columns: 312px minmax(0, 1fr);
+  grid-template-rows: auto minmax(0, 1fr);
+  height: 100dvh;
+  min-width: 700px;
+  overflow: hidden;
+}
+.desktop-shell header {
+  position: relative;
+  inset: auto;
+  grid-column: 1;
+  grid-row: 1;
+  display: flex;
+  flex-wrap: wrap;
+  align-content: start;
+  gap: 16px;
+  padding: 24px 18px 16px;
+  background: #fafaf6;
+  border-bottom: 1px solid var(--border);
+  z-index: 40;
+}
+.desktop-shell .wordmark {
+  margin-right: auto;
+  flex-shrink: 0;
+  width: 100%;
+}
+.desktop-shell .modebar {
+  position: static;
+  inset: auto;
+  transform: none;
+  display: flex;
+  width: 100%;
+  padding: 3px;
+  margin: 0;
+}
+.desktop-shell #plans-toggle {
+  position: static;
+  inset: auto;
+  transform: none;
+  margin: 0;
+  min-height: 40px;
+  width: 100%;
+  border-radius: 11px;
+}
+.desktop-shell main {
+  display: contents;
+}
+.desktop-shell #viewport {
+  position: relative;
+  inset: auto;
+  grid-column: 2;
+  grid-row: 1 / 3;
+  width: 100%;
+  height: 100%;
+  display: grid;
+  grid-template: "surface" 1fr / 1fr;
+  overflow: hidden;
+}
+.desktop-shell aside {
+  position: relative;
+  inset: auto;
+  grid-column: 1;
+  grid-row: 2;
+  display: block;
+  width: auto;
+  max-height: none;
+  height: 100%;
+  margin: 0;
+  padding: 12px 18px 24px;
+  border: 0;
+  border-right: 1px solid var(--border);
+  border-radius: 0;
+  overflow: auto;
+  background: #fafaf6;
+  box-shadow: none;
+}
+.desktop-shell .modebar button {
+  flex: 1;
+  padding: 8px 10px;
+}
+.desktop-shell.evidence-only aside :is(.evidence, .clearance-panel) {
+  display: none;
+}
+.desktop-shell.evidence-only #help-toggle {
+  display: none;
+}
+.desktop-shell.empty-state {
+  grid-template-columns: 1fr;
+}
+.desktop-shell.empty-state header {
+  position: absolute;
+  background: transparent;
+  border: 0;
+}
+.desktop-shell.empty-state #viewport {
+  grid-column: 1;
+}
+.desktop-shell :is(#map-view, #inside-surface) {
+  position: relative;
+  inset: auto;
+  grid-area: surface;
+  min-width: 0;
+  min-height: 0;
+  width: 100%;
+  height: 100%;
+}
+.desktop-shell #map-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+.desktop-shell .map-heading {
+  top: auto;
+  bottom: 36px;
+  left: auto;
+  right: 20px;
+  transform: none;
+  width: 290px;
+  padding: 10px 14px;
+}
+.desktop-shell .map-heading :is(.eyebrow, h2) {
+  display: none;
+}
+.desktop-shell .map-heading p {
+  font-size: 12px;
+}
+.desktop-shell .map-actions {
+  top: 18px;
+  bottom: auto;
+  left: auto;
+  right: 62px;
+  transform: none;
+  padding: 4px;
+  box-shadow: none;
+}
+.desktop-shell .map-note {
+  display: none;
+}
+.desktop-shell .maplibregl-ctrl-top-right {
+  top: 14px;
+  right: 10px;
+}
+.desktop-shell .maplibregl-ctrl-attrib {
+  font-size: 11px;
+}
+.desktop-shell
+  :is(#evidence-stage, #location-review, #commute-panel, #lifestyle-panel) {
+  position: relative;
+  inset: auto;
+  transform: none;
+  grid-area: surface;
+  z-index: 21;
+  padding: 18px;
+  margin: 20px;
+  width: 310px;
+  max-width: none;
+  background: #fafaf6f5;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  box-shadow: 0 6px 24px #203c2f12;
+  overflow: auto;
+}
+.desktop-shell #evidence-stage {
+  align-self: end;
+  justify-self: start;
+  max-height: calc(100% - 100px);
+  margin-bottom: 34px;
+  scrollbar-width: thin;
+}
+.desktop-shell #evidence-stage h1 {
+  font-size: 25px;
+  line-height: 1.15;
+  letter-spacing: -0.7px;
+  margin: 8px 0;
+}
+.desktop-shell #evidence-stage p {
+  font-size: 13px;
+  line-height: 1.45;
+  margin: 9px 0;
+}
+.desktop-shell #overview-freshness {
+  font-size: 11px;
+}
+.desktop-shell #summary-next {
+  color: var(--muted);
+}
+.desktop-shell .summary-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: var(--green);
+  font-size: 12px;
+}
+.desktop-shell #change-listing {
+  padding: 4px 8px;
+  min-height: 32px;
+  background: transparent;
+}
+.desktop-shell #source-details {
+  border-top: 1px solid var(--border);
+  margin-top: 12px;
+  padding-top: 4px;
+}
+.desktop-shell summary {
+  min-height: 36px;
+  padding: 8px 0;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 600;
+}
+.desktop-shell #source-details a {
+  overflow-wrap: anywhere;
+}
+.desktop-shell #location-review {
+  justify-self: end;
+  align-self: start;
+  margin-top: 92px;
+  max-height: calc(100% - 200px);
+}
+.desktop-shell :is(#location-review, #commute-panel) h2 {
+  margin: 0 0 10px;
+  font-size: 21px;
+}
+.desktop-shell :is(#location-review, #commute-panel, #lifestyle-panel) p {
+  font-size: 13px;
+  line-height: 1.5;
+}
+.desktop-shell #location-review small {
+  display: block;
+  font-size: 11px;
+  line-height: 1.5;
+  margin-top: 14px;
+  color: var(--muted);
+}
+.desktop-shell #location-candidates {
+  display: grid;
+  gap: 8px;
+  margin-top: 12px;
+}
+.desktop-shell #location-candidates button {
+  text-align: left;
+  overflow-wrap: anywhere;
+}
+.desktop-shell #lifestyle-panel {
+  justify-self: start;
+  align-self: start;
+  width: 230px;
+  padding: 4px 14px;
+  max-height: calc(100% - 350px);
+}
+.desktop-shell #lifestyle-choices {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.desktop-shell #lifestyle-choices button {
+  min-height: 36px;
+  font-size: 12px;
+  padding: 6px 8px;
+}
+.desktop-shell #lifestyle-choices button[aria-pressed="true"] {
+  color: white;
+  background: var(--green);
+}
+.desktop-shell #commute-panel {
+  justify-self: end;
+  align-self: start;
+  margin-top: 92px;
+  max-height: calc(100% - 190px);
+}
+.desktop-shell[data-view="commute"] #location-review {
+  display: none;
+}
+.desktop-shell #commute-form {
+  display: grid;
+  gap: 8px;
+}
+.desktop-shell #commute-form label {
+  font-size: 12px;
+  margin-top: 6px;
+}
+.desktop-shell #commute-form :is(input, select) {
+  width: 100%;
+  min-height: 44px;
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  padding: 10px;
+  font: inherit;
+  font-size: 13px;
+  background: white;
+}
+.desktop-shell #commute-form button {
+  background: var(--green);
+  color: white;
+  margin-top: 4px;
+}
+.desktop-shell #journey-external {
+  color: var(--green);
+  font-size: 13px;
+}
+.desktop-shell #inside-surface {
+  padding: 32px 32px 330px;
+  display: grid;
+  place-items: center;
+  background: #e9ede5;
+}
+.desktop-shell #inside-plan {
+  width: 100%;
+  max-width: 780px;
+}
+.desktop-shell #inside-plan svg {
+  width: 100%;
+  height: calc(100dvh - 410px);
+  max-height: 100%;
+}
+.desktop-shell #inside-empty {
+  max-width: 510px;
+  padding: 28px;
+  border: 1px solid #c7d2c4;
+  border-radius: 16px;
+  background: #fafaf6;
+}
+.desktop-shell #inside-empty h2 {
+  color: var(--green);
+  font-size: 28px;
+  margin-top: 0;
+}
+.desktop-shell #inside-empty p {
+  font-size: 15px;
+  line-height: 1.6;
+}
+.desktop-shell #inside-source {
+  color: var(--green);
+  font-size: 14px;
+}
+.desktop-shell #entry-stage {
+  top: 15%;
+  max-height: 80%;
+}
+.desktop-shell
+  :is(
+    #inside-surface,
+    #inside-plan,
+    #inside-empty,
+    #location-review,
+    #commute-panel,
+    #lifestyle-panel,
+    #evidence-stage,
+    #map-view
+  )[hidden] {
+  display: none !important;
+}
+.desktop-shell :is(button, a, summary, input, select):focus-visible {
+  outline: 3px solid #387954;
+  outline-offset: 3px;
+}
+@media (prefers-reduced-motion: reduce) {
+  .desktop-shell *,
+  .desktop-shell *::before,
+  .desktop-shell *::after {
+    scroll-behavior: auto !important;
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
+@media (max-width: 1000px) {
+  .desktop-shell #evidence-stage {
+    width: calc(100% - 40px);
+    max-height: 32%;
+  }
+  .desktop-shell #location-review,
+  .desktop-shell #commute-panel {
+    width: calc(100% - 40px);
+    max-height: calc(68% - 110px);
+  }
+  .desktop-shell .map-actions {
+    left: 16px;
+    right: 58px;
+    gap: 3px;
+  }
+  .desktop-shell .map-actions button {
+    font-size: 12px;
+    padding: 6px;
+    flex: 1;
+  }
+  .desktop-shell .map-heading {
+    bottom: auto;
+    top: 74px;
+    right: 20px;
+    width: calc(100% - 40px);
+  }
+  .desktop-shell #location-review,
+  .desktop-shell #commute-panel {
+    margin-top: 138px;
+    max-height: calc(68% - 190px);
+  }
+  .desktop-shell[data-view="commute"] #evidence-stage {
+    max-height: 180px;
+  }
+  .desktop-shell[data-view="commute"]
+    #evidence-stage
+    :is(#evidence-facts, #overview-price, #overview-freshness) {
+    display: none;
+  }
+  .desktop-shell[data-view="commute"] #commute-panel {
+    max-height: calc(100% - 370px);
+  }
+  .desktop-shell #lifestyle-panel {
+    margin-top: 136px;
+  }
+  .desktop-shell:has(#location-review:not([hidden])) #lifestyle-panel {
+    display: none;
+  }
+}

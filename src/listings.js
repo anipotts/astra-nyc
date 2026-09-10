@@ -3,6 +3,7 @@
 export const listings = [
   {
     id: "wall2308",
+    mapAddress: "95 Wall Street, New York, NY",
     url: "https://streeteasy.com/building/95-wall-street-new_york/2308",
     name: "95 Wall Street #2308",
     location: "Financial District, Manhattan",
@@ -19,6 +20,7 @@ export const listings = [
   },
   {
     id: "zephyr501",
+    mapAddress: "689 Marin Boulevard, Jersey City, NJ",
     url: "https://streeteasy.com/building/zephyr-lofts/501",
     name: "Zephyr Lofts #501",
     location: "689 Marin Boulevard, Jersey City",
@@ -33,6 +35,7 @@ export const listings = [
   },
   {
     id: "urby409",
+    mapAddress: "532 Summit Avenue, Jersey City, NJ",
     url: "https://www.urby.com/location/journal-square/availability/unit-409-1-5031127",
     name: "Journal Square Urby #409",
     location: "532 Summit Avenue, Jersey City",
@@ -53,6 +56,7 @@ export const listings = [
   },
   {
     id: "urby1504",
+    mapAddress: "532 Summit Avenue, Jersey City, NJ",
     url: "https://www.urby.com/location/journal-square/availability/unit-1504-0-5031283",
     name: "Journal Square Urby #1504",
     location: "532 Summit Avenue, Jersey City",
@@ -74,6 +78,7 @@ export const listings = [
   },
   {
     id: "charles345",
+    mapAddress: "272 Grove Street, Jersey City, NJ",
     identity: {
       building: "charles-272-grove",
       unit: "345",

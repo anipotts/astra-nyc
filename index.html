@@ -7,6 +7,7 @@
     <title>Elsewhere</title>
     <link rel="stylesheet" href="/src/style.css" />
     <link rel="stylesheet" href="/src/shell.css" />
+    <link rel="stylesheet" href="/src/desktop.css" />
     <link
       rel="icon"
       type="image/png"
@@ -21,7 +22,7 @@
     />
     <link rel="apple-touch-icon" href="/apple-touch-approved-v2.png" />
   </head>
-  <body class="empty-state">
+  <body class="empty-state desktop-shell">
     <svg
       width="0"
       height="0"
@@ -47,6 +48,19 @@
           alt=""
         />Elsewhere</a
       >
+      <div class="modebar" role="group" aria-label="View mode">
+        <button data-mode="overview" aria-pressed="true">Overview</button
+        ><button data-mode="walk" aria-pressed="false">Inside</button
+        ><button data-mode="commute" aria-pressed="false">Commute</button>
+      </div>
+      <button
+        id="plans-toggle"
+        class="plans-utility"
+        aria-haspopup="dialog"
+        aria-pressed="false"
+      >
+        Plans
+      </button>
     </header>
     <main>
       <aside aria-label="Your homes">
@@ -235,20 +249,6 @@
             <button type="button" data-listing="urby1504">Urby #1504</button>
           </div>
         </section>
-        <div class="modebar" role="group" aria-label="View mode">
-          <button data-mode="overview" aria-pressed="true">Overview</button
-          ><button data-mode="walk" aria-pressed="false">Walk</button
-          ><button data-mode="commute" aria-pressed="false">Commute</button
-          ><button data-mode="nearby" aria-pressed="false">Nearby</button>
-        </div>
-        <button
-          id="plans-toggle"
-          class="plans-utility"
-          aria-haspopup="dialog"
-          aria-pressed="false"
-        >
-          Plans
-        </button>
         <div
           id="scene"
           tabindex="0"
@@ -258,90 +258,182 @@
           <div id="map-canvas"></div>
           <div class="map-heading">
             <span class="eyebrow">GEOGRAPHIC CONTEXT</span>
-            <h2>Life around 95 Wall</h2>
+            <h2 id="map-title">Your neighborhood</h2>
             <p id="map-status" role="status">Loading map…</p>
           </div>
           <div class="map-actions">
-            <button id="map-pullback">Pull out</button
-            ><button id="map-direct">Go directly</button
-            ><button id="map-enter" class="primary">Listing evidence →</button>
+            <button id="map-pullback">Neighborhood</button
+            ><button id="map-direct">Focus listing</button
+            ><button id="map-enter" class="primary">Inside →</button>
           </div>
-          <p class="map-note">
-            Approximate listing pin · building heights may be inferred · no
-            driving route or travel time
-          </p>
         </div>
+        <section
+          id="location-review"
+          hidden
+          aria-label="Confirm listing location"
+        >
+          <h2>Locate this listing</h2>
+          <p id="location-progress" role="status">
+            Confirm the address to place its map pin.
+          </p>
+          <button id="resolve-location" type="button">Find on map</button>
+          <div id="location-candidates"></div>
+          <small
+            >Address lookup uses OpenStreetMap. A map pin does not establish an
+            entrance or interior.</small
+          >
+        </section>
+        <section id="inside-surface" hidden aria-label="Inside source view">
+          <div id="inside-plan"></div>
+          <div id="inside-empty">
+            <h2>Start with the real source</h2>
+            <p id="inside-explanation">
+              A matching plan or photo source can show what is known inside.
+              Unseen rooms remain absent.
+            </p>
+            <a id="inside-source" target="_blank" rel="noopener noreferrer"
+              >Open source photos &amp; details ↗</a
+            >
+          </div>
+        </section>
+        <section id="commute-panel" hidden aria-label="Plan a regular journey">
+          <h2>Your regular journey</h2>
+          <p>Start from this listing. No current home address is required.</p>
+          <form id="commute-form">
+            <label for="journey-destination">Where do you go regularly?</label>
+            <input
+              id="journey-destination"
+              required
+              maxlength="180"
+              placeholder="Work, campus, a gym, or another address"
+            />
+            <label for="journey-mode">Your usual mode</label>
+            <select id="journey-mode">
+              <option value="walking">Walk</option>
+              <option value="bicycling">Bike</option>
+              <option value="transit">Transit</option>
+              <option value="driving">Drive</option>
+            </select>
+            <button type="submit">Prepare directions</button>
+          </form>
+          <p id="journey-summary" role="status">
+            Travel times and routes are not connected to this map yet.
+          </p>
+          <a
+            id="journey-external"
+            target="_blank"
+            rel="noopener noreferrer"
+            hidden
+            >Open route in Google Maps ↗</a
+          >
+        </section>
+        <details id="lifestyle-panel" hidden>
+          <summary>What matters nearby?</summary>
+          <p>
+            Choose up to three priorities. Places and detour times appear only
+            when sourced.
+          </p>
+          <div id="lifestyle-choices"></div>
+          <p id="lifestyle-status" role="status">
+            Your priorities are optional.
+          </p>
+        </details>
         <section id="evidence-stage" hidden aria-label="Listing evidence only">
-          <span class="eyebrow">LISTING OVERVIEW</span>
+          <div class="summary-heading">
+            <span id="summary-view-label">Your next place</span
+            ><button id="change-listing" type="button">Change</button>
+          </div>
           <h1 id="evidence-title"></h1>
           <p id="evidence-facts"></p>
           <p id="overview-price"></p>
           <small id="overview-freshness"></small>
           <p id="view-unavailable" role="status" hidden></p>
-          <p id="evidence-reason">
-            A matching, authorized plan with usable scale is needed before
-            creating a dimensional interior. Reported square footage is not
-            enough.
-          </p>
-          <a id="evidence-source" target="_blank" rel="noopener noreferrer"
-            >View original listing ↗</a
-          >
-          <a
-            id="evidence-plan-source"
-            target="_blank"
-            rel="noopener noreferrer"
-            hidden
-            >View original plan reference ↗</a
-          >
-          <p class="evidence-note">
-            No room dimensions or furniture fit have been established. Listing
-            furnishing status is unknown; photo staging does not establish what
-            is included.
-          </p>
-          <section id="inspected-region" hidden aria-label="Inspected region">
-            <h3>Inspected 2D region available</h3>
-            <p id="inspected-region-note"></p>
-            <button id="open-inspected-region" type="button">
-              Open bedroom region in Plans
-            </button>
-          </section>
-          <details id="plan-inspection">
-            <summary>Inspect a published plan</summary>
-            <p>
-              Use a direct PDF or image link from a supported publisher. The
-              source is sent to OpenAI when you submit.
+          <p id="summary-next"></p>
+          <details id="source-details">
+            <summary>Sources &amp; details</summary>
+            <details id="city-source-details">
+              <summary>3D city sources</summary>
+              <p id="city-source-description"></p>
+              <a id="city-source-link" target="_blank" rel="noopener noreferrer"
+                >Building height method ↗</a
+              >
+            </details>
+            <section id="location-source" hidden>
+              <a
+                id="location-source-link"
+                target="_blank"
+                rel="noopener noreferrer"
+              ></a>
+              <small id="location-source-date"></small>
+              <button id="change-location" type="button">
+                Review map location
+              </button>
+            </section>
+            <p id="evidence-reason">
+              A matching, authorized plan with usable scale is needed before
+              creating a dimensional interior. Reported square footage is not
+              enough.
             </p>
-            <form id="plan-inspection-form">
-              <label for="plan-source-url">Plan PDF or image URL</label>
-              <input
-                id="plan-source-url"
-                type="url"
-                required
-                placeholder="https://…/floor-plan.pdf"
-              />
-              <button id="inspect-plan" type="submit">Inspect plan →</button>
-            </form>
-            <p
-              id="plan-inspection-progress"
-              role="status"
-              aria-live="polite"
-            ></p>
-            <section id="plan-inspection-report" hidden></section>
+            <a id="evidence-source" target="_blank" rel="noopener noreferrer"
+              >View original listing ↗</a
+            >
+            <a
+              id="evidence-plan-source"
+              target="_blank"
+              rel="noopener noreferrer"
+              hidden
+              >View original plan reference ↗</a
+            >
+            <p class="evidence-note">
+              No room dimensions or furniture fit have been established. Listing
+              furnishing status is unknown; photo staging does not establish
+              what is included.
+            </p>
+            <section id="inspected-region" hidden aria-label="Inspected region">
+              <h3>Inspected 2D region available</h3>
+              <p id="inspected-region-note"></p>
+              <button id="open-inspected-region" type="button">
+                Open bedroom region in Plans
+              </button>
+            </section>
+            <details id="plan-inspection">
+              <summary>Inspect a published plan</summary>
+              <p>
+                Use a direct PDF or image link from a supported publisher. The
+                source is sent to OpenAI when you submit.
+              </p>
+              <form id="plan-inspection-form">
+                <label for="plan-source-url">Plan PDF or image URL</label>
+                <input
+                  id="plan-source-url"
+                  type="url"
+                  required
+                  placeholder="https://…/floor-plan.pdf"
+                />
+                <button id="inspect-plan" type="submit">Inspect plan →</button>
+              </form>
+              <p
+                id="plan-inspection-progress"
+                role="status"
+                aria-live="polite"
+              ></p>
+              <section id="plan-inspection-report" hidden></section>
+            </details>
+            <section
+              id="reconstruction-evidence"
+              aria-label="Interior evidence review"
+            >
+              <button id="collect-evidence" type="button">
+                Assess interior evidence →
+              </button>
+              <p class="intake-note">
+                Searches public sources with Astra. No images or plans are
+                imported.
+              </p>
+              <output id="evidence-progress" role="status"></output>
+              <div id="evidence-report" hidden></div>
+            </section>
           </details>
-          <section
-            id="reconstruction-evidence"
-            aria-label="Interior evidence review"
-          >
-            <button id="collect-evidence" type="button">
-              Assess interior evidence →
-            </button>
-            <p class="intake-note">
-              Searches public sources with Astra. No images or plans are
-              imported.
-            </p>
-            <output id="evidence-progress" role="status"></output>
-            <div id="evidence-report" hidden></div>
-          </section>
         </section>
         <dialog id="plans-dialog" aria-labelledby="plan-name">
           <section id="plans-panel" hidden aria-label="Planning documents">

@@ -17,10 +17,19 @@ import { listings } from "./listings.js";
 import { setupListingIntake } from "./listing-intake.js";
 import { acceptInspectedRegion } from "./inspected-plan.js";
 import { inspectedPlans } from "./inspected-plan-records.js";
+import { lookupLocation } from "./location.js";
+import { createViewTransition } from "./view-transition.js";
 import { setupPlanInspection } from "./plan-inspection.js";
 import { setupEvidenceReview } from "./listing-evidence.js";
 const $ = (s) => document.querySelector(s);
 const container = $("#scene");
+const viewTransition = createViewTransition($("#viewport"));
+let geoMap,
+  mapInit,
+  locationRequest = null,
+  locationGeneration = 0,
+  shownLocation = null;
+const listingLocations = new Map();
 const state = {
   home: "current",
   mode: "overview",
@@ -417,6 +426,10 @@ function resetCamera() {
   controls.update();
 }
 function setMode(mode) {
+  if (mode === "nearby" && selectedListing) mode = "overview";
+  viewTransition.run();
+  geoMap?.stop();
+  document.body.dataset.view = mode;
   if (entryKind === "empty") mode = "overview";
   if (plansOpen) setPlansOpen(false);
   document.body.classList.toggle("evidence-only", Boolean(selectedListing));
@@ -428,10 +441,18 @@ function setMode(mode) {
   $("#listing-map").hidden = selectedListing?.id !== "wall2308";
   state.mode = mode;
   if (entryKind === "empty") {
+    $("#inside-surface").hidden = true;
+    $("#commute-panel").hidden = true;
+    $("#lifestyle-panel").hidden = true;
+    $("#location-review").hidden = true;
     state.playing = false;
     keys.clear();
     return;
   }
+  $("#inside-surface").hidden = true;
+  $("#commute-panel").hidden = true;
+  $("#lifestyle-panel").hidden = true;
+  $("#location-review").hidden = true;
   if (selectedListing) {
     state.playing = false;
     keys.clear();
@@ -440,22 +461,41 @@ function setMode(mode) {
       .forEach((b) =>
         b.setAttribute("aria-pressed", String(b.dataset.mode === mode)),
       );
-    const unavailable =
+    $("#evidence-stage").hidden = false;
+    $("#astra-form").hidden = true;
+    $(".walk-controls").hidden = true;
+    $(".journey").hidden = true;
+    $(".nearby-panel").hidden = true;
+    $("#summary-view-label").textContent =
       mode === "walk"
-        ? acceptedRegion
-          ? "A limited 2D region is available in Plans. Walk needs complete boundaries, openings and ceiling height; those remain unknown."
-          : "Walk needs a matching interior plan with usable scale. Astra has not established one for this listing."
+        ? "Inside"
         : mode === "commute"
-          ? "Commute needs confirmed endpoints and a connected routing source. No route or travel time has been generated."
-          : mode === "nearby" && selectedListing.id !== "wall2308"
-            ? "Nearby data is not connected for this listing. The original listing provides its location context."
-            : "";
-    $("#view-unavailable").hidden = !unavailable;
-    $("#view-unavailable").textContent = unavailable;
-    $("#evidence-stage").hidden =
-      mode === "nearby" && selectedListing.id === "wall2308";
-    if (mode === "nearby" && selectedListing.id === "wall2308")
+          ? "Your starting point"
+          : "Your next place";
+    $("#summary-next").textContent = acceptedRegion
+      ? "Reviewed nominal 2D region available in Plans."
+      : "Interior dimensions remain unverified. Explore the source or surroundings.";
+    const inside = mode === "walk";
+    $("#inside-surface").hidden = !inside;
+    $("#commute-panel").hidden = mode !== "commute";
+    $("#lifestyle-panel").hidden = mode !== "overview";
+    $("#view-unavailable").hidden = true;
+    if (inside) {
+      $("#inside-plan").innerHTML = acceptedRegion
+        ? renderPlanSvg(acceptedRegion, { compact: true, showClearance: false })
+        : "";
+      $("#inside-plan").hidden = !acceptedRegion;
+      $("#inside-empty").hidden = Boolean(acceptedRegion);
+      $("#inside-source").href = selectedListing.url;
+      $("#summary-next").textContent = acceptedRegion
+        ? "Nominal plan region only. Ceiling height, openings and a walkable interior remain unknown."
+        : "No inspected interior is available. Open the real source or inspect a matching plan.";
+    } else {
       openNeighborhood();
+      $("#location-review").hidden = Boolean(
+        listingLocations.get(selectedListing.id),
+      );
+    }
     return;
   }
   updateCutaway(house, mode === "overview");
@@ -611,6 +651,16 @@ const syntheticPotential = { ...homes.potential };
 function showListing(listing) {
   entryKind = "listing";
   selectedListing = listing;
+  locationGeneration++;
+  locationRequest?.abort();
+  locationRequest = null;
+  $("#location-candidates").replaceChildren();
+  $("#location-progress").textContent =
+    "Confirm the address to place its map pin.";
+  $("#resolve-location").disabled = false;
+  $("#source-details").open = false;
+  $("#location-source").hidden = !listingLocations.has(listing.id);
+  resetJourney();
   acceptedRegion = null;
   for (const record of inspectedPlans) {
     try {
@@ -677,43 +727,152 @@ function showListing(listing) {
   setMode("overview");
 }
 setupListingIntake(showListing);
-let geoMap;
 async function openNeighborhood() {
-  if (selectedListing?.id !== "wall2308") return;
-  state.playing = false;
-  keys.clear();
+  if (!selectedListing || state.mode === "walk") return;
+  const selected = selectedListing;
   $("#map-view").hidden = false;
-  $("#astra-form").hidden = true;
-  $(".walk-controls").hidden = true;
-  $(".journey").hidden = true;
-  $(".nearby-panel").hidden = true;
+  $("#map-title").textContent = selected.name;
   $("#hint").hidden = true;
   try {
-    if (!geoMap) {
-      const { createNeighborhood } = await import("./neighborhood.js");
-      geoMap = createNeighborhood(
-        $("#map-canvas"),
-        (text) => ($("#map-status").textContent = text),
-      );
+    mapInit ||= import("./neighborhood.js").then(({ createNeighborhood }) =>
+      createNeighborhood($("#map-canvas"), (text) => {
+        $("#map-status").textContent = text;
+      }),
+    );
+    geoMap = await mapInit;
+    const citySource = geoMap.getSourceDetails();
+    $("#city-source-description").textContent =
+      citySource.description + " " + citySource.coverage;
+    $("#city-source-link").href = citySource.heightMethod;
+    if (
+      selectedListing?.id !== selected.id ||
+      state.mode === "walk" ||
+      entryKind === "empty"
+    )
+      return;
+    const location = listingLocations.get(selected.id) || null;
+    $("#map-direct").disabled = !location;
+    $("#location-source").hidden = !location;
+    if (location) {
+      $("#location-source-link").href = location.source;
+      $("#location-source-link").textContent = location.label;
+      $("#location-source-date").textContent =
+        `Approximate address chosen from OpenStreetMap · looked up ${new Date(location.observedAt).toLocaleString()}`;
+    }
+    if (shownLocation !== selected.id) {
+      geoMap.setLocation(location);
+      shownLocation = selected.id;
     }
     geoMap.resize();
-    geoMap.pullback();
   } catch {
+    mapInit = null;
     $("#map-status").textContent =
-      "Map could not load. The listing source evidence is still available.";
+      "Map could not load. Source details remain available.";
   }
 }
-$("#listing-map").onclick = openNeighborhood;
-$("#neighborhood-view").onclick = openNeighborhood;
+$("#listing-map").onclick = () => setMode("overview");
+$("#neighborhood-view").onclick = () => setMode("overview");
 $("#map-pullback").onclick = () => geoMap?.pullback();
 $("#map-direct").onclick = () => geoMap?.direct();
-$("#map-enter").onclick = async () => {
-  const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
-  $("#transition span").textContent = "Opening listing evidence…";
-  $("#transition").classList.add("active");
-  if (!reduced) await new Promise((resolve) => setTimeout(resolve, 350));
+$("#map-enter").onclick = () => setMode("walk");
+$("#resolve-location").onclick = async () => {
+  if (!selectedListing || locationRequest) return;
+  const selected = selectedListing,
+    generation = locationGeneration;
+  locationRequest = new AbortController();
+  $("#resolve-location").disabled = true;
+  $("#location-progress").textContent = "Looking up the listing address…";
+  try {
+    const result = await lookupLocation(
+      selected.mapAddress || selected.name + ", " + selected.location,
+      { signal: locationRequest.signal },
+    );
+    if (generation !== locationGeneration) return;
+    $("#location-candidates").replaceChildren();
+    $("#location-progress").textContent = result.candidates.length
+      ? "Choose the matching address. This is an approximate location."
+      : "No matching location returned. Check the address in the original source.";
+    for (const candidate of result.candidates) {
+      const button = document.createElement("button");
+      button.type = "button";
+      button.textContent = candidate.label;
+      button.onclick = () => {
+        if (selectedListing?.id !== selected.id) return;
+        listingLocations.set(selected.id, candidate);
+        shownLocation = null;
+        $("#location-review").hidden = true;
+        openNeighborhood();
+      };
+      $("#location-candidates").append(button);
+    }
+  } catch (error) {
+    if (generation === locationGeneration && error.name !== "AbortError")
+      $("#location-progress").textContent = error.message;
+  } finally {
+    if (generation === locationGeneration) {
+      locationRequest = null;
+      $("#resolve-location").disabled = false;
+    }
+  }
+};
+$("#change-listing").onclick = () => $("#add-listing").click();
+$("#change-location").onclick = () => {
+  if (!selectedListing) return;
+  listingLocations.delete(selectedListing.id);
+  shownLocation = null;
+  $("#source-details").open = false;
   setMode("overview");
-  $("#transition").classList.remove("active");
+};
+const priorities = new Set();
+function resetJourney() {
+  $("#journey-external").hidden = true;
+  $("#journey-external").removeAttribute("href");
+  $("#journey-summary").textContent =
+    "Travel times and routes are not connected to this map yet.";
+}
+$("#journey-destination").addEventListener("input", resetJourney);
+$("#journey-mode").addEventListener("change", resetJourney);
+for (const label of [
+  "Work & study",
+  "People & community",
+  "Daily essentials",
+  "Food & social",
+  "Fitness & outdoors",
+  "Care & services",
+  "Getting around",
+]) {
+  const button = document.createElement("button");
+  button.type = "button";
+  button.textContent = label;
+  button.setAttribute("aria-pressed", "false");
+  button.onclick = () => {
+    if (priorities.has(label)) priorities.delete(label);
+    else if (priorities.size < 3) priorities.add(label);
+    button.setAttribute("aria-pressed", String(priorities.has(label)));
+    $("#lifestyle-status").textContent = priorities.size
+      ? `Selected: ${[...priorities].join(", ")}. Nearby place lookup is not connected yet.`
+      : "Your priorities are optional.";
+  };
+  $("#lifestyle-choices").append(button);
+}
+$("#commute-form").onsubmit = (event) => {
+  event.preventDefault();
+  if (!selectedListing) return;
+  const destination = $("#journey-destination").value.trim(),
+    mode = $("#journey-mode").value;
+  const origin =
+    selectedListing.mapAddress ||
+    selectedListing.name + ", " + selectedListing.location;
+  const params = new URLSearchParams({
+    api: "1",
+    origin,
+    destination,
+    travelmode: mode,
+  });
+  $("#journey-external").href = "https://www.google.com/maps/dir/?" + params;
+  $("#journey-external").hidden = false;
+  $("#journey-summary").textContent =
+    "Directions prepared for your chosen mode. Open Google Maps for the actual route, travel time and departure options; this map has no route yet.";
 };
 $("#listing-preview").addEventListener("click", () => {
   if (selectedListing) $("#evidence-stage").hidden = false;
@@ -1203,6 +1362,11 @@ $("#add-listing").onclick = () => {
   selectedListing = null;
   acceptedRegion = null;
   planInspection.reset(null);
+  locationGeneration++;
+  locationRequest?.abort();
+  locationRequest = null;
+  shownLocation = null;
+  geoMap?.setLocation(null);
   evidenceReview.reset(null);
   setPlansOpen(false);
   refresh();

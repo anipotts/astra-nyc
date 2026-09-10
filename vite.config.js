@@ -3,6 +3,7 @@ import { createAstraMiddleware } from "./server/astra.js";
 import { createListingSearchMiddleware } from "./server/listing-search.js";
 import { createPlanInspectionMiddleware } from "./server/plan-inspection.js";
 import { createListingEvidenceMiddleware } from "./server/listing-evidence.js";
+import { createLocationMiddleware } from "./server/location.js";
 export default defineConfig(({ mode }) => {
   const env = loadEnv(
     mode,
@@ -22,17 +23,20 @@ export default defineConfig(({ mode }) => {
   const listingSearch = createListingSearchMiddleware({
     apiKey: process.env.OPENAI_API_KEY || env.OPENAI_API_KEY,
   });
+  const location = createLocationMiddleware();
   return {
     plugins: [
       {
         name: "elsewhere-local-astra",
         configureServer(server) {
+          server.middlewares.use(location);
           server.middlewares.use(planInspection);
           server.middlewares.use(listingEvidence);
           server.middlewares.use(listingSearch);
           server.middlewares.use(middleware);
         },
         configurePreviewServer(server) {
+          server.middlewares.use(location);
           server.middlewares.use(planInspection);
           server.middlewares.use(listingEvidence);
           server.middlewares.use(listingSearch);

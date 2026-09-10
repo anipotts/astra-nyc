@@ -23,3 +23,12 @@
 - Preserve the participant's updated direction: larger-bed fit, unfurnished view, lighting, and Nearby categories; do not reintroduce the rejected work-desk example.
 - Keep development assistance distinct from live runtime Astra. The app has local controls plus a verified live Astra endpoint for bed sizing, existing furniture-group visibility, and lighting across current scene contexts. Keep model-backed edits and cached replays visibly distinguishable from local suggestions.
 - Real listing imagery and location information must carry sources and freshness context. Never imply complete defect detection or verified reconstruction from visual plausibility alone.
+
+## Current event overrides (September 10, 2026)
+
+- Desktop only for this entire project lifecycle, per Ani's explicit instruction. Do not spend implementation or QA time on mobile responsiveness. Validate the current desktop and annotated desktop sizes (723×856 and 1144×853), keyboard use, reduced motion and real interactions.
+- Normal user flows must contain real source evidence only. Synthetic scene fixtures remain internal regression inputs; never use them as a fallback for a selected listing.
+- Use three main views: Overview, Inside and Commute. Overview is map-led; lifestyle/Nearby context belongs there. Plans is a shared-header action preserving the native modal and camera state.
+- A selected listing needs its own resolved geographic identity or an explicit unresolved state. Never reuse another property's marker or invent an interior/entrance transition.
+- Preserve the existing approved artwork and green/off-white visual identity. Keep detailed evidence and source inspection accessible through compact disclosures.
+- Stack Elsewhere branding, view tabs and Your places in one consistently spaced desktop left column. Remove the extra map-note sentence requested in the browser annotation. Prioritize sourced 3D NYC/Jersey City context over the flat street-map presentation; disclose estimated building heights and absent facade/interior detail in source information.
