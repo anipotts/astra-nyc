@@ -390,30 +390,10 @@ output {
   align-items: center;
   margin-top: 7px;
 }
-.composer-agent {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 12px;
-  font-weight: 600;
-}
-.composer-agent > span:first-child {
-  color: var(--green);
-  font-size: 18px;
-}
-.composer-scope {
-  color: var(--muted);
-  font-size: 10px;
-  font-weight: 400;
-}
-.composer-shortcut {
-  margin-left: auto;
-  color: var(--muted);
-  font-size: 10px;
-}
 #astra-submit {
   display: grid;
   place-items: center;
+  margin-left: auto;
   flex: 0 0 32px;
   width: 32px;
   min-height: 32px;
@@ -996,10 +976,6 @@ aside::-webkit-scrollbar,
 @media (max-width: 650px) {
   #astra-prompt {
     font-size: 16px;
-  }
-  .composer-scope,
-  .composer-shortcut {
-    display: none;
   }
   #astra-submit {
     margin-left: auto;
