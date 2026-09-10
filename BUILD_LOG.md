@@ -227,7 +227,7 @@ Implemented the supplied current-event daylight Hudson landing reference in the 
 
 Verification:112unit tests and production build pass (existing large-chunk advisory). In-app browser reviewed723×856,1144×853 and1536×1024 desktop states, input badge focus, saved address matches and known listing URL submission. No live model requests invoked. Dedicated internal preview5176; integration and participant preview5174 remain separate. Existing stale status on Add listing was reported to the runtime owner for the concurrent startup-reset patch; integration must verify that combined result.
 
-### 2026-09-10T14:21:00-04:00 — Combined landing and runtime integration
+### 2026-09-10T14:20:00-04:00 — Combined landing and runtime integration
 
 Combined PR3 daylight landing with PR4 startup and building-focus changes, preserving both appended build-log entries. Applied Ani's current browser comments: removed duplicate Neighborhood/Focus listing/Inside map actions, moved the extra map status/source note into the existing city-source disclosure, retained native map attribution and zoom controls, and generalized the selector to Browse listings without implying seeded records were personally saved.
 
