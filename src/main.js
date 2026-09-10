@@ -468,9 +468,11 @@ function resetCamera() {
 }
 function setMode(mode) {
   $("#map-view").hidden = true;
-  $("#astra-form").hidden =
-    !homes[state.home].studio || !["walk", "overview"].includes(mode);
-  $("#neighborhood-view").hidden = !homes[state.home].studio;
+  $("#astra-form").hidden = !["walk", "overview"].includes(mode);
+  $("#astra-submit").disabled =
+    !homes[state.home].studio || $("#astra-form").dataset.ready !== "true";
+  $("#neighborhood-view").hidden = true;
+  $("#listing-map").hidden = !homes[state.home].studio;
   state.mode = mode;
   updateCutaway(house, mode === "overview");
   keys.clear();
@@ -530,6 +532,7 @@ function setMode(mode) {
     );
     updateCar();
   }
+  if (mode === "nearby" && homes[state.home].studio) openNeighborhood();
 }
 function updateCar() {
   const p = pointOnRoute(homes[state.home].route, state.progress),
@@ -576,12 +579,12 @@ function refresh() {
   light();
   $("#bed").setAttribute("aria-pressed", String(state.largeBed));
   $("#bed span:last-child").textContent = state.largeBed
-    ? "Return to queen bed"
-    : "Will a king bed fit?";
+    ? "Queen bed"
+    : "King bed";
   $("#unfurnished").setAttribute("aria-pressed", String(state.unfurnished));
   $("#unfurnished span:last-child").textContent = state.unfurnished
-    ? "Restore furnishings"
-    : "See it unfurnished";
+    ? "Furnished"
+    : "Unfurnished";
 }
 let selectedListing = null;
 const syntheticPotential = { ...homes.potential };
@@ -605,8 +608,18 @@ function showListing(listing) {
   $("#listing-preview").hidden = !listing.scene;
   $("#listing-map").hidden = !listing.scene;
   $("#listing-status").textContent = listing.archived
-    ? "Archived listing found. Current availability is unknown."
-    : "Source snapshot loaded. Review the facts, then explore the inferred studio.";
+    ? "Archived listing. No interior is available; current availability is unknown."
+    : "Source snapshot loaded. Inferred studio is ready to explore.";
+  document.querySelector(".evidence").open = listing.archived;
+  if (listing.scene) {
+    $("#listing-preview").click();
+    setMode("overview");
+    if (
+      matchMedia("(max-width: 650px)").matches &&
+      !$("#places-content").hidden
+    )
+      $("#places-toggle").click();
+  }
 }
 $("#listing-form").addEventListener("submit", (event) => {
   event.preventDefault();
@@ -614,6 +627,8 @@ $("#listing-form").addEventListener("submit", (event) => {
   $("#listing-evidence").hidden = true;
   // Do not leave a previously selected listing scene attached to a new URL.
   Object.assign(homes.potential, syntheticPotential, { studio: false });
+  state.home = "current";
+  $("input[value=current]").checked = true;
   $("#potential-name").textContent = "Potential home";
   $("#potential-note").textContent = "Synthetic example · more space";
   refresh();
@@ -645,7 +660,7 @@ async function openNeighborhood() {
   $(".walk-controls").hidden = true;
   $(".journey").hidden = true;
   $(".nearby-panel").hidden = true;
-  $(".local").textContent = "Local demo · map tiles from OpenFreeMap";
+  $("#hint").hidden = true;
   try {
     if (!geoMap) {
       const { createNeighborhood } = await import("./neighborhood.js");
@@ -675,10 +690,10 @@ $("#map-enter").onclick = async () => {
 $("#listing-preview").addEventListener("click", () => {
   if (!selectedListing?.scene) return;
   Object.assign(homes.potential, selectedListing.scene, {
-    label: selectedListing.name + " · inferred sketch",
+    label: selectedListing.name,
   });
   $("#potential-name").textContent = selectedListing.name;
-  $("#potential-note").textContent = "Reported area · inferred layout";
+  $("#potential-note").textContent = "575 ft² reported · inferred layout";
   $("input[value=potential]").checked = true;
   state.home = "potential";
   state.largeBed = state.unfurnished = state.evening = false;
@@ -707,6 +722,7 @@ for (const input of document.querySelectorAll("[name=home]"))
     );
   });
 $("#bed").onclick = () => {
+  $("#astra-status").textContent = "Local preview · no new Astra request";
   state.largeBed = !state.largeBed;
   state.unfurnished = false;
   refresh();
@@ -718,6 +734,7 @@ $("#bed").onclick = () => {
   );
 };
 $("#unfurnished").onclick = () => {
+  $("#astra-status").textContent = "Local preview · no new Astra request";
   state.unfurnished = !state.unfurnished;
   refresh();
   message(
@@ -727,6 +744,7 @@ $("#unfurnished").onclick = () => {
   );
 };
 $("#evening").onclick = () => {
+  $("#astra-status").textContent = "Local preview · no new Astra request";
   state.evening = !state.evening;
   light();
   message(
@@ -736,6 +754,7 @@ $("#evening").onclick = () => {
   );
 };
 $("#reset").onclick = () => {
+  $("#astra-status").textContent = "Local preview · no new Astra request";
   state.largeBed = false;
   state.unfurnished = false;
   state.evening = false;
@@ -874,27 +893,31 @@ fetch("/api/astra/status")
   .then((r) => r.json())
   .then((data) => {
     astraReady = data.configured === true;
-    $("#astra-submit").disabled = !astraReady;
+    $("#astra-form").dataset.ready = String(astraReady);
+    $("#astra-submit").disabled = !astraReady || !homes[state.home].studio;
     $("#astra-status").textContent = astraReady
-      ? "Runtime ready · one validated edit, then local rendering"
-      : "Runtime unavailable · configure API access to try a live edit. Local controls still work.";
+      ? "Astra connected · live edits available in the 95 Wall studio"
+      : "Astra unavailable · suggestions still work locally";
   })
   .catch(() => {
     $("#astra-status").textContent =
-      "Runtime endpoint unavailable. Use the local dev server for Astra edits.";
+      "Astra unavailable · suggestions still work locally";
   });
 $("#astra-form").addEventListener("submit", async (event) => {
   event.preventDefault();
   if (!astraReady || !homes[state.home].studio) return;
   const sceneAtRequest = homes[state.home];
   $("#astra-submit").disabled = true;
-  $("#astra-status").textContent = "Asking Astra for a bounded scene edit…";
+  $("#astra-status").textContent = "Updating scene…";
+  $("#astra-form").setAttribute("aria-busy", "true");
   try {
     const response = await fetch("/api/astra/edit", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        prompt: $("#astra-prompt").value,
+        prompt:
+          $("#astra-prompt").value.trim() ||
+          "Put a king bed here and show the remaining clearance",
         scene: "wall2308-inferred-v2",
       }),
     });
@@ -910,11 +933,40 @@ $("#astra-form").addEventListener("submit", async (event) => {
     refresh();
     if (state.mode === "walk") setMode("walk");
     $("#astra-status").textContent =
-      `${result.cached ? "Cached Astra edit" : "Live Astra edit"} · ${result.model} · ${result.requestId} · ${new Date(result.generatedAt).toLocaleTimeString()}`;
+      `${result.cached ? "Cached Astra edit" : "Live Astra edit"} · ${result.model} · ${new Date(result.generatedAt).toLocaleTimeString()}`;
+    $("#astra-status").title = `Request ${result.requestId}`;
     $(".local").textContent = "Local demo · live Astra edit received";
   } catch (error) {
     $("#astra-status").textContent = error.message;
   } finally {
-    $("#astra-submit").disabled = !astraReady;
+    $("#astra-form").removeAttribute("aria-busy");
+    $("#astra-form").dataset.ready = String(astraReady);
+    $("#astra-submit").disabled = !astraReady || !homes[state.home].studio;
   }
 });
+
+// Keep scene controls discoverable without a permanent instruction banner.
+function dismissHint() {
+  $("#hint").hidden = true;
+}
+container.addEventListener("pointerdown", dismissHint, { once: true });
+container.addEventListener("wheel", dismissHint, { once: true, passive: true });
+container.addEventListener("keydown", dismissHint, { once: true });
+$("#help-toggle").onclick = () => {
+  const open = $("#help-panel").hidden;
+  $("#help-panel").hidden = !open;
+  $("#help-toggle").setAttribute("aria-expanded", String(open));
+};
+$("#places-toggle").onclick = () => {
+  const open = $("#places-content").hidden;
+  $("#places-content").hidden = !open;
+  $("#places-toggle").setAttribute("aria-expanded", String(open));
+  $("#places-toggle").setAttribute(
+    "aria-label",
+    open ? "Collapse places" : "Expand places",
+  );
+  $("#places-toggle").textContent = open ? "−" : "+";
+};
+
+// Clear a retained document offset when this viewport layout replaces an older HMR page.
+window.scrollTo({ top: 0, left: 0, behavior: "instant" });

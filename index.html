@@ -4,165 +4,135 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="theme-color" content="#ffffff" />
-    <title>Elsewhere — imagine your next home</title>
+    <title>Elsewhere — try living here</title>
     <link rel="icon" href="data:," />
   </head>
   <body>
     <header>
       <a class="wordmark" href="/">Elsewhere<span>↗</span></a
-      ><span class="local">Local demo · no data uploaded</span>
+      ><span class="local" hidden></span>
     </header>
     <main>
-      <aside>
-        <div class="intro">
+      <aside aria-label="Your homes">
+        <div class="intro" hidden>
           <h1>Decide where to move. Before you visit.</h1>
-          <p>
-            Compare the space, the commute, and daily essentials. Get a clearer
-            picture before committing to a viewing.
-          </p>
         </div>
-        <form id="listing-form" class="listing-form">
-          <label for="listing-url">Start with a listing</label>
-          <input
-            id="listing-url"
-            type="url"
-            required
-            maxlength="2048"
-            placeholder="Paste a listing URL"
-            aria-describedby="listing-help"
-            autocomplete="off"
-            spellcheck="false"
-          />
-          <button class="primary" type="submit">
-            Explore this listing <span aria-hidden="true">→</span>
+        <div class="panel-heading">
+          <span>Your places</span
+          ><button
+            id="places-toggle"
+            aria-expanded="true"
+            aria-controls="places-content"
+            aria-label="Collapse places"
+          >
+            −
           </button>
-          <p id="listing-help" class="fine">
-            Try a researched example. Live URL import is not connected yet.
-          </p>
+        </div>
+        <div id="places-content">
+          <fieldset class="homes">
+            <legend class="sr-only">Choose a home</legend>
+            <label class="home"
+              ><input type="radio" name="home" value="current" checked /><span
+                ><strong>Current home</strong
+                ><small>Synthetic example</small></span
+              ><span class="selection-mark" aria-hidden="true">✓</span></label
+            >
+            <label class="home"
+              ><input type="radio" name="home" value="potential" /><span
+                ><strong id="potential-name">Potential home</strong
+                ><small id="potential-note">Synthetic example</small></span
+              ><span class="selection-mark" aria-hidden="true">✓</span></label
+            >
+          </fieldset>
+          <div class="examples-heading">
+            Examples <span>Source snapshots</span>
+          </div>
           <div class="listing-examples">
-            <button type="button" data-listing="wall2308">95 Wall studio</button
+            <button type="button" data-listing="wall2308">
+              95 Wall studio <span aria-hidden="true">↗</span></button
             ><button type="button" data-listing="zephyr501">
-              Zephyr #501 · archived
+              Zephyr #501 <small>Archived</small>
             </button>
           </div>
-          <output id="listing-status" aria-live="polite"></output>
-        </form>
-        <section
-          id="listing-evidence"
-          class="listing-card"
-          aria-label="Listing evidence"
-          hidden
-        >
-          <span class="eyebrow"
-            >Source facts · reviewed during development</span
-          >
-          <h2 id="listing-name"></h2>
-          <p id="listing-location"></p>
-          <strong id="listing-facts"></strong>
-          <p id="listing-price"></p>
-          <p id="listing-availability"></p>
-          <a id="listing-source" target="_blank" rel="noopener noreferrer"
-            >View listing &amp; original photos ↗</a
-          >
-          <small id="listing-checked"></small>
-          <details>
-            <summary>What still needs checking?</summary>
-            <p id="listing-unknowns"></p>
+          <form id="listing-form" hidden>
+            <label for="listing-url">Listing URL</label
+            ><input
+              id="listing-url"
+              type="url"
+              required
+              maxlength="2048"
+              placeholder="Paste a listing URL"
+              autocomplete="off"
+              spellcheck="false"
+            /><button type="submit">Explore →</button>
+          </form>
+          <output
+            id="listing-status"
+            class="sr-only"
+            aria-live="polite"
+          ></output>
+          <details class="evidence">
+            <summary>
+              Illustrative model <span aria-hidden="true">ⓘ</span>
+            </summary>
+            <p>
+              Room shape, dimensions, furnishings, light and conditions are
+              inferred. Reported area does not establish room dimensions or
+              prove fit.
+            </p>
+            <section
+              id="listing-evidence"
+              class="listing-card"
+              aria-label="Listing evidence"
+              hidden
+            >
+              <h2 id="listing-name"></h2>
+              <p id="listing-location"></p>
+              <strong id="listing-facts"></strong>
+              <p id="listing-price"></p>
+              <p id="listing-availability"></p>
+              <a id="listing-source" target="_blank" rel="noopener noreferrer"
+                >Original listing &amp; photos ↗</a
+              ><small id="listing-checked"></small>
+              <details>
+                <summary>Unknown conditions</summary>
+                <p id="listing-unknowns"></p>
+              </details>
+              <button id="listing-preview" type="button">
+                Explore inferred interior →
+              </button>
+              <p>
+                Photos have not been reconstructed. Source facts are a dated
+                snapshot, not a live refresh.
+              </p>
+            </section>
+            <p>
+              Other homes, streets and places are synthetic examples. Live map
+              data is identified in Nearby.
+            </p>
+            <output id="status" aria-live="polite">Current home loaded.</output>
           </details>
-          <button id="listing-map" type="button">
-            Explore the neighborhood
-          </button>
-          <button id="listing-preview" type="button">
-            Walk an inferred studio
-          </button>
-          <p class="fine">
-            Scene shape and arrangement are illustrative. Photos have not been
-            reconstructed. No live Astra call.
-          </p>
-        </section>
-        <fieldset class="homes">
-          <legend class="sr-only">Choose a home</legend>
-          <label class="home"
-            ><input type="radio" name="home" value="current" checked /><span
-              class="home-art current"
-              aria-hidden="true"
-              >01</span
-            ><span
-              ><strong>Current home</strong
-              ><small>Synthetic example · compact</small></span
-            ></label
+          <section
+            id="clearance-panel"
+            class="clearance-panel"
+            hidden
+            aria-label="Bed clearance"
           >
-          <label class="home"
-            ><input type="radio" name="home" value="potential" /><span
-              class="home-art potential"
-              aria-hidden="true"
-              >02</span
-            ><span
-              ><strong id="potential-name">Potential home</strong
-              ><small id="potential-note"
-                >Synthetic example · more space</small
-              ></span
-            ></label
-          >
-        </fieldset>
-        <div class="actions">
-          <button class="primary" data-mode="walk">
-            <span>Walk inside</span><span aria-hidden="true">↗</span></button
-          ><button data-mode="commute">
-            <span>Preview commute</span><span aria-hidden="true">→</span>
-          </button>
+            <h2>Estimated room · measured scene</h2>
+            <output id="clearance-values" aria-live="polite"></output>
+            <p>
+              Clearance from bed frame to scene obstacles. Verify actual
+              dimensions before deciding fit.
+            </p>
+          </section>
         </div>
-        <section
-          id="clearance-panel"
-          class="clearance-panel"
-          hidden
-          aria-label="Bed clearance"
-        >
-          <h2>Clearance in this sketch</h2>
-          <output id="clearance-values" aria-live="polite"></output>
-          <p>
-            Measured from the bed frame to scene obstacles. Room dimensions and
-            arrangement are inferred; verify the real plan before deciding fit.
-          </p>
-        </section>
-        <section class="changes">
-          <h2>Picture your move</h2>
-          <button id="bed" aria-pressed="false">
-            <span aria-hidden="true">＋</span
-            ><span>Will a king bed fit?</span></button
-          ><button id="unfurnished" aria-pressed="false">
-            <span aria-hidden="true">□</span
-            ><span>See it unfurnished</span></button
-          ><button id="evening" aria-pressed="false">
-            <span aria-hidden="true">☼</span><span>Evening light</span></button
-          ><button id="reset">
-            <span aria-hidden="true">↺</span><span>Reset scene</span>
-          </button>
-          <p class="fine">
-            These are local scene controls. Live Astra editing is not connected.
-          </p>
-        </section>
-        <details class="evidence">
-          <summary>What is verified?</summary>
-          <p>
-            Example listing facts are dated source snapshots reviewed during
-            development. The 95 Wall sketch uses its reported area and studio
-            type; all other geometry, streets, and nearby places are
-            illustrative. Photos have not been analyzed. Unseen conditions
-            remain unknown.
-          </p>
-        </details>
-        <output id="status" aria-live="polite"
-          >Start with the home you know.</output
-        >
       </aside>
       <section id="viewport" aria-label="Interactive 3D home preview">
         <div class="modebar" role="group" aria-label="View mode">
           <button data-mode="overview" aria-pressed="true">Overview</button
           ><button data-mode="walk" aria-pressed="false">Walk</button
           ><button data-mode="commute" aria-pressed="false">Commute</button
-          ><button data-mode="nearby" aria-pressed="false">Nearby</button
-          ><button id="neighborhood-view" hidden>Neighborhood ↗</button>
+          ><button data-mode="nearby" aria-pressed="false">Nearby</button>
         </div>
         <div
           id="scene"
@@ -182,31 +152,48 @@
             ><button id="map-enter" class="primary">Enter the home →</button>
           </div>
           <p class="map-note">
-            Listing map pin is approximate. Buildings may use inferred heights.
-            No driving route or travel time is provided.
+            Approximate listing pin · building heights may be inferred · no
+            driving route or travel time
           </p>
         </div>
-        <form id="astra-form" class="astra-panel" hidden>
-          <label for="astra-prompt">Ask Astra to change the space</label>
-          <input
-            id="astra-prompt"
-            maxlength="500"
-            value="Put a king bed here and show the remaining clearance"
-          />
-          <button id="astra-submit" class="primary" type="submit" disabled>
-            Ask Astra
-          </button>
+        <form id="astra-form" class="astra-panel">
+          <label for="astra-prompt">What would you change?</label>
+          <div class="change-input">
+            <input
+              id="astra-prompt"
+              maxlength="500"
+              placeholder="Put a king bed here and show clearance"
+            /><button id="astra-submit" class="primary" type="submit" disabled>
+              Ask Astra ↗
+            </button>
+          </div>
+          <div class="changes" aria-label="Local scene changes">
+            <button id="bed" type="button" aria-pressed="false">
+              <span>King bed</span></button
+            ><button id="unfurnished" type="button" aria-pressed="false">
+              <span>Unfurnished</span></button
+            ><button id="evening" type="button" aria-pressed="false">
+              <span>Evening light</span></button
+            ><button
+              id="reset"
+              type="button"
+              aria-label="Reset scene"
+              title="Reset scene"
+            >
+              ↺</button
+            ><span class="local-edits">Local preview</span>
+          </div>
           <output id="astra-status" aria-live="polite"
             >Checking runtime access…</output
           >
-          <p id="scene-clearance"></p>
+          <p id="scene-clearance" class="sr-only"></p>
         </form>
         <div id="transition" aria-hidden="true">
           <span>Stepping inside…</span>
         </div>
-        <div id="scene-title">
+        <div id="scene-title" hidden>
           <strong id="place">Current home</strong
-          ><span id="view-description">A place to start imagining.</span>
+          ><span id="view-description"></span>
         </div>
         <div class="walk-controls" hidden>
           <button data-key="a" aria-label="Step left">←</button
@@ -217,14 +204,13 @@
           ><button data-key="ArrowRight" aria-label="Turn right">↷</button>
         </div>
         <div class="nearby-panel" hidden>
-          <h2>Life around your home</h2>
-          <p>Choose what matters to your move.</p>
+          <h2>Daily essentials</h2>
+          <button id="listing-map" type="button" hidden>
+            Open real neighborhood map ↗</button
+          ><button id="neighborhood-view" hidden>Neighborhood ↗</button>
           <div id="categories"></div>
           <strong id="poi-name"></strong>
-          <p id="poi-note">
-            Illustrative locations only. Real places and distances are not
-            connected.
-          </p>
+          <p id="poi-note">Illustrative places · real distances unknown</p>
         </div>
         <div class="journey" hidden>
           <div>
@@ -242,11 +228,27 @@
           /><small>Illustrative route · no real travel-time estimate</small>
         </div>
         <div class="caption">
-          <span id="hint">Drag to orbit · scroll to zoom</span
-          ><span
-            >Illustrative geometry and streets. Not a verified listing
-            reconstruction.</span
-          >
+          <span id="hint">Drag to orbit · scroll to zoom</span>
+        </div>
+        <button
+          id="help-toggle"
+          aria-expanded="false"
+          aria-controls="help-panel"
+          aria-label="Scene controls"
+        >
+          ?
+        </button>
+        <div id="help-panel" hidden>
+          <strong>Explore the scene</strong>
+          <p>Overview: drag to orbit, scroll to zoom.</p>
+          <p>
+            Walk: WASD to move; drag or arrow keys to look. Use the doorway to
+            go outside.
+          </p>
+          <p>
+            Changes: suggestion buttons render locally. Ask Astra makes a
+            runtime request when available.
+          </p>
         </div>
       </section>
     </main>
