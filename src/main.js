@@ -2,6 +2,8 @@ import * as THREE from "three";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import { homes, pointOnRoute, blocked } from "./model.js";
 import "./style.css";
+import { clearanceAround, validateBedEdit } from "./clearance.js";
+import { buildStudio, updateCutaway } from "./interior.js";
 import { listings, identifyListing } from "./listings.js";
 const $ = (s) => document.querySelector(s);
 const container = $("#scene");
@@ -24,9 +26,9 @@ try {
 }
 renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
 renderer.shadowMap.enabled = true;
-renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+renderer.shadowMap.type = THREE.PCFShadowMap;
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
-renderer.toneMappingExposure = 1.15;
+renderer.toneMappingExposure = 1.05;
 container.appendChild(renderer.domElement);
 const scene = new THREE.Scene();
 scene.background = new THREE.Color("#a8b39e");
@@ -37,7 +39,7 @@ controls.enableDamping = true;
 controls.minDistance = 8;
 controls.maxDistance = 58;
 controls.maxPolarAngle = Math.PI * 0.47;
-const ambient = new THREE.HemisphereLight("#f5f7ef", "#747762", 2.1);
+const ambient = new THREE.HemisphereLight("#e9f1ff", "#af9777", 1.15);
 scene.add(ambient);
 const sun = new THREE.DirectionalLight("#fff1d9", 3.2);
 sun.position.set(-12, 24, 8);
@@ -52,7 +54,8 @@ Object.assign(sun.shadow.camera, {
   far: 90,
 });
 sun.shadow.bias = -0.0005;
-sun.shadow.normalBias = 0.035;
+sun.shadow.normalBias = 0.02;
+sun.shadow.radius = 3;
 scene.add(sun);
 const materials = new Map();
 function material(color) {
@@ -176,6 +179,11 @@ function frameWindow(x, z, width, axis = "x") {
 function buildHome() {
   clear(house);
   solids.length = 0;
+  if (homes[state.home].studio) {
+    buildStudio(house, solids, state, homes[state.home]);
+    updateCutaway(house, state.mode === "overview");
+    return;
+  }
   const { width: w, depth: d, sofa } = homes[state.home];
   box(house, w + 0.35, 0.2, d + 0.35, 0, -0.1, 0, "#b6a78a");
   for (let i = 0; i < Math.ceil(w / 0.28); i++)
@@ -454,12 +462,17 @@ function message(text) {
 }
 function resetCamera() {
   const h = homes[state.home];
-  camera.position.set(11, 16, 14);
+  camera.position.set(...(h.studio ? [8.6, 10.9, 11.5] : [11, 16, 14]));
   controls.target.set(0, 0, 0);
   controls.update();
 }
 function setMode(mode) {
+  $("#map-view").hidden = true;
+  $("#astra-form").hidden =
+    !homes[state.home].studio || !["walk", "overview"].includes(mode);
+  $("#neighborhood-view").hidden = !homes[state.home].studio;
   state.mode = mode;
+  updateCutaway(house, mode === "overview");
   keys.clear();
   controls.enabled = mode === "overview" || mode === "nearby";
   $(".walk-controls").hidden = mode !== "walk";
@@ -534,7 +547,10 @@ function updateCar() {
 function light() {
   sun.color.set(state.evening ? "#ffb970" : "#fff1d9");
   sun.intensity = state.evening ? 1.15 : 3.2;
-  ambient.intensity = state.evening ? 0.85 : 2.1;
+  ambient.intensity = state.evening ? 0.65 : 1.2;
+  house.traverse((o) => {
+    if (o.isPointLight) o.intensity = state.evening ? 14 : 2;
+  });
   scene.background.set(state.evening ? "#777f7b" : "#a8b39e");
   scene.fog.color.copy(scene.background);
   $("#evening").setAttribute("aria-pressed", String(state.evening));
@@ -545,6 +561,17 @@ function light() {
 function refresh() {
   buildHome();
   buildNeighborhood();
+  const footprint = homes[state.home].studio && house.userData.bedFootprint;
+  $("#clearance-panel").hidden = !footprint;
+  if (footprint) {
+    const c = clearanceAround(footprint, solids);
+    $("#clearance-values").textContent = c.overlap
+      ? "Overlap detected — this arrangement needs changing."
+      : `Left ${c.left.toFixed(2)} m · right ${c.right.toFixed(2)} m · foot ${c.foot.toFixed(2)} m`;
+  }
+  $("#scene-clearance").textContent = footprint
+    ? "Inferred layout · " + $("#clearance-values").textContent
+    : "";
   $("#place").textContent = homes[state.home].label;
   light();
   $("#bed").setAttribute("aria-pressed", String(state.largeBed));
@@ -576,6 +603,7 @@ function showListing(listing) {
     " ET · not a live refresh";
   $("#listing-unknowns").textContent = listing.questions;
   $("#listing-preview").hidden = !listing.scene;
+  $("#listing-map").hidden = !listing.scene;
   $("#listing-status").textContent = listing.archived
     ? "Archived listing found. Current availability is unknown."
     : "Source snapshot loaded. Review the facts, then explore the inferred studio.";
@@ -595,7 +623,7 @@ $("#listing-form").addEventListener("submit", (event) => {
     if (listing) showListing(listing);
     else
       $("#listing-status").textContent =
-        "This link has no researched snapshot yet. Try one of the two examples below. No page was fetched and no scene was generated.";
+        "This URL needs a public unit-specific listing, photos, and a floor plan or measured dimensions. Live import is not connected; try a researched example above. No page was fetched and no scene was generated.";
   } catch (error) {
     $("#listing-status").textContent = error.message;
   }
@@ -607,6 +635,43 @@ for (const button of document.querySelectorAll("[data-listing]"))
     ).url;
     $("#listing-form").requestSubmit();
   });
+let geoMap;
+async function openNeighborhood() {
+  if (selectedListing?.id !== "wall2308") return;
+  state.playing = false;
+  keys.clear();
+  $("#map-view").hidden = false;
+  $("#astra-form").hidden = true;
+  $(".walk-controls").hidden = true;
+  $(".journey").hidden = true;
+  $(".nearby-panel").hidden = true;
+  $(".local").textContent = "Local demo · map tiles from OpenFreeMap";
+  try {
+    if (!geoMap) {
+      const { createNeighborhood } = await import("./neighborhood.js");
+      geoMap = createNeighborhood(
+        $("#map-canvas"),
+        (text) => ($("#map-status").textContent = text),
+      );
+    }
+    geoMap.resize();
+    geoMap.pullback();
+  } catch {
+    $("#map-status").textContent =
+      "Map could not load. You can still enter the local interior.";
+  }
+}
+$("#listing-map").onclick = openNeighborhood;
+$("#neighborhood-view").onclick = openNeighborhood;
+$("#map-pullback").onclick = () => geoMap?.pullback();
+$("#map-direct").onclick = () => geoMap?.direct();
+$("#map-enter").onclick = async () => {
+  const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  $("#transition").classList.add("active");
+  if (!reduced) await new Promise((resolve) => setTimeout(resolve, 350));
+  $("#listing-preview").click();
+  $("#transition").classList.remove("active");
+};
 $("#listing-preview").addEventListener("click", () => {
   if (!selectedListing?.scene) return;
   Object.assign(homes.potential, selectedListing.scene, {
@@ -803,3 +868,53 @@ window.__elsewhere = {
     webgl: renderer.capabilities.isWebGL2,
   }),
 };
+
+let astraReady = false;
+fetch("/api/astra/status")
+  .then((r) => r.json())
+  .then((data) => {
+    astraReady = data.configured === true;
+    $("#astra-submit").disabled = !astraReady;
+    $("#astra-status").textContent = astraReady
+      ? "Runtime ready · one validated edit, then local rendering"
+      : "Runtime unavailable · configure API access to try a live edit. Local controls still work.";
+  })
+  .catch(() => {
+    $("#astra-status").textContent =
+      "Runtime endpoint unavailable. Use the local dev server for Astra edits.";
+  });
+$("#astra-form").addEventListener("submit", async (event) => {
+  event.preventDefault();
+  if (!astraReady || !homes[state.home].studio) return;
+  const sceneAtRequest = homes[state.home];
+  $("#astra-submit").disabled = true;
+  $("#astra-status").textContent = "Asking Astra for a bounded scene edit…";
+  try {
+    const response = await fetch("/api/astra/edit", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        prompt: $("#astra-prompt").value,
+        scene: "wall2308-inferred-v2",
+      }),
+    });
+    const result = await response.json();
+    if (!response.ok) throw new Error(result.error || "Astra edit failed.");
+    const edit = validateBedEdit(result.edit);
+    if (homes[state.home] !== sceneAtRequest || !homes[state.home].studio)
+      throw new Error(
+        "Home changed while Astra was working. Edit was not applied.",
+      );
+    state.largeBed = edit.size === "king";
+    state.unfurnished = false;
+    refresh();
+    if (state.mode === "walk") setMode("walk");
+    $("#astra-status").textContent =
+      `${result.cached ? "Cached Astra edit" : "Live Astra edit"} · ${result.model} · ${result.requestId} · ${new Date(result.generatedAt).toLocaleTimeString()}`;
+    $(".local").textContent = "Local demo · live Astra edit received";
+  } catch (error) {
+    $("#astra-status").textContent = error.message;
+  } finally {
+    $("#astra-submit").disabled = !astraReady;
+  }
+});

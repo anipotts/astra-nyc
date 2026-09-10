@@ -32,7 +32,11 @@ npm run build
 
 Public listing facts were researched during development on September 10, 2026 and bundled in src/listings.js. The running app matches two exact listing URLs to these snapshots; it does not fetch arbitrary pages or analyze photographs. Source links open the original listing and gallery. Listing availability and prices can change. All streets, routes, nearby locations, and scene arrangements are synthetic; only the 95 Wall sketch area and studio type are source-informed. The scene is not a verified reconstruction, furniture-fit guarantee, current-condition inspection, or solar study.
 
-Astra assists development of the scene and app. The running product has no live model connection: its controls edit local state deterministically. It does not launch runtime agents or claim that a model processed a listing. API credentials are not required for this version.
+Astra assists development of the scene and app. The running product now has an optional localhost-only Astra endpoint for bounded king/queen bed edits. It remains unavailable until secure API configuration is complete; no live model proof has been recorded yet. Local controls still work without credentials. The endpoint validates the returned edit, caches it in server memory, and leaves movement/rendering local. It does not launch runtime agents or reconstruct listing photos.
+
+## Current graphics and geographic experiment
+
+The inferred 95 Wall studio has procedural materials, rounded furniture, a cutaway overview, and geometry-derived bed clearance. These dimensions are inferred and cannot establish real fit. Its neighborhood opens a separate MapLibre/OpenFreeMap map with source attribution, camera pullback, “Go directly,” and a fade into the interior. The listing pin is approximate; no verified driving route is available. The initial recording remains the baseline.
 
 ## Next integration, not implemented
 

@@ -69,6 +69,9 @@
             <summary>What still needs checking?</summary>
             <p id="listing-unknowns"></p>
           </details>
+          <button id="listing-map" type="button">
+            Explore the neighborhood
+          </button>
           <button id="listing-preview" type="button">
             Walk an inferred studio
           </button>
@@ -109,6 +112,19 @@
             <span>Preview commute</span><span aria-hidden="true">→</span>
           </button>
         </div>
+        <section
+          id="clearance-panel"
+          class="clearance-panel"
+          hidden
+          aria-label="Bed clearance"
+        >
+          <h2>Clearance in this sketch</h2>
+          <output id="clearance-values" aria-live="polite"></output>
+          <p>
+            Measured from the bed frame to scene obstacles. Room dimensions and
+            arrangement are inferred; verify the real plan before deciding fit.
+          </p>
+        </section>
         <section class="changes">
           <h2>Picture your move</h2>
           <button id="bed" aria-pressed="false">
@@ -145,13 +161,49 @@
           <button data-mode="overview" aria-pressed="true">Overview</button
           ><button data-mode="walk" aria-pressed="false">Walk</button
           ><button data-mode="commute" aria-pressed="false">Commute</button
-          ><button data-mode="nearby" aria-pressed="false">Nearby</button>
+          ><button data-mode="nearby" aria-pressed="false">Nearby</button
+          ><button id="neighborhood-view" hidden>Neighborhood ↗</button>
         </div>
         <div
           id="scene"
           tabindex="0"
           aria-label="3D scene. In walk mode use W A S D to move, arrow keys to turn, or drag to look."
         ></div>
+        <div id="map-view" hidden aria-label="Geographic neighborhood">
+          <div id="map-canvas"></div>
+          <div class="map-heading">
+            <span class="eyebrow">GEOGRAPHIC CONTEXT</span>
+            <h2>Life around 95 Wall</h2>
+            <p id="map-status" role="status">Loading map…</p>
+          </div>
+          <div class="map-actions">
+            <button id="map-pullback">Pull out</button
+            ><button id="map-direct">Go directly</button
+            ><button id="map-enter" class="primary">Enter the home →</button>
+          </div>
+          <p class="map-note">
+            Listing map pin is approximate. Buildings may use inferred heights.
+            No driving route or travel time is provided.
+          </p>
+        </div>
+        <form id="astra-form" class="astra-panel" hidden>
+          <label for="astra-prompt">Ask Astra to change the space</label>
+          <input
+            id="astra-prompt"
+            maxlength="500"
+            value="Put a king bed here and show the remaining clearance"
+          />
+          <button id="astra-submit" class="primary" type="submit" disabled>
+            Ask Astra
+          </button>
+          <output id="astra-status" aria-live="polite"
+            >Checking runtime access…</output
+          >
+          <p id="scene-clearance"></p>
+        </form>
+        <div id="transition" aria-hidden="true">
+          <span>Stepping inside…</span>
+        </div>
         <div id="scene-title">
           <strong id="place">Current home</strong
           ><span id="view-description">A place to start imagining.</span>
