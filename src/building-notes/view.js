@@ -8,7 +8,7 @@ const date = (value) => typeof value === "string" ? value.slice(0, 10) : "Not su
 
 // Direction can mount this anywhere in Overview without another view or server.
 export function mountBuildingNotes(container, { listing = null, fetchFn = fetch } = {}) {
-  let selected = null, generation = 0, request = null;
+  let selected = null, generation = 0, request = null, attempted = false;
   const doc = container.ownerDocument;
   const el = (tag, text, className) => {
     const node = doc.createElement(tag); if (text) node.textContent = text;
@@ -27,6 +27,7 @@ export function mountBuildingNotes(container, { listing = null, fetchFn = fetch 
     if (selected?.key === identity) return;
     generation++; request?.abort(); request = null;
     selected = value ? { key: identity, address: value.mapAddress || value.location } : null;
+    attempted = false; root.open = false; button.hidden = true;
     output.replaceChildren(); button.textContent = "Check building records";
     button.disabled = !selected; root.removeAttribute("aria-busy");
   }
@@ -61,9 +62,11 @@ export function mountBuildingNotes(container, { listing = null, fetchFn = fetch 
     }
   }
   async function load({ refresh = false } = {}) {
-    if (!selected) return null;
+    if (!selected || !root.open) return null;
+    attempted = true;
+    let failed = false;
     const version = ++generation; request?.abort(); request = new AbortController();
-    button.disabled = true; root.setAttribute("aria-busy", "true");
+    button.disabled = true; button.hidden = true; root.setAttribute("aria-busy", "true");
     output.replaceChildren(el("p", "Checking this building’s HPD records…"));
     try {
       const response = await fetchFn("/api/building-notes", { method: "POST", headers: {"Content-Type":"application/json"}, body: JSON.stringify({address:selected.address, refresh}), signal: request.signal });
@@ -71,15 +74,18 @@ export function mountBuildingNotes(container, { listing = null, fetchFn = fetch 
       if (version !== generation) return null;
       if (!response.ok || !["completed_with_matches", "completed_no_matches", "unavailable", "ambiguous", "not_supported"].includes(result.coverage))
         throw new Error("Building records are unavailable.");
+      failed = result.coverage === "unavailable";
       render(result); return result;
     } catch (error) {
+      failed = true;
       if (version === generation && error.name !== "AbortError") output.replaceChildren(el("p", "Building records are unavailable. Retry or use HPD Online; no conclusion about this building was made."));
       return null;
     } finally {
-      if (version === generation) { button.disabled = false; button.textContent = "Refresh building records"; root.removeAttribute("aria-busy"); }
+      if (version === generation) { button.disabled = false; button.hidden = false; button.textContent = failed ? "Retry building records" : "Refresh building records"; root.removeAttribute("aria-busy"); }
     }
   }
-  button.onclick = () => load({refresh:button.textContent === "Refresh building records"});
+  button.onclick = () => load({refresh:true});
+  root.ontoggle = () => { if (root.open && !attempted) return load(); };
   reset(listing);
-  return { setListing: reset, load, destroy() { generation++; request?.abort(); root.remove(); } };
+  return { setListing: reset, load, destroy() { generation++; request?.abort(); root.ontoggle = null; root.remove(); } };
 }
