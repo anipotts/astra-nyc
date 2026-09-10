@@ -144,13 +144,17 @@
   border-radius: 7px;
   color: #344d42;
 }
+/* Composition: one sidebar, one visual surface and a non-overlapping fact strip. */
 body.desktop-shell {
   display: grid;
-  grid-template-columns: 312px minmax(0, 1fr);
+  grid-template-columns: var(--ui-sidebar-width) minmax(0, 1fr);
   grid-template-rows: auto minmax(0, 1fr);
   height: 100dvh;
   min-width: 700px;
   overflow: hidden;
+  font-size: var(--ui-text-base);
+  line-height: var(--ui-line-height);
+  color: var(--ui-color-text);
 }
 .desktop-shell header {
   position: relative;
@@ -160,38 +164,30 @@ body.desktop-shell {
   display: flex;
   flex-wrap: wrap;
   align-content: start;
-  gap: 16px;
-  padding: 24px 18px 16px;
-  background: #fafaf6;
-  border-bottom: 1px solid var(--border);
+  gap: var(--ui-space-3);
+  padding: var(--ui-space-6) var(--ui-space-4) var(--ui-space-3);
+  background: var(--ui-color-surface);
+  border-bottom: 1px solid var(--ui-color-border);
+  border-right: 1px solid var(--ui-color-border);
   z-index: 40;
 }
-.desktop-shell .wordmark {
-  margin-right: auto;
-  flex-shrink: 0;
-  width: 100%;
-}
+.desktop-shell .wordmark { margin-right: auto; flex-shrink: 0; width: 100%; font-size: 24px; }
+.desktop-shell .wordmark img { width: 28px; height: 28px; }
 .desktop-shell .modebar {
   position: static;
   inset: auto;
   transform: none;
   display: flex;
   width: 100%;
-  padding: 3px;
+  padding: var(--ui-space-1);
   margin: 0;
+  border-radius: var(--ui-radius-panel);
+  box-shadow: none;
 }
-.desktop-shell #plans-toggle {
-  position: static;
-  inset: auto;
-  transform: none;
-  margin: 0;
-  min-height: 40px;
-  width: 100%;
-  border-radius: 11px;
-}
-.desktop-shell main {
-  display: contents;
-}
+.desktop-shell .modebar button { flex: 1; min-height: var(--ui-control-compact); padding: 6px 8px; font-size: var(--ui-text-sm); border-radius: var(--ui-radius-control); border-color: transparent; background: transparent; }
+.desktop-shell .modebar button[aria-pressed="true"] { color: white; background: var(--ui-color-accent); border-color: var(--ui-color-accent); }
+.desktop-shell #plans-toggle { position: static; inset: auto; transform: none; margin: 0; min-height: var(--ui-control-compact); width: 100%; border-radius: var(--ui-radius-control); font-size: var(--ui-text-sm); }
+.desktop-shell main { display: contents; }
 .desktop-shell #viewport {
   position: relative;
   inset: auto;
@@ -200,9 +196,10 @@ body.desktop-shell {
   width: 100%;
   height: 100%;
   display: grid;
-  grid-template: "surface" 1fr / 1fr;
+  grid-template: "surface" minmax(0, 1fr) / minmax(0, 1fr);
   overflow: hidden;
 }
+.desktop-shell.evidence-only:not(.empty-state) #viewport { grid-template: "surface" minmax(0, 1fr) "facts" auto / minmax(0, 1fr); }
 .desktop-shell aside {
   position: relative;
   inset: auto;
@@ -213,341 +210,130 @@ body.desktop-shell {
   max-height: none;
   height: 100%;
   margin: 0;
-  padding: 12px 18px 24px;
+  padding: var(--ui-space-3) var(--ui-space-4) var(--ui-space-6);
   border: 0;
-  border-right: 1px solid var(--border);
+  border-right: 1px solid var(--ui-color-border);
   border-radius: 0;
   overflow: auto;
-  background: #fafaf6;
-  box-shadow: none;
-}
-.desktop-shell .modebar button {
-  flex: 1;
-  padding: 8px 10px;
-}
-.desktop-shell.evidence-only aside :is(.evidence, .clearance-panel) {
-  display: none;
-}
-.desktop-shell.evidence-only #help-toggle {
-  display: none;
-}
-.desktop-shell.empty-state {
-  grid-template-columns: 1fr;
-}
-.desktop-shell.empty-state header {
-  position: absolute;
-  background: transparent;
-  border: 0;
-}
-.desktop-shell.empty-state #viewport {
-  grid-column: 1;
-}
-.desktop-shell :is(#map-view, #inside-surface) {
-  position: relative;
-  inset: auto;
-  grid-area: surface;
-  min-width: 0;
-  min-height: 0;
-  width: 100%;
-  height: 100%;
-}
-.desktop-shell #map-canvas {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-}
-.desktop-shell .map-heading {
-  top: auto;
-  bottom: 36px;
-  left: auto;
-  right: 20px;
-  transform: none;
-  width: 290px;
-  padding: 10px 14px;
-}
-.desktop-shell .map-heading :is(.eyebrow, h2) {
-  display: none;
-}
-.desktop-shell .map-heading p {
-  font-size: 12px;
-}
-.desktop-shell .map-actions {
-  top: 18px;
-  bottom: auto;
-  left: auto;
-  right: 62px;
-  transform: none;
-  padding: 4px;
-  box-shadow: none;
-}
-.desktop-shell .map-note {
-  display: none;
-}
-.desktop-shell .maplibregl-ctrl-top-right {
-  top: 14px;
-  right: 10px;
-}
-.desktop-shell .maplibregl-ctrl-attrib {
-  font-size: 11px;
-}
-.desktop-shell
-  :is(#evidence-stage, #location-review, #commute-panel) {
-  position: relative;
-  inset: auto;
-  transform: none;
-  grid-area: surface;
-  z-index: 21;
-  padding: 18px;
-  margin: 20px;
-  width: 310px;
-  max-width: none;
-  background: #fafaf6f5;
-  border: 1px solid var(--border);
-  border-radius: 14px;
-  box-shadow: 0 6px 24px #203c2f12;
-  overflow: auto;
-}
-.desktop-shell #evidence-stage {
-  align-self: end;
-  justify-self: start;
-  max-height: calc(100% - 100px);
-  margin-bottom: 34px;
   scrollbar-width: thin;
+  background: var(--ui-color-surface);
+  box-shadow: none;
 }
-.desktop-shell #evidence-stage h1 {
-  font-size: 25px;
-  line-height: 1.15;
-  letter-spacing: -0.7px;
-  margin: 8px 0;
-}
-.desktop-shell #evidence-stage p {
-  font-size: 13px;
-  line-height: 1.45;
-  margin: 9px 0;
-}
-.desktop-shell #overview-freshness {
-  font-size: 11px;
-}
-.desktop-shell #summary-next {
-  color: var(--muted);
-}
-.desktop-shell .summary-heading {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  color: var(--green);
-  font-size: 12px;
-}
-.desktop-shell #change-listing {
-  padding: 4px 8px;
-  min-height: 32px;
-  background: transparent;
-}
-.desktop-shell #source-details {
-  border-top: 1px solid var(--border);
-  margin-top: 12px;
-  padding-top: 4px;
-}
-.desktop-shell summary {
-  min-height: 36px;
-  padding: 8px 0;
-  cursor: pointer;
-  font-size: 13px;
-  font-weight: 600;
-}
-.desktop-shell #source-details a {
-  overflow-wrap: anywhere;
-}
-.desktop-shell #location-review {
-  justify-self: end;
-  align-self: start;
-  margin-top: 164px;
-  max-height: calc(100% - 200px);
-}
-.desktop-shell :is(#location-review, #commute-panel) h2 {
-  margin: 0 0 10px;
-  font-size: 21px;
-}
-.desktop-shell :is(#location-review, #commute-panel) p {
-  font-size: 13px;
-  line-height: 1.5;
-}
-.desktop-shell #location-review small {
-  display: block;
-  font-size: 11px;
-  line-height: 1.5;
-  margin-top: 14px;
-  color: var(--muted);
-}
-.desktop-shell #location-candidates {
+.desktop-shell .panel-heading { margin: 0 0 var(--ui-space-2); min-height: var(--ui-control-compact); font-size: var(--ui-text-sm); }
+.desktop-shell #places-toggle { min-height: var(--ui-control-compact); min-width: var(--ui-control-compact); width: var(--ui-control-compact); padding: 0; border: 0; background: transparent; }
+.desktop-shell.evidence-only aside :is(.evidence, .clearance-panel) { display: none; }
+.desktop-shell.evidence-only #help-toggle { display: none; }
+.desktop-shell.empty-state { grid-template-columns: 1fr; }
+.desktop-shell.empty-state header { position: absolute; background: transparent; border: 0; }
+.desktop-shell.empty-state #viewport { grid-column: 1; }
+.desktop-shell.empty-state .wordmark { font-size: 28px; }
+.desktop-shell.empty-state .wordmark img { width: 36px; height: 36px; }
+.desktop-shell :is(#map-view, #inside-surface) { position: relative; inset: auto; grid-area: surface; min-width: 0; min-height: 0; width: 100%; height: 100%; }
+.desktop-shell #map-canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
+.desktop-shell .maplibregl-ctrl-top-right { top: 8px; right: 8px; }
+.desktop-shell .maplibregl-ctrl-attrib { font-size: 11px; }
+/* Keep provider controls' built-in icons and hit boxes intact. */
+.desktop-shell .maplibregl-ctrl-group button { min-height: 29px; padding: 0; border-radius: 0; }
+.desktop-shell #evidence-stage {
+  position: relative;
+  inset: auto;
+  transform: none;
+  grid-area: facts;
   display: grid;
-  gap: 8px;
-  margin-top: 12px;
+  grid-template-columns: minmax(0, 1fr) minmax(190px, .7fr);
+  gap: var(--ui-space-1) var(--ui-space-6);
+  align-self: stretch;
+  justify-self: stretch;
+  width: auto;
+  max-width: none;
+  max-height: 42dvh;
+  margin: 0;
+  padding: var(--ui-space-3) var(--ui-space-4);
+  border: 0;
+  border-top: 1px solid var(--ui-color-border);
+  border-radius: 0;
+  background: var(--ui-color-surface);
+  box-shadow: none;
+  overflow: auto;
+  scrollbar-width: thin;
+  z-index: 21;
 }
-.desktop-shell #location-candidates button {
-  text-align: left;
-  overflow-wrap: anywhere;
-}
+.desktop-shell #evidence-stage::-webkit-scrollbar { display: block; width: 6px; }
+.desktop-shell .summary-heading { grid-column: 1 / -1; display: flex; justify-content: space-between; align-items: center; color: var(--ui-color-muted); font-size: var(--ui-text-sm); }
+.desktop-shell #change-listing { padding: 4px 8px; min-height: var(--ui-control-compact); border-color: transparent; background: transparent; color: var(--ui-color-accent); font-size: var(--ui-text-sm); }
+.desktop-shell #evidence-stage h1 { grid-column: 1; grid-row: 2; font-size: var(--ui-text-title); line-height: 1.2; letter-spacing: -.5px; margin: 0; overflow-wrap: anywhere; }
+.desktop-shell #evidence-stage p { font-size: var(--ui-text-sm); line-height: var(--ui-line-height); margin: 0; }
+.desktop-shell #evidence-facts { grid-column: 1; grid-row: 3; }
+.desktop-shell #overview-price { grid-column: 2; grid-row: 2; align-self: center; font-size: var(--ui-text-base) !important; }
+.desktop-shell #overview-freshness { grid-column: 2; grid-row: 3; font-size: var(--ui-text-sm); line-height: var(--ui-line-height); }
+.desktop-shell :is(#summary-next, #view-unavailable) { grid-column: 1 / -1; color: var(--ui-color-muted); }
+.desktop-shell #summary-next { margin-top: var(--ui-space-1); }
+.desktop-shell #source-details { grid-column: 1 / -1; border-top: 1px solid var(--ui-color-border); margin-top: var(--ui-space-2); padding-top: 0; }
+.desktop-shell summary { min-height: var(--ui-control-height); padding: var(--ui-space-2) 0; cursor: pointer; font-size: var(--ui-text-sm); font-weight: 600; }
+.desktop-shell #source-details :is(a,p,small) { overflow-wrap: anywhere; font-size: var(--ui-text-sm); }
+.desktop-shell #source-details p { margin: var(--ui-space-2) 0; }
+.desktop-shell #source-details h3 { font-size: var(--ui-text-base); margin: var(--ui-space-3) 0 var(--ui-space-2); }
+.desktop-shell #source-details button { font-size: var(--ui-text-sm); }
+.desktop-shell #source-details :is(#plan-inspection, #reconstruction-evidence) { margin-top: var(--ui-space-3); padding-top: var(--ui-space-3); }
+.desktop-shell #location-candidates { display: grid; gap: var(--ui-space-2); margin-top: var(--ui-space-3); }
+.desktop-shell #location-candidates button { text-align: left; overflow-wrap: anywhere; }
 .desktop-shell #commute-panel {
-  justify-self: end;
+  position: relative;
+  inset: auto;
+  transform: none;
+  grid-area: surface;
+  justify-self: start;
   align-self: start;
-  margin-top: 164px;
-  max-height: calc(100% - 190px);
+  margin: var(--ui-space-4);
+  padding: var(--ui-space-4);
+  width: min(320px, calc(100% - 76px));
+  max-width: none;
+  max-height: calc(100% - 32px);
+  overflow: auto;
+  z-index: 21;
 }
-.desktop-shell[data-view="commute"] #location-review {
-  display: none;
-}
-.desktop-shell #commute-form {
-  display: grid;
-  gap: 8px;
-}
-.desktop-shell #commute-form label {
-  font-size: 12px;
-  margin-top: 6px;
-}
-.desktop-shell #commute-form :is(input, select) {
-  width: 100%;
-  min-height: 44px;
-  border: 1px solid var(--border);
-  border-radius: 9px;
-  padding: 10px;
-  font: inherit;
-  font-size: 13px;
-  background: white;
-}
-.desktop-shell #commute-form button {
-  background: var(--green);
-  color: white;
-  margin-top: 4px;
-}
-.desktop-shell #journey-external {
-  color: var(--green);
-  font-size: 13px;
-}
-.desktop-shell #inside-surface {
-  padding: 32px 32px 330px;
-  display: grid;
-  place-items: center;
-  background: #e9ede5;
-}
-.desktop-shell #inside-plan {
-  width: 100%;
-  max-width: 780px;
-}
-.desktop-shell #inside-plan svg {
-  width: 100%;
-  height: calc(100dvh - 410px);
-  max-height: 100%;
-}
-.desktop-shell #inside-empty {
-  max-width: 510px;
-  padding: 28px;
-  border: 1px solid #c7d2c4;
-  border-radius: 16px;
-  background: #fafaf6;
-}
-.desktop-shell #inside-empty h2 {
-  color: var(--green);
-  font-size: 28px;
-  margin-top: 0;
-}
-.desktop-shell #inside-empty p {
-  font-size: 15px;
-  line-height: 1.6;
-}
-.desktop-shell #inside-source {
-  color: var(--green);
-  font-size: 14px;
-}
-.desktop-shell #entry-stage {
-  top: 15%;
-  max-height: 80%;
-}
-.desktop-shell
-  :is(
-    #inside-surface,
-    #inside-plan,
-    #inside-empty,
-    #location-review,
-    #commute-panel,
-    #evidence-stage,
-    #map-view
-  )[hidden] {
-  display: none !important;
-}
-.desktop-shell :is(button, a, summary, input, select):focus-visible {
-  outline: 3px solid #387954;
-  outline-offset: 3px;
+.desktop-shell #commute-panel h2 { margin: 0 0 var(--ui-space-2); font-size: var(--ui-text-title); line-height: 1.2; }
+.desktop-shell #commute-panel p { font-size: var(--ui-text-sm); line-height: var(--ui-line-height); margin: var(--ui-space-2) 0; }
+.desktop-shell #commute-form { display: grid; gap: var(--ui-space-2); margin-top: var(--ui-space-3); }
+.desktop-shell #commute-form label { font-size: var(--ui-text-sm); margin-top: var(--ui-space-1); font-weight: 600; }
+.desktop-shell #commute-form :is(input, select) { width: 100%; min-height: var(--ui-control-height); border: 1px solid var(--ui-color-border); border-radius: var(--ui-radius-control); padding: var(--ui-space-2); font: inherit; font-size: var(--ui-text-base); background: white; }
+.desktop-shell #commute-form button { min-height: var(--ui-control-primary); background: var(--ui-color-accent); color: white; margin-top: var(--ui-space-1); }
+.desktop-shell #journey-external { color: var(--ui-color-accent); font-size: var(--ui-text-sm); }
+/* Inside content has its own surface row; no fixed330px overlay allowance. */
+.desktop-shell #inside-surface { padding: var(--ui-space-4); display: block; overflow: auto; background: #e9ede5; }
+.desktop-shell #inside-plan { width: 100%; height: 100%; max-width: 900px; margin: 0 auto; }
+.desktop-shell #inside-plan svg { display: block; width: 100%; height: 100%; max-height: 100%; }
+.desktop-shell #inside-empty { max-width: 480px; margin: var(--ui-space-8) auto; padding: var(--ui-space-4); border: 1px solid var(--ui-color-border); border-radius: var(--ui-radius-panel); background: var(--ui-color-surface); }
+.desktop-shell #inside-empty h2 { color: var(--ui-color-accent); font-size: var(--ui-text-title); line-height: 1.2; margin: 0 0 var(--ui-space-3); }
+.desktop-shell #inside-empty p { font-size: var(--ui-text-base); line-height: var(--ui-line-height); }
+.desktop-shell #inside-source { color: var(--ui-color-accent); font-size: var(--ui-text-base); }
+.desktop-shell :is(#inside-surface,#inside-plan,#inside-empty,#location-review,#commute-panel,#evidence-stage,#map-view)[hidden] { display: none !important; }
+.desktop-shell .listing-picker { margin-top: 0; }
+.desktop-shell .listing-picker label { display: block; margin-bottom: var(--ui-space-1); color: var(--ui-color-muted); font-size: var(--ui-text-sm); font-weight: 500; }
+.desktop-shell .listing-picker-row { display: flex; align-items: center; gap: var(--ui-space-1); }
+.desktop-shell #listing-select { flex: 1; width: 100%; min-width: 0; min-height: var(--ui-control-height); padding: 6px 8px; border: 1px solid var(--ui-color-border); border-radius: var(--ui-radius-control); background: white; color: var(--ui-color-text); font: inherit; font-size: var(--ui-text-sm); appearance: auto; text-overflow: ellipsis; }
+.desktop-shell #add-listing { flex: 0 0 auto; width: auto; min-height: var(--ui-control-height); margin: 0; padding: 6px 8px; text-align: center; border-color: transparent; background: transparent; color: var(--ui-color-accent); font-size: var(--ui-text-sm); }
+.desktop-shell #priorities-panel { margin-top: var(--ui-space-6); padding-top: var(--ui-space-4); border-top: 1px solid var(--ui-color-border); }
+.desktop-shell #priorities-panel h2 { margin: 0; font-size: var(--ui-text-base); font-weight: 650; }
+.desktop-shell #priorities-panel .priority-hint { margin: var(--ui-space-1) 0 var(--ui-space-3); color: var(--ui-color-muted); font-size: var(--ui-text-sm); }
+.desktop-shell #priority-choices { display: grid; grid-template-columns: minmax(0,1fr); gap: var(--ui-space-1); }
+.desktop-shell #priority-choices button { display: flex; align-items: center; gap: var(--ui-space-2); min-height: var(--ui-control-compact); padding: 6px 8px; border: 1px solid transparent; border-radius: var(--ui-radius-control); background: transparent; font-size: var(--ui-text-sm); text-align: left; }
+.desktop-shell #priority-choices button::before { content: ''; width: 12px; height: 12px; flex: 0 0 12px; border: 1px solid #8b998e; border-radius: 3px; }
+.desktop-shell #priority-choices button[aria-pressed="true"] { color: var(--ui-color-accent); background: var(--ui-color-selected); border-color: #c1cfc0; }
+.desktop-shell #priority-choices button[aria-pressed="true"]::before { background: var(--ui-color-accent); border-color: var(--ui-color-accent); box-shadow: inset 0 0 0 2px var(--ui-color-selected); }
+.desktop-shell #priority-choices button:disabled { opacity: .65; cursor: default; }
+.desktop-shell .priority-feedback { margin-top: var(--ui-space-3); color: var(--ui-color-muted); font-size: var(--ui-text-sm); line-height: var(--ui-line-height); }
+.desktop-shell #priority-status { display: inline; }
+.desktop-shell #priority-storage { display: inline; font-size: inherit; }
+@media (max-width: 900px) {
+  .desktop-shell #evidence-stage { grid-template-columns: minmax(0,1fr); gap: var(--ui-space-1); padding: var(--ui-space-3) var(--ui-space-4); }
+  .desktop-shell #evidence-stage :is(h1,#evidence-facts,#overview-price,#overview-freshness) { grid-column: 1; grid-row: auto; }
+  .desktop-shell #evidence-stage h1 { font-size: 20px; }
+  .desktop-shell #commute-panel { width: calc(100% - 76px); }
 }
 @media (prefers-reduced-motion: reduce) {
-  .desktop-shell *,
-  .desktop-shell *::before,
-  .desktop-shell *::after {
-    scroll-behavior: auto !important;
-    animation: none !important;
-    transition: none !important;
-  }
+  .desktop-shell *, .desktop-shell *::before, .desktop-shell *::after { scroll-behavior: auto !important; animation: none !important; transition: none !important; }
 }
-
-@media (max-width: 1000px) {
-  .desktop-shell #evidence-stage {
-    width: calc(100% - 40px);
-    max-height: 32%;
-  }
-  .desktop-shell #location-review,
-  .desktop-shell #commute-panel {
-    width: calc(100% - 40px);
-    max-height: calc(68% - 110px);
-  }
-  .desktop-shell .map-actions {
-    left: 16px;
-    right: 58px;
-    gap: 3px;
-  }
-  .desktop-shell .map-actions button {
-    font-size: 12px;
-    padding: 6px;
-    flex: 1;
-  }
-  .desktop-shell .map-heading {
-    bottom: auto;
-    top: 74px;
-    /* Keep status text clear of the full map navigation control stack. */
-    right: 60px;
-    width: calc(100% - 80px);
-  }
-  .desktop-shell #location-review,
-  .desktop-shell #commute-panel {
-    margin-top: 164px;
-    max-height: calc(68% - 190px);
-  }
-  .desktop-shell[data-view="commute"] #evidence-stage {
-    max-height: 180px;
-  }
-  .desktop-shell[data-view="commute"]
-    #evidence-stage
-    :is(#evidence-facts, #overview-price, #overview-freshness) {
-    display: none;
-  }
-  .desktop-shell[data-view="commute"] #commute-panel {
-    max-height: calc(100% - 370px);
-  }
-
-}
-
-/* Listing and preference controls share the persistent desktop sidebar. */
-.desktop-shell .listing-picker { margin-top: 18px; }
-.desktop-shell .listing-picker label { display: block; margin-bottom: 8px; color: var(--muted); font-size: 12px; font-weight: 600; }
-.desktop-shell #listing-select { width: 100%; min-width: 0; min-height: 44px; padding: 10px 12px; border: 1px solid var(--border); border-radius: 10px; background: #fff; color: var(--ink); font: inherit; font-size: 14px; }
-.desktop-shell #priorities-panel { margin-top: 24px; padding-top: 20px; border-top: 1px solid var(--border); }
-.desktop-shell #priorities-panel h2 { margin: 0; font-size: 14px; font-weight: 650; }
-.desktop-shell #priorities-panel p { margin: 8px 0 12px; color: var(--muted); font-size: 12px; line-height: 1.5; }
-.desktop-shell #priority-choices { display: flex; flex-wrap: wrap; gap: 7px; }
-.desktop-shell #priority-choices button { min-height: 34px; padding: 7px 9px; border-radius: 9px; font-size: 12px; }
-.desktop-shell #priority-choices button[aria-pressed="true"] { color: white; background: var(--green); border-color: var(--green); }
-.desktop-shell #priority-choices button:disabled { opacity: .5; cursor: default; }
-.desktop-shell #priority-storage { display: block; color: var(--muted); font-size: 11px; line-height: 1.5; }
 
 .desktop-shell #address-form { position: relative; }
 .desktop-shell #entry-stage:has(#search-suggestions:not([hidden])) { overflow: visible; }
@@ -564,3 +350,11 @@ body.desktop-shell {
 .desktop-shell #entry-stage .suggestion-empty { margin: 0; padding: 14px; color: var(--muted); font-size: 13px; }
 @keyframes suggestions-enter { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: translateY(0); } }
 @media (prefers-reduced-motion: reduce) { .desktop-shell .search-suggestions { animation: none; } }
+
+/* Opening Plans must not resize the obscured source strip or map beneath it. */
+.desktop-shell.evidence-only.plans-open #evidence-stage {
+  inset: auto;
+  width: auto;
+  padding: var(--ui-space-3) var(--ui-space-4);
+  display: grid;
+}
