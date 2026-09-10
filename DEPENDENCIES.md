@@ -6,6 +6,8 @@ The sections below record additions across the event; statements about earlier e
 
 Nominatim is used for bounded address lookup after selection, without autocomplete. See the [OSMF policy](https://operations.osmfoundation.org/policies/nominatim/) and server/location.js for identifying requests, shared throttling and caching. This supersedes the earlier evaluation-only note below. The current default ten-case NYC source catalog is in src/nyc-listings.js, with original links, evidence scope and dates; the older src/listings.js research remains available separately.
 
+Five decorative [Phosphor regular SVG icons](https://github.com/phosphor-icons/core/tree/2b75f3ad12b420c9504ef05df8d2564a28f8500e/assets/regular) are vendored at exact core revision `2b75f3ad12b420c9504ef05df8d2564a28f8500e` under the MIT license: files, map-pin, ruler, magnifying-glass and buildings. They provide visual action cues alongside text, with no icon runtime package. Files and the original license are retained in `src/ui/icons/`; usage is documented in `docs/UI_SYSTEM.md`.
+
 Direct dependencies: Three.js0.186.0 (MIT), MapLibre GL JS6.9.0 (BSD-3-Clause), PDF.js/pdfjs-dist6.3.289 (Apache-2.0) and Vite8.3.0 (MIT). Versions are pinned in package.json and package-lock.json. Vite and its dependency tree are build tools.
 
 Official documentation consulted during this event: [Three.js](https://threejs.org/docs/) and [Vite](https://vite.dev/guide/). No example app or pre-event project code was imported.
