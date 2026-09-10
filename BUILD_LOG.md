@@ -265,7 +265,7 @@ The walking preview follows provider route geometry at approximate eye height. B
 
 Verification: all197combined tests and the production build pass. Native source-plan modal, automatic routes, landing/recent reopening and preference persistence had passed the preceding combined review. Four obsolete worktrees were retired after ancestry/ownership checks; the unique layout file is preserved privately. Only canonical5174 remains a preview server. GitHub main was independently verified at2be2e82 after Ani's manual push, with successful CI; these later local changes are not yet claimed as pushed. No additional runtime Astra inference or dependency was needed for this integration.
 
-## 2026-09-10T16:32:00-04:00 — Simplified combined demo and building records
+## 2026-09-10T16:29:22-04:00 — Simplified combined demo and building records
 
 Integrated the compact shared header, collapsed persistent routine, shorter Commute controls, source-plan viewer and bounded NYC HPD building-record service. Building notes load on first opening, retain agency outcomes, and clear and collapse when the listing changes. Connected the service to canonical 5174. Detailed plan observations now sit behind a disclosure; printed room labels remain visible. Initial Overview framing shows the surrounding block instead of starting at a close view of a building wall.
 

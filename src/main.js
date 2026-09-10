@@ -799,8 +799,10 @@ async function openNeighborhood(focus = false) {
       }, { onBuildingStatus: () => updateCitySource(), routePadding: () => {
         const mapRect = $("#map-canvas").getBoundingClientRect();
         const panel = $("#commute-panel").getBoundingClientRect();
-        const overlaps = !$("#commute-panel").hidden && panel.top < mapRect.bottom && panel.bottom > mapRect.top;
-        return { left: overlaps ? Math.min(panel.right - mapRect.left + 24, mapRect.width - 100) : 40, right: 40, top: 40, bottom: 48 };
+        const overlaps = !$("#commute-panel").hidden &&
+          panel.right > mapRect.left && panel.left < mapRect.right &&
+          panel.top < mapRect.bottom && panel.bottom > mapRect.top;
+        return { left: overlaps ? Math.max(40, Math.min(panel.right - mapRect.left + 24, mapRect.width - 100)) : 40, right: 40, top: 40, bottom: 48 };
       } }),
     );
     geoMap = await mapInit;
