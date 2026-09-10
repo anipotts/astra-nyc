@@ -13,7 +13,8 @@ import {
   savePlanHistory,
   cleanPlanState,
 } from "./plan-storage.js";
-import { listings, identifyListing } from "./listings.js";
+import { listings } from "./listings.js";
+import { setupListingIntake } from "./listing-intake.js";
 const $ = (s) => document.querySelector(s);
 const container = $("#scene");
 const state = {
@@ -611,7 +612,7 @@ function showListing(listing) {
     $("#listing-" + key).textContent = listing[key];
   $("#listing-source").href = listing.url;
   $("#listing-checked").textContent =
-    "Source checked " +
+    (listing.discovery ? "Search observed " : "Source checked ") +
     new Date(listing.checkedAt).toLocaleString("en-US", {
       timeZone: "America/New_York",
       month: "short",
@@ -640,25 +641,7 @@ function showListing(listing) {
   refresh();
   setMode("overview");
 }
-$("#listing-form").addEventListener("submit", (event) => {
-  event.preventDefault();
-  try {
-    const listing = identifyListing($("#listing-url").value);
-    if (listing) showListing(listing);
-    else
-      $("#listing-status").textContent =
-        "This URL needs a public unit-specific listing, photos, and a floor plan or measured dimensions. Live import is not connected; try a researched example above. No page was fetched and no scene was generated.";
-  } catch (error) {
-    $("#listing-status").textContent = error.message;
-  }
-});
-for (const button of document.querySelectorAll("[data-listing]"))
-  button.addEventListener("click", () => {
-    $("#listing-url").value = listings.find(
-      (l) => l.id === button.dataset.listing,
-    ).url;
-    $("#listing-form").requestSubmit();
-  });
+setupListingIntake(showListing);
 let geoMap;
 async function openNeighborhood() {
   if (selectedListing?.id !== "wall2308") return;
@@ -1170,7 +1153,7 @@ $("#add-listing").onclick = () => {
   setPlansOpen(false);
   refresh();
   setMode("overview");
-  $("#listing-url").focus();
+  $("#listing-address").focus();
 };
 $("#entry-demo").onclick = () => $("#evidence-demo").click();
 $("#plan-dimensions").onchange = renderPlans;

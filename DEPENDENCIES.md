@@ -84,3 +84,7 @@ Additional facts-only references: [Journal Square Urby #409](https://www.urby.co
 ## Personal previews and current interface
 
 Green-seat and black-shelf geometry was authored during the event from participant-supplied appearance references. Personal photographs and their backgrounds are not included. Product identity and real dimensions remain unknown; preview bounds are hypothetical defaults. Direct controls, shared command validation, empty entry and the Plans modal add no dependencies. Active branding uses versioned PNG exports from the approved event-created raster, replacing the earlier approximate SVG in the header and favicon. Planning drawings make no NCS or ISO compliance claim.
+
+## Bounded address-to-listing discovery
+
+The existing OpenAI Responses API now uses its web_search tool for explicit address or public-listing-link submissions, following the official [web search guide](https://developers.openai.com/api/docs/guides/tools-web-search). This hosted service has provider pricing and data terms; no SDK package or new runtime dependency was installed. Candidate URLs are attributed in the interface and limited to existing public residential source domains. Source pages/photos are not copied or bundled. Public Nominatim was evaluated but not adopted: its [usage policy](https://operations.osmfoundation.org/policies/nominatim/) prohibits autocomplete and limits usage. No geocoding requests were made.

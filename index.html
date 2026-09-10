@@ -159,29 +159,58 @@
           <h1 id="entry-title">
             See what life could be like in your next home
           </h1>
-          <p>Start with a listing and see what is known about the home</p>
-          <form id="listing-form">
-            <label for="listing-url">Listing URL</label
-            ><input
-              id="listing-url"
-              type="url"
+          <p>Where are you thinking of moving?</p>
+          <form id="address-form">
+            <label class="sr-only" for="listing-address"
+              >Address or building in NYC or Jersey City</label
+            >
+            <input
+              id="listing-address"
+              type="search"
               required
-              maxlength="2048"
-              placeholder="Paste a listing URL"
+              minlength="3"
+              maxlength="180"
+              placeholder="Address, building or apartment"
               autocomplete="off"
               spellcheck="false"
-            /><button type="submit">Review listing →</button>
+              aria-describedby="search-disclosure"
+            />
+            <button type="submit">Search →</button>
           </form>
+          <details id="listing-link-entry">
+            <summary>Paste a listing link</summary>
+            <form id="listing-form">
+              <label class="sr-only" for="listing-url">Listing URL</label>
+              <input
+                id="listing-url"
+                type="url"
+                required
+                maxlength="2048"
+                placeholder="https://…"
+                autocomplete="off"
+                spellcheck="false"
+              />
+              <button type="submit">Find listing →</button>
+            </form>
+          </details>
+          <p id="search-disclosure" class="intake-note">
+            NYC &amp; Jersey City · Online searches go to OpenAI only when you
+            submit.
+          </p>
           <output
             id="listing-status"
             class="intake-status"
             aria-live="polite"
           ></output>
-
-          <p class="intake-note">
-            Known examples are supported today · live URL import is not
-            connected
-          </p>
+          <section
+            id="listing-results"
+            aria-label="Listing matches"
+            hidden
+          ></section>
+          <button id="search-online" class="text-action" type="button" hidden>
+            Search online for more listings →
+          </button>
+          <p class="intake-note">Examples</p>
           <div class="entry-examples" aria-label="Supported listing examples">
             <button type="button" data-listing="wall2308">
               95 Wall studio

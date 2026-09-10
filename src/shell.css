@@ -2,11 +2,11 @@
 #entry-stage {
   position: absolute;
   z-index: 20;
-  top: 22%;
+  top: clamp(96px, 18dvh, 180px);
   left: 50%;
   transform: translateX(-50%);
   width: min(620px, calc(100% - 40px));
-  max-height: calc(100dvh - 120px);
+  max-height: calc(100dvh - clamp(96px, 18dvh, 180px) - 24px);
   overflow: auto;
   scrollbar-width: none;
 }
@@ -354,4 +354,89 @@ body.evidence-only #object-controls {
 
 body.evidence-only .homes {
   display: none;
+}
+
+/* Address-first intake; all online requests are explicit submissions. */
+#address-form {
+  display: flex;
+  gap: 8px;
+  margin: 28px 0 16px;
+}
+#listing-address {
+  flex: 1;
+  min-width: 0;
+  min-height: 56px;
+  padding: 14px 16px;
+  font: inherit;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: white;
+}
+#address-form button {
+  background: var(--green);
+  color: white;
+  padding: 12px 20px;
+}
+#listing-link-entry {
+  font-size: 14px;
+  color: var(--green);
+}
+#listing-link-entry summary {
+  cursor: pointer;
+  width: fit-content;
+  padding: 4px 0;
+}
+#listing-link-entry #listing-form {
+  margin: 12px 0;
+}
+#listing-results {
+  margin-top: 16px;
+  display: grid;
+  gap: 8px;
+}
+#listing-results[hidden] {
+  display: none;
+}
+.listing-match {
+  padding: 14px;
+  background: white;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+}
+.listing-match strong {
+  display: block;
+  color: var(--ink);
+  font-size: 15px;
+}
+#entry-stage .listing-match p {
+  margin: 5px 0;
+  font-size: 12px;
+}
+.listing-match footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-top: 8px;
+}
+.listing-match a {
+  font-size: 12px;
+  color: var(--green);
+}
+.listing-match button {
+  min-height: 40px;
+  padding: 8px 12px;
+}
+#search-online {
+  margin-top: 8px;
+  font-size: 13px;
+}
+@media (max-width: 650px) {
+  #entry-stage {
+    top: 112px;
+    max-height: calc(100dvh - 132px);
+  }
+  #address-form button {
+    padding: 12px;
+  }
 }
