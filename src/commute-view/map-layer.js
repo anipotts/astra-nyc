@@ -1,9 +1,11 @@
+import { createWalkingSession } from './walking-session.js';
 const empty = () => ({ type: 'FeatureCollection', features: [] });
 const feature = geometry => ({ type: 'Feature', properties: {}, geometry });
 // MapLibre owns the geospatial projection: route coordinates never become screen pixels.
 export function createCommuteMapLayer(map, { reducedMotion = () => globalThis.matchMedia?.('(prefers-reduced-motion: reduce)').matches, padding = 72 } = {}) {
   const ids = ['commute-route-halo', 'commute-route-line', 'commute-highlight-line', 'commute-highlight-point'];
-  let route = null, step = null, destroyed = false, ready = map.isStyleLoaded();
+  let route = null, step = null, walking = null, destroyed = false, ready = map.isStyleLoaded();
+  function endWalk(options) { const session = walking; walking = null; session?.end(options); }
   function ensure() {
     if (destroyed || !ready) return;
     for (const id of ['commute-route', 'commute-highlight']) if (!map.getSource(id)) map.addSource(id, { type: 'geojson', data: empty() });
@@ -18,10 +20,19 @@ export function createCommuteMapLayer(map, { reducedMotion = () => globalThis.ma
   map.on('style.load', onStyleLoad);
   ensure();
   return {
-    setRoute(value) { route = value; step = null; ensure(); },
+    setRoute(value) { if (!value || value.key !== route?.key) endWalk({ restore: false }); route = value; step = null; ensure(); },
+    beginWalk(options = {}) {
+      if (destroyed || !ready || !route) return false;
+      endWalk();
+      walking = createWalkingSession(map, route, { ...options, reducedMotion, onExit() { walking = null; options.onExit?.(); } });
+      return true;
+    },
+    endWalk,
+    walkAction(action) { walking?.action(action); },
+    seekWalk(fraction) { walking?.seek(fraction); },
     highlight(value) { step = value; ensure(); },
-    fit({ bounds, duration = 500 }) { if (!destroyed) { map.stop(); map.fitBounds(bounds, { padding: typeof padding === 'function' ? padding() : padding, maxZoom: 16.5, pitch: 35, duration: reducedMotion() ? 0 : Math.min(duration, 650) }); } },
-    stop() { if (!destroyed) map.stop(); },
-    destroy() { map.stop(); map.off('style.load', onStyleLoad); for (const id of [...ids].reverse()) if (map.getLayer(id)) map.removeLayer(id); for (const id of ['commute-highlight', 'commute-route']) if (map.getSource(id)) map.removeSource(id); destroyed = true; },
+    fit({ bounds, duration = 500 }) { if (!destroyed) { endWalk(); map.stop(); map.fitBounds(bounds, { padding: typeof padding === 'function' ? padding() : padding, maxZoom: 16.5, pitch: 35, duration: reducedMotion() ? 0 : Math.min(duration, 650) }); } },
+    stop() { if (!destroyed) { walking?.pause(); map.stop(); } },
+    destroy() { endWalk({ restore: false }); map.stop(); map.off('style.load', onStyleLoad); for (const id of [...ids].reverse()) if (map.getLayer(id)) map.removeLayer(id); for (const id of ['commute-highlight', 'commute-route']) if (map.getSource(id)) map.removeSource(id); destroyed = true; },
   };
 }
