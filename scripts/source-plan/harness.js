@@ -1,0 +1,12 @@
+import '../../src/ui/tokens.css';
+import '../../src/ui/components.css';
+import { mountSourcePlan } from '../../src/source-plan/index.js';
+const viewer = mountSourcePlan(document.querySelector('#viewer'));
+let context = {sourceUrl:'https://www.relatedrentals.com/sites/default/files/2021-04/MiMA_H_39-50.pdf',title:'MiMA 48H'};
+const open = (sourceUrl,title) => { context={sourceUrl,title}; void viewer.update(context); };
+document.querySelector('#mima').onclick=()=>open('https://www.relatedrentals.com/sites/default/files/2021-04/MiMA_H_39-50.pdf','MiMA 48H');
+document.querySelector('#charles').onclick=()=>open('https://silvermanbuilding.com/wp-content/uploads/CC_1Bed_45Line.pdf','Charles & Co');
+document.querySelector('#error').onclick=()=>open('https://www.relatedrentals.com/not-approved.pdf','Unavailable');
+document.querySelector('#pause').onclick=()=>viewer.setActive(false);
+document.querySelector('#resume').onclick=()=>void viewer.update(context);
+void viewer.update(context);

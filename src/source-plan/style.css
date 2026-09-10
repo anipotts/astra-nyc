@@ -1,0 +1,9 @@
+.source-plan-viewer { display:flex; flex-direction:column; min-width:0; width:100%; height:100%; min-height:240px; gap:var(--ui-space-2,8px); color:var(--ui-color-text,#18231f); font-size:var(--ui-text-sm,12px); }
+.source-plan-viewer .sp-toolbar { display:flex; flex-wrap:wrap; align-items:center; gap:var(--ui-space-2,8px); }
+.source-plan-viewer .sp-toolbar a { color:var(--ui-color-accent,#204d3d); margin-right:auto; }
+.source-plan-viewer .sp-toolbar button { min-height:var(--ui-control-compact,30px); padding:4px 8px; }
+.source-plan-viewer .sp-scroll { flex:1; min-height:160px; overflow:auto; background:white; border:1px solid var(--ui-color-border,#dce2df); }
+.source-plan-viewer .sp-scroll canvas { display:block; max-width:none; margin:0 auto; }
+.source-plan-viewer canvas[hidden] { display:none; }
+.source-plan-viewer .sp-status { margin:0; font-size:var(--ui-text-sm,12px); }
+.source-plan-viewer .sp-provenance { color:var(--ui-color-muted,#59665e); overflow-wrap:anywhere; }
