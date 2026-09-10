@@ -57,7 +57,13 @@ export function mountWalkingControls(container, routeLayer) {
       container.closest?.('.commute-view')?.scrollTo?.({ top: 0, behavior: 'instant' });
     } catch (error) { $('.cv-walk-unavailable').hidden = false; $('.cv-walk-unavailable').textContent = error.message; }
   };
-  $('.cv-walk-exit').onclick = () => { routeLayer.endWalk?.(); exited(); $('.cv-walk-start').focus(); };
+  const exitWalk = () => { routeLayer.endWalk?.(); exited(); $('.cv-walk-start').focus(); };
+  $('.cv-walk-exit').onclick = exitWalk;
+  // Scope this shortcut to walking controls; destination editing keeps its own keys.
+  $('.cv-walk-controls').onkeydown = event => {
+    if (!active || event.key !== 'Escape' || event.isComposing || event.defaultPrevented) return;
+    event.preventDefault(); event.stopPropagation(); exitWalk();
+  };
   $('.cv-walk-seek').oninput = () => routeLayer.seekWalk?.(Number($('.cv-walk-seek').value) / 1000);
   for (const button of container.querySelectorAll('[data-walk-action]')) button.onclick = () => routeLayer.walkAction?.(button.dataset.walkAction);
   return {
