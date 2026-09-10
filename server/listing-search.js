@@ -1,14 +1,9 @@
 import { createHash } from "node:crypto";
+import {
+  SOURCE_DOMAINS as DOMAINS,
+  normalizeSourceUrl as safeUrl,
+} from "../src/source-policy.js";
 
-const DOMAINS = [
-  "streeteasy.com",
-  "zillow.com",
-  "realtor.com",
-  "apartments.com",
-  "urby.com",
-  "apartmentfinder.com",
-  "redfin.com",
-];
 const NOTES = [
   "Possible address match; confirm details on the original listing.",
   "Building page; choose a unit and confirm details with the source.",
@@ -28,25 +23,6 @@ const shortText = (value, max) =>
   !/[\x00-\x1f\x7f]/.test(value);
 const regionalAddress =
   /\b(?:(?:new york(?: city)?|nyc|manhattan|brooklyn|queens|bronx|staten island),?\s+(?:NY|New York)|jersey city,?\s+(?:NJ|New Jersey))(?:\s+\d{5}(?:-\d{4})?)?\s*$/i;
-
-function safeUrl(value) {
-  if (typeof value !== "string" || value.length > 1200 || /[\s\\]/.test(value))
-    throw new Error("Invalid source URL.");
-  const url = new URL(value);
-  if (
-    url.protocol !== "https:" ||
-    url.username ||
-    url.password ||
-    url.port ||
-    !DOMAINS.some(
-      (domain) =>
-        url.hostname === domain || url.hostname.endsWith("." + domain),
-    )
-  )
-    throw new Error("Unsupported source URL.");
-  url.hash = "";
-  return url.href;
-}
 
 const candidateSchema = {
   type: "object",

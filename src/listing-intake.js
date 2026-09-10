@@ -1,5 +1,7 @@
+import { normalizeSourceUrl } from "./source-policy.js";
 import { listings, identifyListing } from "./listings.js";
 const aliases = {
+  charles345: "charles co 345 272 grove street jersey city new jersey",
   wall2308: "95 wall street 2308 financial district manhattan new york",
   zephyr501: "zephyr lofts 501 689 marin boulevard jersey city new jersey",
   urby409: "journal square urby 409 532 summit avenue jersey city new jersey",
@@ -27,30 +29,8 @@ export function findKnownListings(query) {
     ),
   );
 }
-const allowed = [
-  "streeteasy.com",
-  "zillow.com",
-  "realtor.com",
-  "apartments.com",
-  "urby.com",
-  "apartmentfinder.com",
-  "redfin.com",
-];
 export function safeListingUrl(value) {
-  const url = new URL(value);
-  if (
-    url.protocol !== "https:" ||
-    url.username ||
-    url.password ||
-    url.port ||
-    !allowed.some(
-      (host) => url.hostname === host || url.hostname.endsWith("." + host),
-    )
-  )
-    throw new Error(
-      "Use a public StreetEasy, Zillow, Realtor.com, Apartments.com, Urby, Apartment Finder or Redfin listing link. Other sites are not supported in this experiment.",
-    );
-  return url.href;
+  return normalizeSourceUrl(value);
 }
 export function candidateListing(candidate, checkedAt) {
   if (

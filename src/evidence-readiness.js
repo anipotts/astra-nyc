@@ -3,8 +3,10 @@
 export function evidenceCapabilities(sources = []) {
   const exact = sources.filter((s) => s.scope === "exact_unit");
   const photos = exact.filter((s) => s.kind === "photos");
-  const plans = exact.filter(
-    (s) => s.kind === "floor_plan" || s.kind === "dimensions",
+  const plans = sources.filter(
+    (s) =>
+      ["exact_unit", "unit_group"].includes(s.scope) &&
+      ["floor_plan", "dimensions"].includes(s.kind),
   );
   return [
     {
@@ -27,7 +29,7 @@ export function evidenceCapabilities(sources = []) {
     },
     {
       id: "show_floor_plan",
-      label: "Exact-unit plan",
+      label: "Unit or mapped-type plan",
       status: plans.length ? "partial" : "missing",
       sources: plans.map((s) => s.url),
       requirement: plans.length

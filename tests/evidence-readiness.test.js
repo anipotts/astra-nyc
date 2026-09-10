@@ -42,3 +42,21 @@ test("a cited dimensioned plan is still a lead until independent inspection acce
 test("empty report claims no source or rendering capability", () => {
   assert.ok(evidenceCapabilities([]).every((c) => c.status === "missing"));
 });
+
+test("mapped type plans remain source references and group photos are not exact-unit imagery", () => {
+  const s = states([
+    {
+      url: "https://example.test/type.pdf",
+      scope: "unit_group",
+      kind: "floor_plan",
+    },
+    {
+      url: "https://example.test/type.jpg",
+      scope: "unit_group",
+      kind: "photos",
+    },
+  ]);
+  assert.equal(s.show_floor_plan, "partial");
+  assert.equal(s.show_source_photos, "missing");
+  assert.equal(s.render_unit, "missing");
+});

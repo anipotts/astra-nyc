@@ -1,8 +1,10 @@
 import { safeListingUrl } from "./listing-intake.js";
+import { inspectedRegionCapabilities } from "./inspected-plan.js";
 import { evidenceCapabilities } from "./evidence-readiness.js";
-export function setupEvidenceReview() {
+export function setupEvidenceReview({ inspectPlan } = {}) {
   const $ = (s) => document.querySelector(s);
   let listing = null;
+  let acceptedRegion = null;
   let generation = 0;
   let pending = null;
   const reports = new Map();
@@ -16,14 +18,22 @@ export function setupEvidenceReview() {
     summary.textContent = report.assessment;
     const qualification = document.createElement("p");
     qualification.className = "evidence-qualification";
-    qualification.textContent =
-      "Astra assessed text references. Source identity, image contents, plan scale and reuse permission still need verification. No interior has been generated.";
+    qualification.textContent = acceptedRegion
+      ? "Astra assessed text references. A separately inspected historical 2D region is available in Plans; this search did not generate it. Complete interior and source artwork reuse rights remain unresolved."
+      : "Astra assessed text references. Source identity, image contents, plan scale and reuse permission still need verification. No interior has been generated.";
     panel.append(title, summary, qualification);
     const capabilities = document.createElement("details");
     const capabilityTitle = document.createElement("summary");
     capabilityTitle.textContent = "What this supports";
     const capabilityList = document.createElement("ul");
-    for (const capability of evidenceCapabilities(report.sources)) {
+    const accepted = inspectedRegionCapabilities(acceptedRegion);
+    const capabilitiesForReport = [
+      ...evidenceCapabilities(report.sources).filter(
+        (c) => !accepted.some((a) => a.id === c.id),
+      ),
+      ...accepted,
+    ];
+    for (const capability of capabilitiesForReport) {
       const item = document.createElement("li");
       item.textContent = capability.label + ": " + capability.requirement;
       capabilityList.append(item);
@@ -54,6 +64,7 @@ export function setupEvidenceReview() {
     sourceDetails.append(sourceTitle);
     const scopes = {
       exact_unit: "Reported exact unit",
+      unit_group: "Mapped unit group / layout type",
       building: "Building-wide",
       other_unit: "Different unit",
       unclear: "Identity unclear",
@@ -81,6 +92,16 @@ export function setupEvidenceReview() {
         "",
       );
       article.append(link, metadata, note);
+      if (
+        inspectPlan &&
+        /\.(pdf|png|jpe?g)$/i.test(new URL(source.url).pathname)
+      ) {
+        const inspect = document.createElement("button");
+        inspect.type = "button";
+        inspect.textContent = "Inspect this plan →";
+        inspect.onclick = () => inspectPlan(source.url);
+        article.append(inspect);
+      }
       sourceDetails.append(article);
     }
     panel.append(sourceDetails);
@@ -88,7 +109,8 @@ export function setupEvidenceReview() {
     receipt.textContent = `${report.cached ? "Cached assessment" : "Astra assessment"} · ${new Date(report.observedAt).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })} · bounded source search`;
     panel.append(receipt);
   }
-  function reset(next) {
+  function reset(next, region = null) {
+    acceptedRegion = region;
     generation++;
     pending?.abort();
     pending = null;
@@ -139,8 +161,9 @@ export function setupEvidenceReview() {
       report.sources.forEach((source) => safeListingUrl(source.url));
       reports.set(selected.url, report);
       render(report);
-      $("#evidence-progress").textContent =
-        "Assessment ready. Interior remains unavailable.";
+      $("#evidence-progress").textContent = acceptedRegion
+        ? "Assessment ready. Inspected 2D region retained; complete interior unavailable."
+        : "Assessment ready. Interior remains unavailable.";
     } catch (error) {
       if (version === generation && error.name !== "AbortError")
         $("#evidence-progress").textContent = error.message;

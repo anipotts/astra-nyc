@@ -111,7 +111,8 @@ export function renderPlanSvg(layout, options = {}) {
     const selected = element.id === selectedId;
     const title = `${element.label || element.kind || element.id}: ${number(w)} × ${number(d)} m; ${element.evidence?.basis || layout.measurementStatus || "unknown"}; ${element.evidence?.source || "source not supplied"}`;
     const label =
-      category !== "structure" &&
+      (category !== "structure" ||
+        layout.representation === "inspected_2d_region") &&
       element.kind !== "rug" &&
       Math.min(w, d) >= 0.3
         ? text(
@@ -122,7 +123,7 @@ export function renderPlanSvg(layout, options = {}) {
           )
         : "";
     layers[category].push(
-      `<g data-object-id="${escape(element.id)}" role="button" tabindex="0" aria-label="${escape(title)}"><title>${escape(title)}</title><rect x="${number(x - (w * scale) / 2)}" y="${number(y - (d * scale) / 2)}" width="${number(w * scale)}" height="${number(d * scale)}" transform="rotate(${number(element.rotation)} ${number(x)} ${number(y)})" fill="${fill}" stroke="${selected ? "#146c4e" : "#707b71"}" stroke-width="${selected ? 3 : 1.3}"/>${label}</g>`,
+      `<g data-object-id="${escape(element.id)}" role="button" tabindex="0" aria-label="${escape(title)}"><title>${escape(title)}</title><rect x="${number(x - (w * scale) / 2)}" y="${number(y - (d * scale) / 2)}" width="${number(w * scale)}" height="${number(d * scale)}" transform="rotate(${number(element.rotation)} ${number(x)} ${number(y)})" fill="${fill}" ${layout.representation === "inspected_2d_region" ? 'stroke-dasharray="7 5"' : ""} stroke="${selected ? "#146c4e" : "#707b71"}" stroke-width="${selected ? 3 : 1.3}"/>${label}</g>`,
     );
     if (showDimensions && selected && category !== "structure")
       layers.dimensions.push(
@@ -218,7 +219,14 @@ export function renderPlanSvg(layout, options = {}) {
       : `Calculated bed clearance: ${measures.join(" · ") || "no bounded obstacle found"}`;
   }
   const footerLines = [
-    clearanceSummary,
+    ...(layout.representation === "inspected_2d_region"
+      ? [
+          layout.extent,
+          layout.qualification,
+          `Excluded: ${layout.exclusions.join("; ")}`,
+          "No wall, opening, ceiling or fit geometry established.",
+        ]
+      : [clearanceSummary]),
     "Geometric distances only. Verify real dimensions; this does not establish real-world fit.",
     ...(elements.some((e) => e.assetId)
       ? [
@@ -244,7 +252,7 @@ export function renderPlanSvg(layout, options = {}) {
     layers.annotations = [];
     viewBox = `${number(sx(-width / 2) - 70)} ${number(sy(-depth / 2) - 30)} ${number(width * scale + 100)} ${number(depth * scale + 105)}`;
   }
-  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${viewBox}" role="img" aria-labelledby="plan-title plan-description"><title id="plan-title">${escape(layout.label || "Home")} — generated planning document</title><desc id="plan-description">${escape(basisLabel(layout))}. Canonical layout in metres. Structure, fixed fixtures and visible movable furniture. Source and revision details included.</desc><style>${rules}</style><rect width="100%" height="100%" fill="white"/>${Object.entries(
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${viewBox}" role="img" aria-labelledby="plan-title plan-description"><title id="plan-title">${escape(layout.label || "Home")} — generated planning document</title><desc id="plan-description">${escape(basisLabel(layout))}. ${layout.representation === "inspected_2d_region" ? "Limited nominal planar region; unknown architecture excluded." : "Canonical layout in metres. Structure, fixed fixtures and visible movable furniture."} Source and revision details included.</desc><style>${rules}</style><rect width="100%" height="100%" fill="white"/>${Object.entries(
     layers,
   )
     .map(([id, items]) => `<g id="${id}">${items.join("")}</g>`)

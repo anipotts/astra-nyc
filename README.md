@@ -21,9 +21,9 @@ npm run build
 
 ## What works
 
-- Start with address/building search, with a secondary listing-link field and no synthetic apartment loaded. Local address aliases and known URLs resolve to bundled source snapshots: 95 Wall Street #2308, archived Zephyr Lofts #501, or Journal Square Urby #409/#1504. Explicit online submissions use a bounded Astra web search for up to three source-linked candidates in NYC or Jersey City. Discovery candidates open evidence-only Overview records; known archived records retain their warning. The last selected known real example resumes on reload. Geographic address validation, floor-plan upload and full listing import are not implemented.
+- Start with address/building search, with a secondary listing-link field and no synthetic apartment loaded. Local address aliases and known URLs resolve to bundled source snapshots: 95 Wall Street #2308, archived Zephyr Lofts #501, or Journal Square Urby #409/#1504. Explicit online submissions use a bounded Astra web search for up to three source-linked candidates in NYC or Jersey City. Discovery candidates open evidence-only Overview records; known archived records retain their warning. The last selected known real example resumes on reload. Geographic address validation, floor-plan upload and full listing-page import are not implemented. A source-seeded Charles & Co #345 record can also be found by address.
 - Use a compact, full-viewport interface with one mode selector. The document does not scroll; places and accuracy details can be collapsed.
-- Review dated source facts and unknowns. Real listings are evidence only: no dimensional interior or fit result is generated from reported square footage. Linked Urby plan references have not established usable scale or authorization for reproduction.
+- Review dated source facts and unknowns. No dimensional interior or fit result is generated from reported square footage. A separately inspected nominal bedroom region is available for Charles & Co, with the unknown closet/entry, openings, ceiling and remaining apartment excluded. Linked Urby plan references have not established usable scale or authorization for reproduction.
 - Assess interior evidence from the selected source. Astra returns dated references, proposed exact-unit/building/other-unit classifications, subject levels, conflicts and gaps. The report separates available references from unverified geometry. It does not generate an interior.
 - The real 95 Wall neighborhood map remains available with attribution and an approximate pin. Other geographic adapters remain unimplemented.
 
@@ -53,11 +53,43 @@ Live search and a cached browser replay were verified during the event; this is 
 
 The separate evidence endpoint accepts a selected address and source page, with two provider attempts per server start, thirty-minute result caching/coalescing, a 45-second timeout, up to three web-search tool calls and 3,000 output tokens. Each returned source URL must appear in actual tool sources or citations. Hierarchy (neighborhood/site/building/shared space/floor/unit/room/object) is separate from whether a source matches the exact unit. Source publication labels are model-extracted text; collection time is recorded separately. Source counts are not independent corroboration.
 
-A live report and cached browser replay were verified. The adapter examines search text and references, not original images or measured geometry. Application capability checks can identify available references and missing requirements; they cannot accept the model's claim as proof of scale, permission or rendering readiness. An inspected, accepted-plan/scan adapter remains unimplemented. A positive plan-derived geometry case is still required before claiming the general reconstruction path works. Completed reports remain visible after failed refreshes; timeout recovery of partial provider findings and durable background jobs are not implemented.
+A live report and cached browser replay were verified. The adapter examines search text and references, not original images or measured geometry. Application capability checks can identify available references and missing requirements; they cannot accept the model's claim as proof of scale, permission or rendering readiness. A separate trusted inspected-region adapter now accepts reviewed identity, printed measurements, extent and exclusions into canonical 2D. The bundled Charles & Co region is developer-reviewed source data, not autonomous reconstruction; the dimension-to-region correspondence remains a qualified interpretation. Completed reports remain visible after failed refreshes; timeout recovery of partial provider findings and durable background jobs are not implemented.
+
+## Direct plan inspection and supported 2D
+
+Open **Inspect a published plan** from a selected home and supply a direct PDF, PNG or JPEG link from a supported publisher. The local service retrieves at most 4 MB, checks every redirect (maximum two), validates file type/signature, then sends the media to the existing Astra connection. No media is written into the repository or returned to the client. Original artwork stays linked at its source; redistribution/derivative rights remain unresolved.
+
+The endpoint makes at most two provider attempts per server session, with no automatic retries, a 20-second source-fetch timeout, 45-second provider timeout and 2,500 output tokens. Equivalent requests coalesce and replay for 30 minutes. Receipts separate original acquisition/provider stages, token caching and current-request local replay. Observations identify the requested unit versus a mapped unit group, readable printed dimensions, irregular boundaries, conflicts and missing evidence. They do not become accepted geometry automatically.
+
+Live source-seeded inspection of Charles & Co and MiMA PDFs recovered the printed dimension pairs and unit groups, while identifying irregular boundaries and absent visible dates. This demonstrates media inspection, not autonomous address discovery, precise boundary extraction or a full interior reconstruction. Accepted geometry still requires independently reviewed correspondence between dimensions and boundaries. No source-derived ceiling heights or appearance textures are invented.
+
+Plans can render/export a separately reviewed nominal Charles & Co main-bedroom region through the general acceptance adapter. The rectangular region is a developer-reviewed interpretation of the printed size and visible proportions; source dimension endpoints are not explicitly marked. It is not an unobstructed clear-floor rectangle or current-condition certification. Closets, entry recess, wall/opening geometry, fixtures and ceiling height remain absent. It cannot unlock Walk, furniture placement or clearance. The 2015 date comes from embedded artwork metadata, not a visibly printed date. Original plan reuse rights remain unresolved.
+
+## Bounded evaluation
+
+A dedicated local evaluation process shares one ceiling of **eight actual provider attempts across all stages**, including failed requests. UI reloads do not reset its budget. Do not restart it to reset the budget. Supply the existing ignored project env file through Node; do not copy credentials into another checkout:
+
+```sh
+node --env-file=/path/to/authorized/project/.env.local scripts/evaluation-server.mjs
+```
+
+Open http://127.0.0.1:5175. Read-only `/api/evaluation/status` reports attempts remaining without credentials. The normal local preview still uses port 5173 (or `npm run dev -- --port 5174` for an isolated checkout). A static build does not host the API.
+
+Run a frozen, externally stored suite with private output:
+
+```sh
+node scripts/evaluate-evidence.mjs --suite /path/to/suite.json --output /tmp/evidence-run.json --base-url http://127.0.0.1:5175 --max-calls 4
+```
+
+Use `--holdouts` only after the first implementation pass. The harness distinguishes source-policy blocks, HTTP failures, source reports, local replay and untested geometry; it never scores `needs_review` alone as success. The first eight-case baseline produced two source reports, two failed requests and four source-policy blocks. The two direct media inspections are separate runs. These small counts do not establish market coverage, production latency or complete cost (failed source searches lack usage receipts in that baseline).
 
 ## Next integration, not implemented
 
-Prioritize a separate inspected-plan adapter that accepts source identity, use permissions and verified scale, produces canonical supported geometry, and passes a genuine positive rendering case. Preserve unknown portions and the unit-to-building relationship as unknown where unsupported. Evaluate multiple evidence-completeness cases with one code path; no property-specific reconstruction rules.
+Runtime inspection-to-reviewed-boundary extraction remains incomplete: printed room extents are not an automatic walkable polygon. Improve source coverage and failure receipts before further live evaluation. Preserve unknown portions and unit-to-building placement. No property-specific reconstruction rules.
+
+
+
+
 
 
 Furniture evidence lookup should accept a photo, link, or description, use visual reasoning and bounded web search to find likely product variants and original specifications, and ask for confirmation when identity is ambiguous. No measurement form is required for previews. Automatic product search, matching, dimension recovery, and Astra manipulation of personal objects are not implemented. Single-image appearance alone does not establish real scale. Cache confirmed evidence per object; movement stays local.

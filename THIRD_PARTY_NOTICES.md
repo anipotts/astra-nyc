@@ -4555,3 +4555,9 @@ Repository: https://github.com/sveltejs/zimmerframe
 > LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 > OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 > SOFTWARE.
+
+## Inspected source facts added during the event
+
+Charles & Co Type7 public plan: https://silvermanbuilding.com/wp-content/uploads/CC_1Bed_45Line.pdf . The app stores a small factual transcription of nominal room dimensions and unit mapping with a qualified developer-reviewed region interpretation. Original PDF/artwork is not redistributed. Embedded artwork metadata names a2015architect date; the marketing sheet's publication date is not visually established. Source artwork reproduction/derivative rights remain unresolved. Live plan inspection can retrieve public publisher PDFs/images transiently and send them to the configured OpenAI service at explicit submission; it does not grant rights to redistribute those materials.
+
+MiMA public plan used for private runtime verification: https://www.relatedrentals.com/sites/default/files/2021-04/MiMA_H_39-50.pdf . No plan artwork, textures, tour assets or source file is bundled. Printed dimensions are approximate, and a unit-group plan is not a current measured survey.

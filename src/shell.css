@@ -497,3 +497,30 @@ body.evidence-only .homes {
 .evidence-reference a {
   font-size: 13px;
 }
+
+#plan-inspection {
+  margin-top: 1rem;
+  border-top: 1px solid #dce2dc;
+  padding-top: 0.8rem;
+}
+#plan-inspection summary {
+  cursor: pointer;
+  font-weight: 600;
+}
+#plan-inspection-form {
+  display: grid;
+  gap: 0.5rem;
+}
+#plan-source-url {
+  min-width: 0;
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid #cbd3ca;
+  border-radius: 8px;
+  background: #fff;
+  color: #233d32;
+}
+#plan-inspection-report small {
+  display: block;
+  margin-top: 0.75rem;
+}

@@ -3,6 +3,54 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { Readable } from "node:stream";
 import { createListingEvidenceMiddleware } from "../server/listing-evidence.js";
+
+test("official plan citations preserve document identity without unlocking geometry", async () => {
+  for (const sourceUrl of [
+    "https://theonenj.com/pdf/1bdrm-h2-9.pdf",
+    "https://silvermanbuilding.com/wp-content/uploads/CC_1Bed_45Line.pdf",
+    "https://www.relatedrentals.com/sites/default/files/2021-04/MiMA_H_39-50.pdf",
+    "https://gothampoint.com/availability/?unit=South2409",
+  ]) {
+    const accepted = setup(async () =>
+      response({
+        sources: [sourceUrl],
+        data: report({
+          sources: [source({ url: sourceUrl, kind: "floor_plan" })],
+        }),
+      }),
+    );
+    const result = await invoke(accepted.middleware, {
+      body: input({ sourceUrl }),
+    });
+    assert.equal(result.status, 200);
+    assert.equal(result.body.sources[0].url, sourceUrl);
+    assert.equal(result.body.readiness, "needs_review");
+    assert.equal(
+      JSON.parse(JSON.parse(accepted.calls[0][1].body).input).sourceUrl,
+      sourceUrl,
+    );
+    const rejected = setup(async () =>
+      response({
+        sources: [sourceUrl + "#page=1"],
+        data: report({
+          sources: [
+            source({
+              url:
+                sourceUrl +
+                (sourceUrl.includes("?") ? "&" : "?") +
+                "unit=other",
+            }),
+          ],
+        }),
+      }),
+    );
+    assert.equal(
+      (await invoke(rejected.middleware, { body: input({ sourceUrl }) }))
+        .status,
+      502,
+    );
+  }
+});
 const url = "https://streeteasy.com/building/95-wall-street-new_york/2308";
 const input = (patch = {}) => ({
   address: "95 Wall Street #2308, New York, NY",
@@ -185,7 +233,7 @@ test("request preserves source unit path and returns needs_review with actual co
   assert.equal(sent.max_output_tokens, 3000);
   assert.equal(sent.tools[0].type, "web_search");
   assert.equal(sent.tools[0].search_context_size, "low");
-  assert.equal(sent.tools[0].filters.allowed_domains.length, 7);
+  assert.equal(sent.tools[0].filters.allowed_domains.length, 16);
   assert.deepEqual(sent.include, ["web_search_call.action.sources"]);
   assert.equal(sent.text.format.strict, true);
   assert.match(sent.instructions, /untrusted data/);
@@ -368,6 +416,132 @@ test("failed attempts are evicted, capped at two, and never leak provider errors
     json: async () => assert.fail("provider error body read"),
   }));
   assert.equal((await invoke(denied.middleware)).status, 502);
+});
+
+test("failed source validation retains safe provider usage without leaking source output", async () => {
+  for (const invalid of [
+    { data: report({ geometry: { private: "model-only-secret" } }) },
+    {
+      sources: [url + "/unrelated"],
+      data: report({ assessment: "model-only-secret" }),
+    },
+  ]) {
+    const { middleware, calls } = setup(async () => ({
+      ...response({
+        ...invalid,
+        usage: {
+          input_tokens: 13000,
+          output_tokens: 540,
+          input_tokens_details: { cached_tokens: 4096 },
+        },
+      }),
+      headers: new Headers({ "x-request-id": "req_test_validation" }),
+    }));
+    const result = await invoke(middleware);
+    assert.equal(result.status, 502);
+    assert.equal(result.body.stage, "invalid_source_report");
+    assert.equal(result.body.httpStatus, 200);
+    assert.equal(result.body.providerStatus, "completed");
+    assert.equal(result.body.requestId, "resp_fake_evidence");
+    assert.equal(result.body.providerRequestId, "req_test_validation");
+    assert.equal(result.body.model, "gpt-6-astra");
+    assert.deepEqual(result.body.usage, {
+      inputTokens: 13000,
+      outputTokens: 540,
+      cachedTokens: 4096,
+    });
+    assert.equal(result.body.toolCalls, 1);
+    assert.equal(result.body.cached, false);
+    assert.equal(result.body.sources, undefined);
+    assert.equal(result.body.assessment, undefined);
+    assert.doesNotMatch(
+      JSON.stringify(result),
+      /model-only-secret|fake-private-key|streeteasy/,
+    );
+    await invoke(middleware);
+    assert.equal(calls.length, 2);
+    assert.equal((await invoke(middleware)).status, 429);
+  }
+});
+
+test("malformed metadata is sanitized while completion and schema failures remain distinct", async () => {
+  const bad = setup(async () => ({
+    ...response({
+      status: "private provider status",
+      id: "resp_invalid\nprivate-id",
+      model: "gpt-6-astra private-model",
+      usage: {
+        input_tokens: -1,
+        output_tokens: "500",
+        input_tokens_details: { cached_tokens: Number.MAX_SAFE_INTEGER + 1 },
+      },
+      output: { secret: "private-output" },
+    }),
+    headers: { get: () => "private header value" },
+  }));
+  const result = await invoke(bad.middleware);
+  assert.equal(result.status, 502);
+  assert.equal(result.body.stage, "invalid_source_report");
+  assert.equal(result.body.providerStatus, "unknown");
+  assert.equal(result.body.requestId, null);
+  assert.equal(result.body.providerRequestId, null);
+  assert.equal(result.body.model, null);
+  assert.equal(result.body.toolCalls, null);
+  assert.deepEqual(result.body.usage, {
+    inputTokens: null,
+    outputTokens: null,
+    cachedTokens: null,
+  });
+  assert.doesNotMatch(JSON.stringify(result), /private/);
+  const invalidReceipt = setup(async () => response({ id: "invalid-id" }));
+  const receipt = await invoke(invalidReceipt.middleware);
+  assert.equal(receipt.body.stage, "invalid_completion_receipt");
+  assert.equal(receipt.body.requestId, null);
+  assert.equal(receipt.body.usage.inputTokens, 150);
+  assert.equal(receipt.body.toolCalls, 1);
+});
+
+test("HTTP, unreadable response, and network failures retain only known receipt fields", async () => {
+  const denied = setup(async () => ({
+    ok: false,
+    status: 429,
+    headers: new Headers({ "x-request-id": "req_test_http" }),
+    json: async () => assert.fail("provider error body must not be read"),
+  }));
+  const http = await invoke(denied.middleware);
+  assert.equal(http.status, 502);
+  assert.equal(http.body.stage, "provider_http_error");
+  assert.equal(http.body.httpStatus, 429);
+  assert.equal(http.body.providerRequestId, "req_test_http");
+  assert.equal(http.body.requestId, null);
+  assert.equal(http.body.usage, null);
+  assert.equal(http.body.toolCalls, null);
+  assert.equal(http.body.providerStatus, "unknown");
+  const unreadable = setup(async () => ({
+    ok: true,
+    status: 200,
+    headers: new Headers({ "x-request-id": "req_test_bad_json" }),
+    json: async () => {
+      throw new Error("private malformed body");
+    },
+  }));
+  const malformed = await invoke(unreadable.middleware);
+  assert.equal(malformed.body.stage, "invalid_provider_payload");
+  assert.equal(malformed.body.providerRequestId, "req_test_bad_json");
+  assert.equal(malformed.body.usage, null);
+  assert.doesNotMatch(JSON.stringify(malformed), /private malformed body/);
+  const disconnected = setup(async () => {
+    throw new Error("private network failure");
+  });
+  const network = await invoke(disconnected.middleware);
+  assert.equal(network.body.stage, "provider_network_error");
+  assert.equal(network.body.providerStatus, "unknown");
+  assert.equal(network.body.httpStatus, null);
+  assert.equal(network.body.requestId, null);
+  assert.equal(network.body.providerRequestId, null);
+  assert.equal(network.body.usage, null);
+  assert.equal(network.body.toolCalls, null);
+  assert.doesNotMatch(JSON.stringify(network), /private network failure/);
 });
 
 test("hierarchy levels are independent from source scope and new supported domains remain source-backed", async () => {

@@ -298,6 +298,36 @@
             furnishing status is unknown; photo staging does not establish what
             is included.
           </p>
+          <section id="inspected-region" hidden aria-label="Inspected region">
+            <h3>Inspected 2D region available</h3>
+            <p id="inspected-region-note"></p>
+            <button id="open-inspected-region" type="button">
+              Open bedroom region in Plans
+            </button>
+          </section>
+          <details id="plan-inspection">
+            <summary>Inspect a published plan</summary>
+            <p>
+              Use a direct PDF or image link from a supported publisher. The
+              source is sent to OpenAI when you submit.
+            </p>
+            <form id="plan-inspection-form">
+              <label for="plan-source-url">Plan PDF or image URL</label>
+              <input
+                id="plan-source-url"
+                type="url"
+                required
+                placeholder="https://…/floor-plan.pdf"
+              />
+              <button id="inspect-plan" type="submit">Inspect plan →</button>
+            </form>
+            <p
+              id="plan-inspection-progress"
+              role="status"
+              aria-live="polite"
+            ></p>
+            <section id="plan-inspection-report" hidden></section>
+          </details>
           <section
             id="reconstruction-evidence"
             aria-label="Interior evidence review"

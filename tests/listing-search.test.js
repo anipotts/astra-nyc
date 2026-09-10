@@ -3,6 +3,31 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { Readable } from "node:stream";
 import { createListingSearchMiddleware } from "../server/listing-search.js";
+
+test("official publisher candidates still require the exact cited path and query", async () => {
+  for (const url of [
+    "https://theonenj.com/pdf/1bdrm-h2-9.pdf",
+    "https://silvermanbuilding.com/wp-content/uploads/CC_1Bed_45Line.pdf",
+    "https://www.relatedrentals.com/sites/default/files/2021-04/MiMA_H_39-50.pdf",
+    "https://gothampoint.com/availability/?unit=South2409",
+  ]) {
+    const accepted = setup(async () =>
+      response({ candidates: [candidate({ url })], sources: [url] }),
+    );
+    const result = await invoke(accepted.middleware);
+    assert.equal(result.status, 200);
+    assert.equal(result.body.candidates[0].url, url);
+    for (const cited of [
+      url + "/other",
+      url + (url.includes("?") ? "&" : "?") + "unit=other",
+    ]) {
+      const rejected = setup(async () =>
+        response({ candidates: [candidate({ url })], sources: [cited] }),
+      );
+      assert.equal((await invoke(rejected.middleware)).status, 502);
+    }
+  }
+});
 const candidate = (patch = {}) => ({
   name: "95 Wall Street",
   address: "95 Wall Street, New York, NY 10005",
@@ -179,6 +204,15 @@ test("search request uses documented bounded controls and returns discovery-only
     "urby.com",
     "apartmentfinder.com",
     "redfin.com",
+    "theonenj.com",
+    "silvermanbuilding.com",
+    "relatedrentals.com",
+    "gothampoint.com",
+    "eosnomad.com",
+    "jasperhp.com",
+    "live65newkirk.com",
+    "rnhousing.org",
+    "castironlofts.com",
   ]);
   assert.deepEqual(sent.include, ["web_search_call.action.sources"]);
   assert.equal(sent.text.format.strict, true);

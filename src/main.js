@@ -15,6 +15,9 @@ import {
 } from "./plan-storage.js";
 import { listings } from "./listings.js";
 import { setupListingIntake } from "./listing-intake.js";
+import { acceptInspectedRegion } from "./inspected-plan.js";
+import { inspectedPlans } from "./inspected-plan-records.js";
+import { setupPlanInspection } from "./plan-inspection.js";
 import { setupEvidenceReview } from "./listing-evidence.js";
 const $ = (s) => document.querySelector(s);
 const container = $("#scene");
@@ -30,6 +33,7 @@ const state = {
   playing: false,
 };
 let currentLayout = null;
+let acceptedRegion = null;
 let entryKind = "empty";
 let plansOpen = false;
 let planZoom = 1;
@@ -239,7 +243,7 @@ function buildHome() {
   house.userData.bedFootprint = null;
   house.visible = entryKind === "demo";
   if (entryKind !== "demo") {
-    currentLayout = null;
+    currentLayout = acceptedRegion;
     return;
   }
   currentLayout = createLayout(state.home, state);
@@ -438,7 +442,9 @@ function setMode(mode) {
       );
     const unavailable =
       mode === "walk"
-        ? "Walk needs a matching interior plan with usable scale. Astra has not established one for this listing."
+        ? acceptedRegion
+          ? "A limited 2D region is available in Plans. Walk needs complete boundaries, openings and ceiling height; those remain unknown."
+          : "Walk needs a matching interior plan with usable scale. Astra has not established one for this listing."
         : mode === "commute"
           ? "Commute needs confirmed endpoints and a connected routing source. No route or travel time has been generated."
           : mode === "nearby" && selectedListing.id !== "wall2308"
@@ -579,7 +585,9 @@ function refresh() {
     const modelStatus = $("#" + id);
     if (modelStatus)
       modelStatus.textContent = selectedListing
-        ? "Evidence only"
+        ? acceptedRegion
+          ? "Partial 2D region"
+          : "Evidence only"
         : "Illustrative model";
   }
   light();
@@ -594,13 +602,24 @@ function refresh() {
   renderPlans();
   renderObjectControls();
 }
-const evidenceReview = setupEvidenceReview();
+const evidenceReview = setupEvidenceReview({
+  inspectPlan: (url) => planInspection.inspect(url),
+});
+const planInspection = setupPlanInspection();
 let selectedListing = null;
 const syntheticPotential = { ...homes.potential };
 function showListing(listing) {
   entryKind = "listing";
   selectedListing = listing;
-  evidenceReview.reset(listing);
+  acceptedRegion = null;
+  for (const record of inspectedPlans) {
+    try {
+      acceptedRegion = acceptInspectedRegion(record, listing.identity);
+      break;
+    } catch {}
+  }
+  evidenceReview.reset(listing, acceptedRegion);
+  planInspection.reset(listing);
   try {
     localStorage.setItem("elsewhere-last-real-home", listing.id);
   } catch {}
@@ -629,17 +648,30 @@ function showListing(listing) {
   $("#overview-freshness").textContent = $("#listing-checked").textContent;
   $("#listing-preview").hidden = true;
   $("#listing-map").hidden = listing.id !== "wall2308";
-  $("#listing-status").textContent =
-    "Evidence only · a usable dimensioned plan is needed.";
+  $("#listing-status").textContent = acceptedRegion
+    ? "Inspected nominal 2D region available in Plans."
+    : "Evidence only · a usable dimensioned plan is needed.";
   $("#evidence-title").textContent = listing.name;
   $("#evidence-facts").textContent =
-    listing.facts + (listing.archived ? " · Archived" : "");
+    listing.facts +
+    (listing.historical
+      ? " · Historical source"
+      : listing.archived
+        ? " · Archived"
+        : "");
   $("#evidence-reason").textContent =
     listing.readinessReason ||
     "A matching, authorized plan with usable scale is needed before creating a dimensional interior. Reported square footage is not enough.";
   $("#evidence-source").href = listing.url;
   $("#evidence-plan-source").hidden = !listing.planUrl;
   if (listing.planUrl) $("#evidence-plan-source").href = listing.planUrl;
+  $("#inspected-region").hidden = !acceptedRegion;
+  $("#inspected-region-note").textContent = acceptedRegion
+    ? `${acceptedRegion.extent} ${acceptedRegion.qualification}`
+    : "";
+  $("#evidence-stage .evidence-note").textContent = acceptedRegion
+    ? "A source-seeded, visually inspected 2D region is available. Furniture fit and current conditions are not established. Original plan artwork remains at its source."
+    : "No room dimensions or furniture fit have been established. Listing furnishing status is unknown; photo staging does not establish what is included.";
   document.querySelector(".evidence").open = false;
   refresh();
   setMode("overview");
@@ -694,6 +726,7 @@ for (const b of document.querySelectorAll("[data-mode]"))
 for (const input of document.querySelectorAll("[name=home]"))
   input.addEventListener("change", () => {
     selectedListing = null;
+    acceptedRegion = null;
     entryKind = "demo";
     $("#listing-evidence").hidden = true;
     state.home = input.value;
@@ -1071,7 +1104,7 @@ function renderPlans() {
   $("#plans-panel").hidden = !plansOpen;
   $("#plan-name").textContent =
     selectedListing?.name || currentLayout?.label || "Plans";
-  const enabled = Boolean(currentLayout) && !selectedListing;
+  const enabled = Boolean(currentLayout);
   for (const id of [
     "plan-svg",
     "plan-print",
@@ -1081,16 +1114,26 @@ function renderPlans() {
     "plan-dimensions",
   ])
     $("#" + id).disabled = !enabled;
-  $("#plan-undo").disabled = !enabled || histories[state.home].length < 2;
-  for (const button of document.querySelectorAll("[data-document]"))
+  $("#plan-undo").disabled =
+    !enabled || Boolean(selectedListing) || histories[state.home].length < 2;
+  $("#plan-persistence").textContent = acceptedRegion
+    ? "Bundled inspected source record · original artwork linked only · reuse rights unresolved"
+    : "Saved on this browser only";
+  for (const button of document.querySelectorAll("[data-document]")) {
+    button.disabled =
+      Boolean(acceptedRegion) &&
+      ["arrangement", "offered"].includes(button.dataset.document);
+    if (button.dataset.document === "empty")
+      button.textContent = acceptedRegion ? "Supported region" : "Empty layout";
     button.setAttribute(
       "aria-pressed",
       String(
         enabled &&
           button.dataset.document ===
-            (state.unfurnished ? "empty" : "arrangement"),
+            (acceptedRegion || state.unfurnished ? "empty" : "arrangement"),
       ),
     );
+  }
   if (!enabled) {
     $("#plan-drawing").replaceChildren();
     $("#plan-notice").textContent =
@@ -1100,12 +1143,13 @@ function renderPlans() {
     $("#plan-revision").textContent = "Evidence only";
     return;
   }
-  $("#plan-notice").textContent =
-    "Synthetic demonstration · 2D and 3D share this layout. Empty hides movable furniture; fixed fixtures remain.";
+  $("#plan-notice").textContent = acceptedRegion
+    ? `${acceptedRegion.extent} Nominal correspondence to printed sizes; dimension endpoints are unmarked. Unknown architecture is excluded. Current clear-floor geometry is not established.`
+    : "Synthetic demonstration · 2D and 3D share this layout. Empty hides movable furniture; fixed fixtures remain.";
   $("#plan-drawing").innerHTML = renderPlanSvg(currentLayout, {
     selectedId: selectedPlanObject,
     showDimensions: $("#plan-dimensions").checked,
-    showClearance: true,
+    showClearance: !acceptedRegion,
     compact: true,
   });
   const svg = $("#plan-drawing svg");
@@ -1113,8 +1157,9 @@ function renderPlans() {
     svg.style.width = `${planZoom * 100}%`;
     svg.style.height = `${planZoom * 100}%`;
   }
-  $("#plan-revision").textContent =
-    "Revision " + currentLayout.revision.id.slice(0, 8);
+  $("#plan-revision").textContent = acceptedRegion
+    ? "Artwork metadata: " + (acceptedRegion.artworkDate || "date unknown")
+    : "Revision " + currentLayout.revision.id.slice(0, 8);
   const element = currentLayout.elements.find(
     (e) => e.id === selectedPlanObject && e.visible,
   );
@@ -1122,7 +1167,9 @@ function renderPlans() {
     ? `${element.label} · hypothetical preview ${element.width.toFixed(2)} × ${element.depth.toFixed(2)} m · actual dimensions unknown`
     : element
       ? `${element.label} · outer ${element.width.toFixed(2)} × ${element.depth.toFixed(2)} m · ${element.evidence.basis} · ${element.category === "fixtures" ? "Fixed fixture" : element.category}`
-      : "Select an object to inspect its model dimensions.";
+      : acceptedRegion
+        ? "Published nominal 2D dimensions. No ceiling height, walkable interior or fit claim."
+        : "Select an object to inspect its model dimensions.";
 }
 function setPlansOpen(open) {
   plansOpen = open;
@@ -1133,6 +1180,7 @@ function setPlansOpen(open) {
   if (open && !$("#plans-dialog").open) $("#plans-dialog").showModal();
   else if (!open && $("#plans-dialog").open) $("#plans-dialog").close();
 }
+$("#open-inspected-region").onclick = () => setPlansOpen(true);
 $("#plans-toggle").onclick = () => setPlansOpen(!plansOpen);
 $("#plans-close").onclick = () => setPlansOpen(false);
 $("#plans-dialog").addEventListener("cancel", (event) => {
@@ -1153,6 +1201,8 @@ $("#plans-dialog").addEventListener("click", (event) => {
 $("#add-listing").onclick = () => {
   entryKind = "empty";
   selectedListing = null;
+  acceptedRegion = null;
+  planInspection.reset(null);
   evidenceReview.reset(null);
   setPlansOpen(false);
   refresh();
@@ -1188,9 +1238,15 @@ $("#plan-drawing").onclick = (event) => {
 for (const button of document.querySelectorAll("[data-document]"))
   button.onclick = () => {
     const kind = button.dataset.document;
+    if (acceptedRegion && kind === "empty") {
+      renderPlans();
+      return;
+    }
     if (kind === "source") {
       $("#plan-notice").textContent = selectedListing?.planUrl
-        ? "Original plan reference is linked in the source evidence. Scale and permission for reuse remain unverified."
+        ? acceptedRegion
+          ? "Original plan artwork remains at its source. Published room dimensions were inspected; artwork reuse rights remain unresolved."
+          : "Original plan reference is linked in the source evidence. Scale and permission for reuse remain unverified."
         : "No source plan is available for this home. This demonstration was authored during the event.";
       return;
     }
@@ -1221,7 +1277,7 @@ $("#plan-undo").onclick = () => {
   persistPlans();
 };
 $("#plan-svg").onclick = () => {
-  if (!currentLayout || selectedListing) return;
+  if (!currentLayout) return;
   const file = new Blob([renderPlanSvg(currentLayout)], {
     type: "image/svg+xml",
   });
@@ -1233,7 +1289,7 @@ $("#plan-svg").onclick = () => {
   setTimeout(() => URL.revokeObjectURL(url), 1000);
 };
 $("#plan-print").onclick = () => {
-  if (!currentLayout || selectedListing) return;
+  if (!currentLayout) return;
   const popup = window.open("", "_blank");
   if (!popup) {
     $("#plan-notice").textContent = "Allow a print window, then try again.";

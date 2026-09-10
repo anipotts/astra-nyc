@@ -72,6 +72,30 @@ export const listings = [
       "Confirm drawing scale, room dimensions, permitted plan reuse, included furnishings, current availability and condition. The source terms restrict reuse; no plan image has been copied into this app.",
     scene: null,
   },
+  {
+    id: "charles345",
+    identity: {
+      building: "charles-272-grove",
+      unit: "345",
+      label: "Charles & Co #345",
+    },
+    url: "https://silvermanbuilding.com/wp-content/uploads/CC_1Bed_45Line.pdf",
+    planUrl:
+      "https://silvermanbuilding.com/wp-content/uploads/CC_1Bed_45Line.pdf",
+    name: "Charles & Co #345",
+    location: "272 Grove Street, Jersey City",
+    facts: "1 bedroom · 1 bathroom · published Type 7 plan",
+    price: "Rent not verified",
+    availability: "Current availability not verified",
+    checkedAt: "2026-09-10T17:13:27Z",
+    archived: false,
+    historical: true,
+    scene: null,
+    questions:
+      "Historical 2015 plan; current conditions, full geometry and source artwork reproduction rights remain unverified.",
+    readinessReason:
+      "Inspected main bedroom region available in Plans. Historical nominal dimensions; remaining apartment, openings and ceiling height stay unknown.",
+  },
 ];
 export function identifyListing(input) {
   let url;
