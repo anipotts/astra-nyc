@@ -7,6 +7,8 @@
     <title>Elsewhere</title>
     <link rel="stylesheet" href="/src/style.css" />
     <link rel="stylesheet" href="/src/shell.css" />
+    <link rel="stylesheet" href="/src/ui/tokens.css" />
+    <link rel="stylesheet" href="/src/ui/components.css" />
     <link rel="stylesheet" href="/src/desktop.css" />
     <link
       rel="icon"
@@ -79,7 +81,6 @@
           </button>
         </div>
         <div id="places-content">
-          <button id="add-listing" type="button">+ Add listing</button>
           <fieldset class="homes">
             <legend class="sr-only">Choose a home</legend>
             <label class="home"
@@ -114,9 +115,12 @@
           </section>
           <div class="listing-picker">
             <label for="listing-select">Browse listings</label>
-            <select id="listing-select" aria-label="Browse listings">
-              <option value="" disabled selected>Choose a place</option>
-            </select>
+            <div class="listing-picker-row">
+              <select id="listing-select" class="ui-field" aria-label="Browse listings">
+                <option value="" disabled selected>Choose a place</option>
+              </select>
+              <button id="add-listing" class="ui-button ui-button--quiet" type="button" aria-label="Add listing">Add</button>
+            </div>
           </div>
           <details class="evidence">
             <summary>
@@ -176,10 +180,12 @@
         </div>
         <section id="priorities-panel" aria-labelledby="priorities-title">
           <h2 id="priorities-title">Your priorities</h2>
-          <p>What matters nearby? Choose up to three.</p>
+          <p class="priority-hint">Choose up to three nearby priorities.</p>
           <div id="priority-choices" aria-label="Nearby priorities"></div>
-          <p id="priority-status" role="status"></p>
-          <small id="priority-storage">Saved in this browser.</small>
+          <div class="priority-feedback">
+            <span id="priority-status" role="status"></span>
+            <small id="priority-storage">Saved in this browser.</small>
+          </div>
         </section>
         <small id="collapsed-model-status">Illustrative model</small>
       </aside>
@@ -263,19 +269,20 @@
             >
           </div>
         </section>
-        <section id="commute-panel" hidden aria-label="Plan a regular journey">
+        <section id="commute-panel" class="ui-panel" hidden aria-label="Plan a regular journey">
           <h2>Your regular journey</h2>
-          <p>Start from this listing. No current home address is required.</p>
+          <p>Directions from this listing.</p>
           <form id="commute-form">
             <label for="journey-destination">Where do you go regularly?</label>
             <input
               id="journey-destination"
               required
               maxlength="180"
-              placeholder="Work, campus, a gym, or another address"
+              class="ui-field"
+              placeholder="Destination address or place"
             />
             <label for="journey-mode">Your usual mode</label>
-            <select id="journey-mode">
+            <select id="journey-mode" class="ui-field">
               <option value="walking">Walk</option>
               <option value="bicycling">Bike</option>
               <option value="transit">Transit</option>
@@ -294,7 +301,7 @@
             >Open route in Google Maps ↗</a
           >
         </section>
-        <section id="evidence-stage" hidden aria-label="Listing evidence only">
+        <section id="evidence-stage" class="ui-panel" hidden aria-label="Listing evidence only">
           <div class="summary-heading">
             <span id="summary-view-label">Your next place</span
             ><button id="change-listing" type="button">Change</button>
@@ -305,7 +312,7 @@
           <small id="overview-freshness"></small>
           <p id="view-unavailable" role="status" hidden></p>
           <p id="summary-next"></p>
-          <details id="source-details">
+          <details id="source-details" class="ui-disclosure">
             <summary>Sources &amp; details</summary>
             <details
               id="location-review"

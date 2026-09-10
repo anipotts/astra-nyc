@@ -24,14 +24,18 @@ export const listings = [
     url: "https://streeteasy.com/building/zephyr-lofts/501",
     name: "Zephyr Lofts #501",
     location: "689 Marin Boulevard, Jersey City",
-    facts: "2 beds · 2 baths · 1,434 ft²",
+    facts:
+      "Historical 2-bed listing · conflicting area and bath records",
     price: "$3,950 / month historical base rent",
-    availability: "Archived — no longer available since July 16, 2024.",
+    availability:
+      "2024 StreetEasy record archived July 16, 2024; ApartmentFinder also showed unavailable in the September 10, 2026 research. Current availability is unknown.",
     checkedAt: "2026-09-10T15:08:03Z",
     archived: true,
     questions:
-      "Current availability, price, layout, and condition are unknown. Use this archived listing to test evidence review; a unit-specific scene has not been built.",
+      "StreetEasy history reports 1,434 ft² / 2 baths in 2018 and 2024, versus 1,087 ft² / 1 bath in 2021. ApartmentFinder describes bedrooms on two levels and reports 18-foot ceilings. Confirm the current configuration, floor connections and measurements; these historical claims have not been reconciled.",
     scene: null,
+    readinessReason:
+      "No matching scaled plan was found in the September 10 research. The reported duplex arrangement and ceiling height do not establish complete geometry; do not combine conflicting historical dimensions into one layout.",
   },
   {
     id: "urby409",
@@ -107,7 +111,8 @@ export const listings = [
     url: "https://www.relatedrentals.com/apartment-rentals/new-york-city/midtown-manhattan/mima/studio-1-bath-31510",
     name: "MiMA #48H",
     location: "450 West 42nd Street, New York, NY 10036",
-    facts: "Unit 48H · published source reference",
+    facts:
+      "Alcove studio · 1 bath · H-line, floors 39–50",
     price: "Check source for current rent",
     availability:
       "Current availability not verified; confirm with the original source.",
@@ -117,11 +122,15 @@ export const listings = [
     dimensionalReadiness: "needs-evidence",
     furnishingStatus: "unknown",
     questions:
-      "Confirm current availability, the exact unit, plan dimensions and current condition. The building map is geographic context; a walkable interior is not established.",
+      "The official 48H page links the H-line plan for floors 39–50. The linked tour is titled Sample Alcove Studio and is representative, not an exact-unit record. Confirm the current unit condition, dimensions and source reuse terms.",
     readinessReason:
-      "Published listing or plan reference available. Room geometry and current conditions remain unverified; review the original source.",
+      "September 10 plan inspection recorded approximate living dimensions of 11′10″ × 15′ and alcove dimensions of 9′4″ × 11′5″. These printed labels are not calibrated coordinates or a measured survey; other dimensions and heights remain unknown.",
     planUrl:
       "https://www.relatedrentals.com/sites/default/files/2021-04/MiMA_H_39-50.pdf",
+    tourUrl:
+      "https://my.matterport.com/show/?brand=0&m=zppYDS4u2M8",
+    tourIdentity:
+      "representative_sample",
   },
   {
     id: "theone2h",
@@ -129,7 +138,8 @@ export const listings = [
     url: "https://theonenj.com/pdf/1bdrm-h2-9.pdf",
     name: "The One #2H",
     location: "110 First Street, Jersey City, NJ 07302",
-    facts: "Unit 2H · published source reference",
+    facts:
+      "1 bed · 1 bath · mapped H/J/L residence plan",
     price: "Check source for current rent",
     availability:
       "Current availability not verified; confirm with the original source.",
@@ -139,9 +149,9 @@ export const listings = [
     dimensionalReadiness: "needs-evidence",
     furnishingStatus: "unknown",
     questions:
-      "Confirm current availability, the exact unit, plan dimensions and current condition. The building map is geographic context; a walkable interior is not established.",
+      "The mapped PDF covers 2H–9H, 10J and 11L–33L. The same building’s generic A1 image has a different layout and must remain separate. Confirm which plan reflects 2H today and obtain any missing measurements.",
     readinessReason:
-      "Published listing or plan reference available. Room geometry and current conditions remain unverified; review the original source.",
+      "September 10 independent visual inspection confirmed printed bedroom dimensions of 12′11″ × 11′ and living/dining dimensions of 18′4″ × 13′4″ in the mapped PDF. The irregular outline still needs reviewed coordinate calibration; opening dimensions and ceiling heights remain unknown.",
     planUrl: "https://theonenj.com/pdf/1bdrm-h2-9.pdf",
   },
   {
@@ -150,7 +160,8 @@ export const listings = [
     url: "https://www.eosnomad.com/residences/studio/878484/",
     name: "EOS #24F",
     location: "100 West 31st Street, Manhattan, NY 10001",
-    facts: "Unit 24F · published source reference",
+    facts:
+      "Studio · 1 bath · representative marketing imagery",
     price: "Check source for current rent",
     availability:
       "Current availability not verified; confirm with the original source.",
@@ -160,9 +171,9 @@ export const listings = [
     dimensionalReadiness: "needs-evidence",
     furnishingStatus: "unknown",
     questions:
-      "Confirm current availability, the exact unit, plan dimensions and current condition. The building map is geographic context; a walkable interior is not established.",
+      "The official page warns that model or representative images may differ from 24F and states that listing republication requires prior written consent. Confirm exact-unit imagery, current condition and the applicable source-use terms.",
     readinessReason:
-      "Published listing or plan reference available. Room geometry and current conditions remain unverified; review the original source.",
+      "Floor-plan and 360-view labels were observed on September 10, but usable assets were not inspected. Acquisition and unit matching remain unresolved; this does not establish that no plan exists. Representative images do not establish unit geometry or textures.",
   },
   {
     id: "jasperw410",
@@ -170,7 +181,8 @@ export const listings = [
     url: "https://jasperhp.com/availability/",
     name: "Jasper #W410",
     location: "2-33 50th Avenue, Long Island City, NY",
-    facts: "Unit W410 · published source reference",
+    facts:
+      "Studio W410 · furnished/unfurnished plan illustrations",
     price: "Check source for current rent",
     availability:
       "Current availability not verified; confirm with the original source.",
@@ -180,9 +192,9 @@ export const listings = [
     dimensionalReadiness: "needs-evidence",
     furnishingStatus: "unknown",
     questions:
-      "Confirm current availability, the exact unit, plan dimensions and current condition. The building map is geographic context; a walkable interior is not established.",
+      "Furnished and unfurnished plan displays are illustrations, not evidence of furniture included in a lease. Confirm any included inventory and whether the shared W410/W710/W809/W1009/W1108/W1207 asset matches the selected unit.",
     readinessReason:
-      "Published listing or plan reference available. Room geometry and current conditions remain unverified; review the original source.",
+      "In the September 10 research, the linked plan timed out through one reader and returned HTTP 403 through another; the image was not inspected. This is a past access result, not a current availability check. Plan content, scale and current condition remain unverified.",
     planUrl:
       "https://jasperhp.com/wp-content/uploads/2025/03/Classic_Studio_W410-W710-W809-W1009-W1108-W1207-1024x666.png",
   },
@@ -192,7 +204,8 @@ export const listings = [
     url: "https://www.live65newkirk.com/virtualtours",
     name: "65 Newkirk tour type",
     location: "65 Newkirk Street, Jersey City, NJ 07306",
-    facts: "Building / plan-type source · no exact unit selected",
+    facts:
+      "1 bed · 1 bath + den and balcony · building/type tour",
     price: "Check source for current rent",
     availability:
       "Current availability not verified; confirm with the original source.",
@@ -202,11 +215,15 @@ export const listings = [
     dimensionalReadiness: "needs-evidence",
     furnishingStatus: "unknown",
     questions:
-      "Confirm current availability, the exact unit, plan dimensions and current condition. The building map is geographic context; a walkable interior is not established.",
+      "The official page links a publicly viewable tour titled 1 Bedroom / 1 Bath + Den w Balcony. No apartment number was established. Confirm the unit/type match before using it to assess a listing, and confirm current availability.",
     readinessReason:
-      "Published listing or plan reference available. Room geometry and current conditions remain unverified; review the original source.",
+      "Public tour playback was observed on September 10. No measurements were taken, no mesh/API access was established, and the associated plan image was not inspected. Viewing the tour does not establish exact-unit geometry or permission to export its assets.",
     planUrl:
       "https://www.live65newkirk.com/s/0_65-newkirk-1bd-w-balcony_0_1-copy.png",
+    tourUrl:
+      "https://my.matterport.com/show/?m=MU3hFyq1obs",
+    tourIdentity:
+      "building_type",
   },
   {
     id: "plazastudio",
@@ -214,19 +231,20 @@ export const listings = [
     url: "https://rnhousing.org/properties/plaza-apartments/",
     name: "Plaza Apartments studio type",
     location: "91 Sip Avenue, Jersey City, NJ 07306",
-    facts: "Building / plan-type source · no exact unit selected",
+    facts:
+      "Studio type · 320 ft² reported · no exact unit selected",
     price: "Check source for current rent",
     availability:
-      "Current availability not verified; confirm with the original source.",
+      "The owner page showed the waiting list closed on September 10, 2026. Current waiting-list status and unit availability have not been rechecked.",
     checkedAt: "2026-09-10",
     archived: false,
     scene: null,
     dimensionalReadiness: "needs-evidence",
     furnishingStatus: "unknown",
     questions:
-      "Confirm current availability, the exact unit, plan dimensions and current condition. The building map is geographic context; a walkable interior is not established.",
+      "Confirm current waiting-list status and the specific apartment/type. The source also includes 420 ft² one-bedroom A/B plans; keep those separate from the studio. Building accessibility language does not establish measured clearance within this layout.",
     readinessReason:
-      "Published listing or plan reference available. Room geometry and current conditions remain unverified; review the original source.",
+      "The studio source reports 320 ft², but no usable linear dimensions were verified in the September 10 research. Area alone cannot calibrate the drawing or establish furniture fit. This is building/type evidence, independent of current availability.",
     planUrl:
       "https://rnhousing.org/wp-content/uploads/2024/07/floor-plan-plaza.pdf",
   },
@@ -236,7 +254,8 @@ export const listings = [
     url: "https://gothampoint.com/availability/",
     name: "Gotham Point South #2409",
     location: "56-27 2nd Street, Long Island City, NY 11101",
-    facts: "Unit South2409 · published source reference",
+    facts:
+      "South Tower studio · Residence 09 · floors 19–29",
     price: "Check source for current rent",
     availability:
       "Current availability not verified; confirm with the original source.",
@@ -246,9 +265,11 @@ export const listings = [
     dimensionalReadiness: "needs-evidence",
     furnishingStatus: "unknown",
     questions:
-      "Confirm current availability, the exact unit, plan dimensions and current condition. The building map is geographic context; a walkable interior is not established.",
+      "The official availability page linked South 2409 to Residence 09 on floors 19–29. The direct plan asset is JPEG despite its download-style URL. Keep the South Tower identity separate from North Tower and leasing addresses; confirm the actual entrance and current unit condition.",
     readinessReason:
-      "Published listing or plan reference available. Room geometry and current conditions remain unverified; review the original source.",
+      "September 10 visual inspection recorded approximate living dimensions of 17′ × 12′4″, openings, fixtures and a floor locator. Printed dimensions are not calibrated geometry; remaining lengths, ceiling heights and exact exterior alignment remain unverified.",
+    planUrl:
+      "https://gothamproperties.file.force.com/sfc/dist/version/download/?asPdf=false&d=%2Fa%2FPW00000BkVMC%2FObLJwDbQBIERvwT9YfW8j3gReFSMzeDQsGDjQhJzZwE&ids=068PW000013OReS&oid=00DfI00000L4WTx",
   },
   {
     id: "castiron5j",
@@ -256,7 +277,8 @@ export const listings = [
     url: "https://castironlofts.com/floorplans/cil1_5-6j/",
     name: "Cast Iron Lofts #5J",
     location: "300 Coles Street, Jersey City, NJ 07310",
-    facts: "Unit 5J (CIL1 plan group) · published source reference",
+    facts:
+      "1 bed · 1 bath · 696 ft² reported · CIL1 5–6J plan",
     price: "Check source for current rent",
     availability:
       "Current availability not verified; confirm with the original source.",
@@ -266,9 +288,9 @@ export const listings = [
     dimensionalReadiness: "needs-evidence",
     furnishingStatus: "unknown",
     questions:
-      "Confirm current availability, the exact unit, plan dimensions and current condition. The building map is geographic context; a walkable interior is not established.",
+      "The official CIL1 plan names 5–6J on floors 5–6 and says the illustration may not be to scale and actual dimensions may vary. Confirm the building, entrance and 5J plan match, then request room measurements.",
     readinessReason:
-      "Published listing or plan reference available. Room geometry and current conditions remain unverified; review the original source.",
+      "September 10 research found reported area of 696 ft² but no usable room dimensions. The source’s not-to-scale qualification prevents treating this illustration as calibrated geometry; total area cannot establish room dimensions or furniture clearances.",
     planUrl: "https://castironlofts.com/assets/files/Binder1-31.pdf",
   },
 ];

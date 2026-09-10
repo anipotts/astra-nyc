@@ -133,7 +133,7 @@ body.evidence-only #viewport {
   max-height: none;
   padding: 0;
   border: 1px solid var(--border);
-  border-radius: 16px;
+  border-radius: var(--ui-radius-panel);
   background: var(--glass);
   color: inherit;
   overflow: hidden;
@@ -147,7 +147,7 @@ body.evidence-only #viewport {
   width: 100%;
   height: 100%;
   max-height: none;
-  padding: 24px;
+  padding: var(--ui-space-4);
   border: 0;
   display: flex;
   flex-direction: column;
@@ -524,3 +524,11 @@ body.evidence-only .homes {
   display: block;
   margin-top: 0.75rem;
 }
+
+/* Shared native Plans modal; retain runtime focus management and document controls. */
+.desktop-shell #plans-dialog .plan-heading h2 { font-size: var(--ui-text-title); line-height: 1.2; margin: var(--ui-space-1) 0; overflow-wrap: anywhere; }
+.desktop-shell #plans-dialog :is(.plan-documents button, .plan-tools button, .plan-footer button, .plan-tools label) { min-height: var(--ui-control-compact); padding: 6px 8px; font-size: var(--ui-text-sm); border-radius: var(--ui-radius-control); }
+.desktop-shell #plans-close { min-height: var(--ui-control-height); min-width: var(--ui-control-height); padding: 0; font-size: 22px; }
+.desktop-shell #plans-dialog :is(#plan-notice,#plan-selection,#plan-persistence) { font-size: var(--ui-text-sm); line-height: var(--ui-line-height); }
+.desktop-shell #plans-dialog .plan-tools { gap: var(--ui-space-1); margin: var(--ui-space-2) 0; flex-wrap: wrap; }
+.desktop-shell #plans-dialog .plan-footer { gap: var(--ui-space-2); }
