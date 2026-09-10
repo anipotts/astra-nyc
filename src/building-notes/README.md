@@ -7,11 +7,11 @@ Import `mountBuildingNotes` from this directory's `index.js` and mount it in the
 ```js
 const notes = mountBuildingNotes(container, { listing });
 notes.setListing(nextListing); // aborts/discards old-property requests
-// notes.load() is optional; normal UI waits for the button inside the disclosure.
+// First opening loads once; subsequent checks use explicit Refresh/Retry.
 notes.destroy();
 ```
 
-The component begins collapsed and does not fetch on mount or camera changes. No default card, new view or prominent loader is added. Server results distinguish `completed_with_matches`, `completed_no_matches`, `ambiguous`, `not_supported`, and `unavailable`. Cache lasts 30 minutes (15 seconds for failure); refresh bypasses cached results. Equivalent concurrent queries coalesce; at most four are in flight, with a ten-second source timeout and 160 KB response cap.
+The component begins collapsed and does not fetch on mount or camera changes. Its first opening starts one lookup for that selection; closing/reopening does not repeat it. Changing identity aborts, clears and collapses it, and the next selection waits for its own opening. Explicit Refresh/Retry remains after the first lookup. No default card, new view or prominent loader is added. Server results distinguish `completed_with_matches`, `completed_no_matches`, `ambiguous`, `not_supported`, and `unavailable`. Cache lasts 30 minutes (15 seconds for failure); refresh bypasses cached results. Equivalent concurrent queries coalesce; at most four are in flight, with a ten-second source timeout and 160 KB response cap.
 
 Source: NYC HPD Housing Maintenance Code Complaints and Problems, `ygpa-z7cr`, daily update metadata verified September 10. Query matches exact house number, normalized street and borough over the preceding 730-day date window; at most 51 problem rows are retrieved to flag a 50-row display cap. Problem IDs deduplicate and related problems group by complaint ID. Multiple observed building IDs become ambiguous. No-match claims concern only that exact address, source and date window. No apartment identifiers, complainant contact fields, reviews, violation scores or geometry are collected.
 
