@@ -670,6 +670,10 @@ const commuteView = mountCommuteView($("#commute-panel"), {
     highlight: (step) => geoMap?.routeLayer.highlight(step),
     fit: (options) => geoMap?.routeLayer.fit(options),
     stop: () => geoMap?.routeLayer.stop(),
+    beginWalk: (options) => geoMap?.routeLayer.beginWalk?.(options),
+    endWalk: (options) => geoMap?.routeLayer.endWalk?.(options),
+    walkAction: (action) => geoMap?.routeLayer.walkAction?.(action),
+    seekWalk: (fraction) => geoMap?.routeLayer.seekWalk?.(fraction),
   },
 });
 function syncViewServices() {

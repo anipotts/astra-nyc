@@ -62,13 +62,13 @@ Examples:
 
 ## Shared layout and integrations
 
-For a selected listing, #evidence-stage belongs in the main sidebar directly below the listing selector. Title, essential facts and price stay visible; freshness, qualifications and source inspection live in Sources & details. The sidebar scrolls independently when expanded. Do not reintroduce a bottom facts bar, floating listing card or duplicate listing summary. Overview and Inside retain the full viewport height.
+For a selected listing, #evidence-stage belongs in the main sidebar directly below the listing selector. The selector identifies the property and unit; the heading shows its sourced street address. Essential bed/bath/area facts, quoted rent and one availability status stay visible. Unknown rent uses quiet metadata styling. Freshness, full original facts, qualifications and source inspection live in Sources & details. The sidebar scrolls independently when expanded. Do not reintroduce a bottom facts bar, floating listing card or duplicate listing summary. Overview and Inside retain the full viewport height.
 
 #inside-surface is a block with16px padding and overflow:auto. Incoming Inside content owns only its inner layout. #commute-panel remains a bounded overlay above900px; at narrower desktop widths, its independently scrolling row occupies at most36dvh below the map. Map controls stay clear. Incoming modules must consume shared tokens and primitives without global shell overrides.
 
 Plans remains a native dialog. Opening it must not reposition the sidebar or map. Preserve Escape, focus return, document state and camera state. Background document controls remain inert. Original publisher documents and generated planning drawings must remain visibly distinct.
 
-Your places retains Browse listings wording: bundled source cases are not relabelled as user-saved. Add sits alongside the select. Priorities remain real pressed-state buttons in stable single-column rows. Status/persistence elements retain runtime IDs and failure messages; concise runtime wording is separately handed to the coordinator.
+Use one visible Selected place section heading. Browse listings remains the accessible name of the native selector without another visible label; bundled source cases are not relabelled as user-saved. Add sits alongside the select. Priorities remain real pressed-state buttons in stable single-column rows. Status/persistence elements retain runtime IDs and failure messages.
 
 ## Content and evidence
 
