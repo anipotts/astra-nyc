@@ -7,6 +7,7 @@ A local prototype for comparing the space, commute, and daily essentials around 
 ## Run locally
 
 ```sh
+cd ~/Code/hackathons/astra-nyc
 npm ci
 npm run dev
 ```
@@ -20,7 +21,8 @@ npm run build
 
 ## What works
 
-- Start with a listing URL immediately below the heading. Two researched example snapshots are supported: 95 Wall Street #2308 and archived Zephyr Lofts #501. Other URLs show an explicit unsupported state without fetching data.
+- Pick a researched example: 95 Wall Street #2308 or archived Zephyr Lofts #501. The disconnected URL importer is hidden until arbitrary listing imports work.
+- Use a compact, full-viewport canvas with one mode selector and one change field. The document does not scroll; places and accuracy details can be collapsed.
 - Review dated source facts and unknowns, then walk an inferred 95 Wall studio sketch. Its 575 ft² area and studio type come from the listing; the rectangular footprint, windows, furnishings, and placement are invented.
 - Switch between a synthetic current home and a potential home with illustrative routes.
 - Orbit the home or walk at eye level. Focus the scene, use WASD to move, arrow keys to turn, or drag to look. On-screen buttons also support movement. Walls and furniture have collision boundaries; the front doorway leads outside.
@@ -30,7 +32,7 @@ npm run build
 
 ## What the demo does not establish
 
-Public listing facts were researched during development on September 10, 2026 and bundled in src/listings.js. The running app matches two exact listing URLs to these snapshots; it does not fetch arbitrary pages or analyze photographs. Source links open the original listing and gallery. Listing availability and prices can change. All streets, routes, nearby locations, and scene arrangements are synthetic; only the 95 Wall sketch area and studio type are source-informed. The scene is not a verified reconstruction, furniture-fit guarantee, current-condition inspection, or solar study.
+Public listing facts were researched during development on September 10, 2026 and bundled in src/listings.js. The example picker opens these snapshots; it does not fetch arbitrary pages or analyze photographs. Source links open the original listing and gallery. Listing availability and prices can change. The interior and car-demo streets, routes, and example nearby places are synthetic. The separate 95 Wall neighborhood map uses live OpenFreeMap tiles sourced from OpenStreetMap; the listing map pin is approximate. Only the studio type and reported floor area inform the interior sketch. The scene is not a verified reconstruction, furniture-fit guarantee, current-condition inspection, or solar study.
 
 Astra assists development of the scene and app. The running product now has an optional localhost-only Astra endpoint for bounded king/queen bed edits. One live gpt-6-astra king-bed edit and cached replay were verified during the event. The server reads OPENAI_API_KEY from the local environment or ignored .env.local; credentials are never bundled into the client. Local controls still work without credentials. The endpoint validates the returned edit, caches it in server memory, and leaves movement/rendering local. It does not launch runtime agents or reconstruct listing photos.
 
@@ -40,7 +42,7 @@ The inferred 95 Wall studio has procedural materials, rounded furniture, a cutaw
 
 ## Next integration, not implemented
 
-Replace the two bundled snapshots with a live, bounded listing importer. Use the participant's listing inputs to collect attributable photo evidence with source URLs and observation dates. Separate visible details from inferred geometry and unknown conditions. Generate a validated scene description and bounded edits, then render locally with Three.js. Real commute and nearby data require a geographic provider and source/license attribution. A photo cannot establish every issue or guarantee a listing's present condition.
+Replace the two bundled snapshots with a live, bounded listing importer. Use the participant's listing inputs to collect attributable photo evidence with source URLs and observation dates. Separate visible details from inferred geometry and unknown conditions. Generate a validated scene description and bounded edits, then render locally with Three.js. Verified driving routes, travel times, and filtered nearby-business details remain unimplemented. A photo cannot establish every issue or guarantee a listing's present condition.
 
 ## Build provenance
 

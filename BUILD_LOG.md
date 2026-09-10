@@ -41,7 +41,7 @@ Git timestamps document recorded activity, not proof of originality. Preserve or
 
 - Initial three-file repository scaffold.
 - Fresh-build guidance, this provenance and milestone log, and an initial dependency ledger prepared after the scope instruction.
-- Product implementation: starting a local browser prototype with synthetic homes and streets; actual listing reconstruction, geocoding, and live runtime Astra edits are not implemented.
+- Product implementation: local interactive homes, a source-informed but inferred studio, geographic neighborhood experiment, and a verified bounded live Astra bed edit. Listing reconstruction and verified driving routes remain unimplemented.
 - Runtime verification: completed for the local synthetic flow; see the 10:58:18 AM entry.
 - Recording: a local working-flow screen capture has been created; presentation narration and real-data claims are not part of that capture.
 - Submission: not sent.
@@ -93,3 +93,13 @@ Prepared a localhost-only Astra Responses API adapter with a strict bounded bed-
 Secure API provisioning completed outside tracked files. At 11:26:34 AM ET, the running app received a completed gpt-6-astra response for the participant’s king-bed request. The returned resize_bed/existing_bed/king edit passed validation and changed the rendered bed. Geometry-derived clearances updated from queen 0.60/0.90/1.55 m to king 0.40/0.70/1.55 m (left/right/foot). All room dimensions remain inferred. A local queen reset followed by the same Astra request restored the king from cache. Server attempt count remained one; the provider response reported 189 input tokens and 53 output tokens. Request receipt is retained locally outside the repo. This proves one narrow runtime edit, not model-based reconstruction or general scene generation.
 
 Independent worktree review hardened provider-error redaction and malformed input handling. Eight simulated-provider tests cover no-key/no-network behavior, request guards, UTF-8 parsing, valid/invalid edits, concurrent cache reuse, failed-request eviction, and the ten-attempt cap. All fourteen tests pass after integrating the review into build/event. Simulated-provider tests are distinct from the live-browser proof above.
+
+### 11:34:18 AM — compact viewport, relocation, and new recording verified
+
+Reviewed and merged two isolated agent worktrees into build/event. The compact UI removes duplicate navigation and disconnected URL intake from the everyday flow, uses a working examples picker and collapsible places/source details, and places local suggestions with the Astra input. Document bounds and scroll position were verified at 1536×1024, 1147×856, 1024×540, and 390×844; the actual in-app viewport also verified 872×856 with matching document/body bounds and scrollY zero. No captured page errors. The viewport stays fixed and hides scrollbar gutters; source/help details remain accessible.
+
+At the participant’s request, moved the clean repository to ~/Code/hackathons/astra-nyc, repaired linked worktree metadata, retained ignored local configuration with mode600, and restarted localhost5173 from the new path. Reviewed worktrees were then removed; their commits and branches remain in Git history. The default main branch was read-only inspected and has no protection or rulesets, so integration remains on build/event under the existing merge policy.
+
+Production-build map-worker and map→interior transition checks passed before relocation. A new local recording completed at11:33:18, including a fresh completed gpt-6-astra edit at11:32:57 (190 input/69 output tokens, not a cache hit), rendered king bed, calculated clearance, and geographic context. Fourteen unit tests and production build pass. ffprobe verified the new MP4 is H.2641280×900 and exactly60.000seconds; a frame containing the live result was visually inspected. It is a silent review candidate; participant narration/review and public submission are pending. The original recording is unchanged.
+
+Initial graphics/geography experiment closed within the30-minute window. Keep the useful interior/map/transition results. Known limits: inferred interior dimensions, approximate geographic pin and building heights, no verified driving route, a large lazy map chunk, and nonfatal optional map-icon/style warnings. Next scope is the reviewed one-minute story and evidence quality, protecting1PM review,3:30PM feature freeze and5PM readiness.
