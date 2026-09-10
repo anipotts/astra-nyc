@@ -27,6 +27,23 @@ function setup() {
 }
 const state = (distance, extra = {}) => ({ distance, fraction: distance / 2000, speed: 1, stepIndex: 0, arrived: false, step: { name: 'Test street' }, ...extra });
 
+test('movement dismisses the initial help, looking does not, and re-entry restores compact onboarding', () => {
+  const h = setup(); h.start();
+  assert.equal(h.$('.cv-walk-onboarding').hidden, false);
+  assert.equal(h.$('.cv-walk-more').open, false);
+  h.change(state(0, { viewBearing: 90 }));
+  assert.equal(h.$('.cv-walk-onboarding').hidden, false, 'looking alone keeps movement help');
+  h.forward.onclick();
+  assert.equal(h.$('.cv-walk-onboarding').hidden, true);
+  h.change(state(0));
+  assert.equal(h.$('.cv-walk-onboarding').hidden, true, 'returning to the start does not revive dismissed help');
+  h.$('.cv-walk-more').open = true;
+  h.$('.cv-walk-exit').onclick(); h.start();
+  assert.equal(h.$('.cv-walk-onboarding').hidden, false);
+  assert.equal(h.$('.cv-walk-more').open, false);
+  h.view.destroy();
+});
+
 test('Escape after Step forward exits from walking controls and returns focus to the start action', () => {
   const h = setup(); h.start(); h.forward.focus(); h.forward.onclick();
   assert.match(h.$('.cv-walk-progress').textContent, /^3 m/);

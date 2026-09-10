@@ -22,20 +22,25 @@ export function mountWalkingControls(container, routeLayer) {
       <div class="cv-walk-heading"><strong>Walk the route</strong><button type="button" class="ui-button ui-button--compact cv-walk-exit">Exit walk</button></div>
       <p class="cv-walk-progress"></p>
       <span class="cv-walk-announcement" role="status" aria-live="polite" aria-atomic="true"></span>
+      <div class="cv-walk-onboarding"><strong>W/S move · A/D or drag to look</strong><span>Click the map to use keys. Escape exits.</span></div>
+      <details class="cv-walk-more ui-disclosure"><summary>Controls</summary>
       <div class="cv-walk-actions"><button type="button" class="ui-button ui-button--compact" data-walk-action="back">Step back</button><button type="button" class="ui-button ui-button--compact" data-walk-action="forward">Step forward</button><button type="button" class="ui-button ui-button--compact" data-walk-action="next">Skip segment</button></div>
       <div class="cv-walk-actions"><button type="button" class="ui-button ui-button--compact" data-walk-action="left">Look left</button><button type="button" class="ui-button ui-button--compact" data-walk-action="right">Look right</button><button type="button" class="ui-button ui-button--compact cv-walk-speed" data-walk-action="speed">Speed 1×</button></div>
       <label class="ui-label cv-walk-seek-label">Jump along route<input class="cv-walk-seek" type="range" min="0" max="1000" value="0" aria-label="Position along walking route"></label>
-      <details class="cv-walk-details ui-disclosure"><summary>Route overview & controls</summary>
+      <details class="cv-walk-details ui-disclosure"><summary>Route overview & help</summary>
         <canvas class="cv-walk-inset" width="240" height="64" role="img" aria-label="North-up route overview; orange point shows your position and viewing direction"></canvas>
         <p class="cv-walk-help">Focus the map: W/S move, A/D or drag look, Shift speeds up. Release to pause; Escape exits. Reduced motion uses single steps.</p>
         <p class="cv-walk-help">The environment uses approximate, untextured buildings along the mapped route. Sidewalks, street elevation and entrances are unverified. Select another home in Your places to compare the same destination.</p>
       </details>
+      </details>
     </div>
     <p class="cv-walk-note" hidden>Approximate route · entrances unverified</p>`;
   const $ = selector => container.querySelector(selector);
-  let route = null, active = false, lastAnnouncement = '';
+  let route = null, active = false, lastAnnouncement = '', initialDistance = null;
   function exited() { active = false; $('.cv-walk-controls').hidden = true; $('.cv-walk-start').hidden = Boolean(walkingAvailability(route)); container.classList.remove('is-walking'); }
   function position(state) {
+    if (initialDistance === null) initialDistance = state.distance;
+    else if (Math.abs(state.distance - initialDistance) > .01) $('.cv-walk-onboarding').hidden = true;
     $('.cv-walk-seek').value = String(Math.round(state.fraction * 1000));
     $('.cv-walk-seek').setAttribute('aria-valuetext', `${Math.round(state.fraction * 100)} percent of route`);
     $('.cv-walk-speed').textContent = `Speed ${state.speed}×`;
@@ -50,6 +55,9 @@ export function mountWalkingControls(container, routeLayer) {
     if (!route || active) return;
     try {
       lastAnnouncement = '';
+      initialDistance = null;
+      $('.cv-walk-onboarding').hidden = false;
+      $('.cv-walk-more').open = false;
       $('.cv-walk-details').open = false;
       if (!routeLayer.beginWalk?.({ onChange: position, onExit: exited })) throw new Error('The walking camera is not ready yet. Try again shortly.');
       active = true; $('.cv-walk-controls').hidden = false; $('.cv-walk-start').hidden = true; container.classList.add('is-walking');

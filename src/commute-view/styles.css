@@ -15,3 +15,12 @@
 .cv-route-segments{font-size:var(--ui-text-sm);margin:var(--ui-space-2) 0;color:var(--ui-color-muted)}
 .cv-route-segments summary{cursor:pointer;color:var(--ui-color-accent)}
 .cv-card:has(.is-walking) .cv-route-segments{display:none}
+
+/* The viewport owns placement; the active map overlay stays small by default. */
+.cv-walk-more{font-size:var(--ui-text-sm);color:var(--ui-color-muted)}
+.cv-walk-more>summary{cursor:pointer;color:var(--ui-color-accent)}
+.cv-walk-onboarding{display:grid;gap:var(--ui-space-1);padding:var(--ui-space-2);margin:var(--ui-space-2) 0;background:var(--ui-color-selected);border-radius:var(--ui-radius-control);font-size:var(--ui-text-sm);color:var(--ui-color-accent)}
+.cv-card:has(.is-walking){padding:var(--ui-space-3)}
+.cv-card:has(.is-walking)>.cv-external{display:none}
+.cv-walking.is-walking{margin-bottom:var(--ui-space-2)}
+.cv-card:has(.is-walking) .cv-attribution{padding-top:var(--ui-space-2);margin-top:var(--ui-space-2)}
