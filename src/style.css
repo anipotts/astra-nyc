@@ -341,59 +341,166 @@ output {
   width: min(500px, calc(100% - 340px));
   background: var(--glass);
   border: 1px solid #fff9;
-  border-radius: 14px;
-  padding: 13px 15px;
+  border-radius: 23px;
+  padding: 10px 10px 11px;
   box-shadow: 0 8px 35px #182d181b;
   backdrop-filter: blur(16px);
 }
-.astra-panel label {
+.composer-input {
+  border: 1px solid var(--border);
+  border-radius: 17px;
+  background: #fff;
+  padding: 13px 13px 9px;
+  transition:
+    border-color 0.15s,
+    box-shadow 0.15s;
+}
+.composer-input:focus-within {
+  border-color: #789383;
+  box-shadow: 0 0 0 3px #214b3910;
+}
+#astra-prompt {
   display: block;
+  width: 100%;
+  min-height: 44px;
+  max-height: 108px;
+  resize: none;
+  border: 0;
+  padding: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-size: 14px;
+  line-height: 1.5;
+  scrollbar-width: none;
+  overscroll-behavior: contain;
+}
+#astra-prompt:focus {
+  outline: none;
+}
+#astra-prompt::-webkit-scrollbar {
+  display: none;
+}
+#astra-prompt::placeholder {
+  color: #7b837d;
+}
+.composer-toolbar {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  margin-top: 7px;
+}
+.composer-agent {
+  display: flex;
+  align-items: center;
+  gap: 6px;
   font-size: 12px;
   font-weight: 600;
-  margin-bottom: 8px;
 }
-.change-input {
-  display: flex;
-  gap: 7px;
+.composer-agent > span:first-child {
+  color: var(--green);
+  font-size: 18px;
 }
-.change-input input {
-  width: 100%;
-  min-width: 0;
-  padding: 9px 10px;
-  border: 1px solid #c7d3c6;
-  border-radius: 7px;
-  font-size: 12px;
-  color: #17201f;
-  background: #fff;
+.composer-scope {
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 400;
 }
-.change-input button {
-  white-space: nowrap;
-  font-size: 11px;
-  padding: 8px 11px;
+.composer-shortcut {
+  margin-left: auto;
+  color: var(--muted);
+  font-size: 10px;
+}
+#astra-submit {
+  display: grid;
+  place-items: center;
+  flex: 0 0 32px;
+  width: 32px;
+  min-height: 32px;
+  height: 32px;
+  border-radius: 50%;
+  padding: 0;
+}
+#astra-submit:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+.astra-panel[aria-busy="true"] #astra-submit svg {
+  animation: composer-pulse 1s ease-in-out infinite alternate;
+}
+@keyframes composer-pulse {
+  to {
+    opacity: 0.25;
+  }
 }
 .changes {
   display: flex;
   gap: 5px;
-  margin-top: 9px;
+  margin-top: 10px;
   align-items: center;
 }
 .changes button {
-  min-height: 28px;
+  min-height: 26px;
   font-size: 10px;
-  padding: 5px 9px;
-  border-radius: 6px;
+  padding: 4px 8px;
+  border-radius: 20px;
+  background: transparent;
+}
+.changes button:hover {
+  background: #e8eeea;
+}
+.changes button[aria-pressed="true"] {
+  background: var(--green);
 }
 .changes .local-edits {
   font-size: 9px;
   color: var(--muted);
-  margin-left: auto;
+  margin-right: auto;
 }
 .astra-panel output {
+  display: block;
   font-size: 10px;
   color: var(--muted);
   line-height: 1.4;
   margin-top: 8px;
   overflow-wrap: anywhere;
+}
+.agent-reply {
+  margin: 0 3px 12px;
+  max-height: min(180px, 23dvh);
+  overflow: auto;
+  scrollbar-width: none;
+  overscroll-behavior: contain;
+  font-size: 12px;
+  line-height: 1.5;
+}
+.agent-reply::-webkit-scrollbar {
+  display: none;
+}
+.reply-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+#dismiss-reply {
+  border: 0;
+  background: transparent;
+  min-height: 24px;
+  padding: 0 5px;
+  font-size: 18px;
+  color: var(--muted);
+}
+#astra-request {
+  color: var(--muted);
+  white-space: pre-wrap;
+  margin: 3px 0 7px;
+  font-size: 11px;
+}
+#astra-answer {
+  margin: 0;
+}
+.astra-panel[data-error="true"] #astra-answer {
+  color: #964729;
 }
 .caption {
   position: absolute;
@@ -879,5 +986,41 @@ aside::-webkit-scrollbar,
   }
   .caption {
     top: 69px;
+  }
+}
+
+/* Keep navigation above the expanding composer in every viewport. */
+.walk-controls {
+  bottom: calc(var(--composer-height, 190px) + 36px);
+}
+@media (max-width: 650px) {
+  #astra-prompt {
+    font-size: 16px;
+  }
+  .composer-scope,
+  .composer-shortcut {
+    display: none;
+  }
+  #astra-submit {
+    margin-left: auto;
+  }
+  .changes {
+    flex-wrap: nowrap;
+    gap: 4px;
+  }
+  .changes button {
+    padding: 4px 7px;
+  }
+  .changes .local-edits {
+    display: block;
+    font-size: 8px;
+  }
+  .walk-controls {
+    bottom: calc(var(--composer-height, 190px) + 28px);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .astra-panel[aria-busy="true"] #astra-submit svg {
+    animation: none;
   }
 }

@@ -157,17 +157,62 @@
           </p>
         </div>
         <form id="astra-form" class="astra-panel">
-          <label for="astra-prompt">What would you change?</label>
-          <div class="change-input">
-            <input
+          <div id="astra-reply" class="agent-reply" hidden>
+            <div class="reply-heading">
+              <strong>Astra</strong
+              ><button
+                id="dismiss-reply"
+                type="button"
+                aria-label="Dismiss reply"
+              >
+                ×
+              </button>
+            </div>
+            <p id="astra-request"></p>
+            <p id="astra-answer" aria-live="polite"></p>
+          </div>
+          <div class="composer-input">
+            <label for="astra-prompt" class="sr-only">Message Astra</label>
+            <textarea
               id="astra-prompt"
+              rows="2"
               maxlength="500"
-              placeholder="Put a king bed here and show clearance"
-            /><button id="astra-submit" class="primary" type="submit" disabled>
-              Ask Astra ↗
-            </button>
+              placeholder="What would you change?"
+              aria-describedby="astra-status"
+              spellcheck="true"
+            ></textarea>
+            <div class="composer-toolbar">
+              <span class="composer-agent"
+                ><span aria-hidden="true">✦</span> Astra
+                <span class="composer-scope">· Bed size edits</span></span
+              >
+              <span class="composer-shortcut" aria-hidden="true">↵ Send</span>
+              <button
+                id="astra-submit"
+                class="primary"
+                type="submit"
+                aria-label="Send message to Astra"
+                title="Send message (Enter)"
+                disabled
+              >
+                <svg
+                  viewBox="0 0 24 24"
+                  width="19"
+                  height="19"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  aria-hidden="true"
+                >
+                  <path d="M12 19V5m-6 6 6-6 6 6" />
+                </svg>
+              </button>
+            </div>
           </div>
           <div class="changes" aria-label="Local scene changes">
+            <span class="local-edits">Quick previews</span>
             <button id="bed" type="button" aria-pressed="false">
               <span>King bed</span></button
             ><button id="unfurnished" type="button" aria-pressed="false">
@@ -180,8 +225,8 @@
               aria-label="Reset scene"
               title="Reset scene"
             >
-              ↺</button
-            ><span class="local-edits">Local preview</span>
+              ↺
+            </button>
           </div>
           <output id="astra-status" aria-live="polite"
             >Checking runtime access…</output

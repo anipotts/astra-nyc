@@ -457,6 +457,7 @@ let yaw = 0,
   drag = false,
   prev = { x: 0, y: 0 };
 const keys = new Set();
+let sceneRevision = 0;
 function message(text) {
   $("#status").textContent = text;
 }
@@ -469,8 +470,7 @@ function resetCamera() {
 function setMode(mode) {
   $("#map-view").hidden = true;
   $("#astra-form").hidden = !["walk", "overview"].includes(mode);
-  $("#astra-submit").disabled =
-    !homes[state.home].studio || $("#astra-form").dataset.ready !== "true";
+  syncComposer();
   $("#neighborhood-view").hidden = true;
   $("#listing-map").hidden = !homes[state.home].studio;
   state.mode = mode;
@@ -562,6 +562,8 @@ function light() {
     : "Evening light";
 }
 function refresh() {
+  sceneRevision++;
+  $("#astra-reply").hidden = true;
   buildHome();
   buildNeighborhood();
   const footprint = homes[state.home].studio && house.userData.bedFootprint;
@@ -888,60 +890,112 @@ window.__elsewhere = {
   }),
 };
 
+function syncComposer() {
+  const form = $("#astra-form");
+  $("#astra-submit").disabled =
+    form.dataset.ready !== "true" ||
+    !homes[state.home].studio ||
+    form.getAttribute("aria-busy") === "true" ||
+    !$("#astra-prompt").value.trim();
+}
+function sizeComposer() {
+  const input = $("#astra-prompt");
+  input.style.height = "auto";
+  input.style.height = Math.min(108, input.scrollHeight) + "px";
+  syncComposer();
+}
+$("#astra-prompt").addEventListener("input", sizeComposer);
+$("#astra-prompt").addEventListener("keydown", (event) => {
+  if (event.key === "Enter" && !event.shiftKey && !event.isComposing) {
+    event.preventDefault();
+    if (!$("#astra-submit").disabled) $("#astra-form").requestSubmit();
+  }
+});
+$("#dismiss-reply").onclick = () => {
+  $("#astra-reply").hidden = true;
+};
+new ResizeObserver(([entry]) => {
+  document.documentElement.style.setProperty(
+    "--composer-height",
+    `${entry.target.offsetHeight}px`,
+  );
+}).observe($("#astra-form"));
 let astraReady = false;
 fetch("/api/astra/status")
   .then((r) => r.json())
   .then((data) => {
     astraReady = data.configured === true;
     $("#astra-form").dataset.ready = String(astraReady);
-    $("#astra-submit").disabled = !astraReady || !homes[state.home].studio;
+    syncComposer();
     $("#astra-status").textContent = astraReady
-      ? "Astra connected · live edits available in the 95 Wall studio"
-      : "Astra unavailable · suggestions still work locally";
+      ? "Connected · ask about bed size in the 95 Wall studio"
+      : "Astra unavailable · quick previews work locally";
   })
   .catch(() => {
     $("#astra-status").textContent =
-      "Astra unavailable · suggestions still work locally";
+      "Astra unavailable · quick previews work locally";
   });
 $("#astra-form").addEventListener("submit", async (event) => {
   event.preventDefault();
-  if (!astraReady || !homes[state.home].studio) return;
+  const prompt = $("#astra-prompt").value.trim();
+  if (
+    !astraReady ||
+    !homes[state.home].studio ||
+    !prompt ||
+    $("#astra-form").getAttribute("aria-busy") === "true"
+  )
+    return;
   const sceneAtRequest = homes[state.home];
-  $("#astra-submit").disabled = true;
-  $("#astra-status").textContent = "Updating scene…";
+  const revisionAtRequest = sceneRevision;
   $("#astra-form").setAttribute("aria-busy", "true");
+  $("#astra-form").dataset.error = "false";
+  syncComposer();
+  $("#astra-status").textContent = "Updating scene…";
+  $("#astra-status").removeAttribute("title");
+  $("#astra-request").textContent = prompt;
+  $("#astra-answer").textContent = "Updating scene…";
+  $("#astra-reply").hidden = false;
   try {
     const response = await fetch("/api/astra/edit", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        prompt:
-          $("#astra-prompt").value.trim() ||
-          "Put a king bed here and show the remaining clearance",
-        scene: "wall2308-inferred-v2",
-      }),
+      body: JSON.stringify({ prompt, scene: "wall2308-inferred-v2" }),
     });
     const result = await response.json();
     if (!response.ok) throw new Error(result.error || "Astra edit failed.");
     const edit = validateBedEdit(result.edit);
-    if (homes[state.home] !== sceneAtRequest || !homes[state.home].studio)
+    if (
+      homes[state.home] !== sceneAtRequest ||
+      !homes[state.home].studio ||
+      sceneRevision !== revisionAtRequest
+    )
       throw new Error(
-        "Home changed while Astra was working. Edit was not applied.",
+        "Scene changed while Astra was working. Edit was not applied. Send your request again.",
       );
     state.largeBed = edit.size === "king";
     state.unfurnished = false;
     refresh();
     if (state.mode === "walk") setMode("walk");
+    $("#astra-reply").hidden = false;
+    $("#astra-answer").textContent =
+      `${edit.size === "king" ? "King" : "Queen"} bed placed. ${$("#scene-clearance").textContent}. Room dimensions are estimated; verify measurements before deciding fit.`;
     $("#astra-status").textContent =
-      `${result.cached ? "Cached Astra edit" : "Live Astra edit"} · ${result.model} · ${new Date(result.generatedAt).toLocaleTimeString()}`;
-    $("#astra-status").title = `Request ${result.requestId}`;
+      `${result.cached ? "Cached Astra edit" : "Live Astra edit"} · ${result.model}`;
+    $("#astra-status").title =
+      `Request ${result.requestId} · ${new Date(result.generatedAt).toLocaleTimeString()}`;
     $(".local").textContent = "Local demo · live Astra edit received";
+    if ($("#astra-prompt").value.trim() === prompt)
+      $("#astra-prompt").value = "";
+    sizeComposer();
   } catch (error) {
-    $("#astra-status").textContent = error.message;
+    $("#astra-form").dataset.error = "true";
+    $("#astra-reply").hidden = false;
+    $("#astra-answer").textContent = error.message;
+    $("#astra-status").textContent =
+      "No edit applied · revise your message and try again";
   } finally {
     $("#astra-form").removeAttribute("aria-busy");
-    $("#astra-form").dataset.ready = String(astraReady);
-    $("#astra-submit").disabled = !astraReady || !homes[state.home].studio;
+    syncComposer();
   }
 });
 
