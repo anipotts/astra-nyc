@@ -51,11 +51,6 @@
           alt=""
         />Elsewhere</a
       >
-      <div class="modebar" role="group" aria-label="View mode">
-        <button data-mode="overview" aria-pressed="true">Overview</button
-        ><button data-mode="walk" aria-pressed="false">Inside</button
-        ><button data-mode="commute" aria-pressed="false">Commute</button>
-      </div>
       <button
         id="plans-toggle"
         class="plans-utility"
@@ -64,6 +59,11 @@
       >
         Plans
       </button>
+      <div class="modebar" role="group" aria-label="View mode">
+        <button data-mode="overview" aria-pressed="true">Overview</button
+        ><button data-mode="walk" aria-pressed="false">Inside</button
+        ><button data-mode="commute" aria-pressed="false">Commute</button>
+      </div>
     </header>
     <main>
       <aside aria-label="Your homes">
@@ -304,13 +304,19 @@
           </section>
         </div>
         <section id="priorities-panel" aria-labelledby="priorities-title">
-          <h2 id="priorities-title">Your priorities</h2>
-          <p class="priority-hint">Choose up to three nearby priorities.</p>
-          <div id="priority-choices" aria-label="Nearby priorities"></div>
-          <div class="priority-feedback">
-            <span id="priority-status" role="status"></span>
-            <small id="priority-storage">Saved in this browser.</small>
-          </div>
+          <details id="routine-details">
+            <summary>
+              <span id="priorities-title">Your routine</span>
+              <span class="routine-edit" aria-hidden="true">Edit</span>
+              <span id="priority-summary">Choose up to three priorities</span>
+            </summary>
+            <p class="priority-hint">Choose up to three nearby priorities.</p>
+            <div id="priority-choices" aria-label="Nearby priorities"></div>
+            <div class="priority-feedback">
+              <span id="priority-status" role="status"></span>
+              <small id="priority-storage">Saved in this browser.</small>
+            </div>
+          </details>
         </section>
         <small id="collapsed-model-status">Illustrative model</small>
       </aside>
