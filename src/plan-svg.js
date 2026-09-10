@@ -1,4 +1,5 @@
 import { clearanceAround } from "./clearance.js";
+import { elementBounds, isSolidElement } from "./layout.js";
 
 const escape = (value) =>
   String(value ?? "").replace(
@@ -23,22 +24,6 @@ const basisLabel = (layout) =>
   layout.measurementStatus === "synthetic"
     ? "Synthetic dimensions"
     : `${layout.measurementStatus || "Unknown"} dimensions — verify source scale`;
-
-function footprint(element) {
-  const angle = (finite(element.rotation) * Math.PI) / 180;
-  const w =
-    positive(element.width) * Math.abs(Math.cos(angle)) +
-    positive(element.depth) * Math.abs(Math.sin(angle));
-  const d =
-    positive(element.width) * Math.abs(Math.sin(angle)) +
-    positive(element.depth) * Math.abs(Math.cos(angle));
-  return {
-    minX: finite(element.x) - w / 2,
-    maxX: finite(element.x) + w / 2,
-    minZ: finite(element.z) - d / 2,
-    maxZ: finite(element.z) + d / 2,
-  };
-}
 
 function sourcesOf(layout) {
   return (Array.isArray(layout.sources) ? layout.sources : []).map((source) =>
@@ -113,11 +98,13 @@ export function renderPlanSvg(layout, options = {}) {
       x = sx(element.x),
       y = sy(element.z);
     const fill =
-      category === "structure"
-        ? "#7b847b"
-        : category === "fixtures"
-          ? "#e1e9e5"
-          : "#eee8da";
+      element.kind === "floor"
+        ? "#fcfcf8"
+        : category === "structure"
+          ? "#7b847b"
+          : category === "fixtures"
+            ? "#e1e9e5"
+            : "#eee8da";
     const selected = element.id === selectedId;
     const title = `${element.label || element.kind || element.id}: ${number(w)} × ${number(d)} m; ${element.evidence?.basis || layout.measurementStatus || "unknown"}; ${element.evidence?.source || "source not supplied"}`;
     const label =
@@ -187,10 +174,12 @@ export function renderPlanSvg(layout, options = {}) {
   );
   const bed = beds.find((element) => element.id === selectedId) || beds[0];
   if (showClearance && bed) {
-    const target = footprint(bed);
+    const target = elementBounds(bed);
     const clear = clearanceAround(
       target,
-      elements.filter((element) => element !== bed).map(footprint),
+      elements
+        .filter((element) => element !== bed && isSolidElement(element))
+        .map(elementBounds),
     );
     const centerX = (target.minX + target.maxX) / 2,
       centerZ = (target.minZ + target.maxZ) / 2;

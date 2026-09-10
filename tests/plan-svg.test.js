@@ -14,6 +14,8 @@ const layout = () => ({
       id: "wall",
       label: "Wall",
       category: "structure",
+      kind: "wall",
+      rotation: 0,
       x: -3,
       z: 0,
       width: 0.1,
@@ -25,6 +27,8 @@ const layout = () => ({
       id: "sink",
       label: "Fixed sink",
       category: "fixtures",
+      kind: "kitchen",
+      rotation: 0,
       x: 2,
       z: 2,
       width: 0.6,
@@ -35,6 +39,7 @@ const layout = () => ({
       id: "bed",
       label: "Bed",
       kind: "bed",
+      rotation: 0,
       category: "furniture",
       x: 0,
       z: 0,
@@ -104,8 +109,22 @@ test("text and attribute injections are escaped in SVG and print document", () =
 test("clearance uses canonical bounds and rotation without unbounded numbers", () => {
   const value = layout();
   assert.match(renderPlanSvg(value), /left 1.99 m/);
+  value.elements.push({
+    id: "floor",
+    category: "structure",
+    kind: "floor",
+    x: 0,
+    z: 0,
+    width: 6,
+    depth: 8,
+    rotation: 0,
+    visible: true,
+  });
+  assert.match(renderPlanSvg(value), /left 1.99 m/);
+  assert.doesNotMatch(renderPlanSvg(value), /overlap detected/);
   value.elements[2].rotation = 90;
-  assert.match(renderPlanSvg(value), /left 1.94 m/);
+  assert.match(renderPlanSvg(value, { showClearance: false }), /rotate\(90.00/);
+  value.elements[2].rotation = 0;
   value.elements = [value.elements[2]];
   assert.match(renderPlanSvg(value), /no bounded obstacle found/);
   assert.doesNotMatch(renderPlanSvg(value), /NaN|Infinity/);
