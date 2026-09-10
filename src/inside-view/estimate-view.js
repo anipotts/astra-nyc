@@ -18,6 +18,7 @@ export function mountEstimatedInterior(host,{onSource}={}) {
     try {
       let receipt=cache.get(key);
       if(receipt&&Date.now()-receipt.savedAt>30*60*1000){cache.delete(key);receipt=null;}
+      if(receipt)receipt={...receipt,cached:true};
       if(!receipt){
         const response=await fetch('/api/interiors/estimate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({listingId,sourceUrl}),signal:AbortSignal.any([request.signal,AbortSignal.timeout(80000)])});
         const payload=await response.json();if(!response.ok)throw new Error(payload.error||'The estimated interior could not load.');
